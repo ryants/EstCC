@@ -53,24 +53,6 @@ object CTBuild extends InfConfig {
     if (t.length != wts.length) { println(t.length, wts.length); throw new Exception }
     else { for (v <- (0 until t.length).toVector) yield (t(v) map (x => (x * wts(v)).round.toInt)) }.toVector
 
-  // checks if each element vector has the same sum
-  def isUniform(t: Vector[Vector[Int]]): Boolean = {
-    val rsums = t map (_.sum)
-    !(rsums exists (_ != rsums.head))
-  }
-
-  // alters 2D vector if it fails uniformity test so that it passes
-  def makeUniformWts(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
-    if (isUniform(t)) t
-    else {
-      val rsums: Vector[Int] = t map (_.sum)
-      val total = rsums.sum.toDouble
-      val uRow = total / t.length.toDouble
-      val uWts: List[Double] = (rsums map (x => uRow / x.toDouble)).toList
-      weightSignalData(t, uWts)
-    }
-  }
-
   // builds contingency table given randomization parameter, dataset, pair of bin sizes, bin-delimiting trees, weighting 
   def buildTable(randomize: Boolean)(pl: DRData, nb: Pair[Int], rbd: Tree, cbd: Tree, weights: Option[Weight] = None): ConstructedTable = {
     val rd = if (rbd.isEmpty) getBinDelims(pl._1, nb._1) else rbd
@@ -89,12 +71,12 @@ object CTBuild extends InfConfig {
     }
 
     // builds uniformly weighted table
-    val ctUniform = makeUniformWts(if (randomize) addValues(table, myShuffle(pl._1, rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2))
+    val ct = if (randomize) addValues(table, myShuffle(pl._1, rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
 
     // applies other weights if present
     weights match {
-      case None => new ConstructedTable(ctUniform)
-      case Some((x, tag)) => new ConstructedTable(weightSignalData(ctUniform, x))
+      case None => new ConstructedTable(ct)
+      case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 
   }
@@ -102,7 +84,7 @@ object CTBuild extends InfConfig {
 }
 
 object EstimateMI extends InfConfig {
-  import CTBuild.{ buildTable, getBinDelims, makeUniformWts, weightSignalData }
+  import CTBuild.{ buildTable, getBinDelims, weightSignalData }
 
   // generates all (row, col) bin number tuples
   def genBins(binList: List[Int], otherBinList: List[Int] = List()): List[Pair[Int]] = {
@@ -118,6 +100,24 @@ object EstimateMI extends InfConfig {
       val shuffledPairs = myShuffle(pl._1 zip pl._2, rEngine)
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
+
+  // checks if each element vector has the same sum
+  def isUniform(t: Vector[Vector[Int]]): Boolean = {
+    val rsums = t map (_.sum)
+    !(rsums exists (_ != rsums.head))
+  }
+
+  // alters 2D vector if it fails uniformity test so that it passes
+  def makeUniform(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
+    if (isUniform(t)) t
+    else {
+      val rsums: Vector[Int] = t map (_.sum)
+      val total = rsums.sum.toDouble
+      val uRow = total / t.length.toDouble
+      val uWts: List[Double] = (rsums map (x => uRow / x.toDouble)).toList
+      weightSignalData(t, uWts)
+    }
+  }
 
   // resample fraction of data without replacement by modifying the contingency table
   def subSample(frac: Double, t: ContTable, weights: Option[Weight] = None): ConstructedTable = {
@@ -137,13 +137,13 @@ object EstimateMI extends InfConfig {
       else {
         val numPossible = (validIndices map (x => x._2)).sum
         val randSample = rEngine.raw() * numPossible
-        
-        @tailrec def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int = 
+
+        @tailrec def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int =
           if (cumuVal + validIndices(curIndex)._2 > r) curIndex
           else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
-          
+
         val chosenIndex = findIndex(randSample, 0, 0)
-        
+
         val row = validIndices(chosenIndex)._1._1
         val col = validIndices(chosenIndex)._1._2
         val newTable: Vector[Vector[Int]] = st updated (row, st(row) updated (col, st(row)(col) - 1))
@@ -152,7 +152,7 @@ object EstimateMI extends InfConfig {
       }
     }
 
-    val sTable = makeUniformWts(shrinkTable(numToRemove, nonzeroIndices, t.table))
+    val sTable = makeUniform(shrinkTable(numToRemove, nonzeroIndices, t.table))
     weights match {
       case None => new ConstructedTable(sTable)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
@@ -193,39 +193,39 @@ object EstimateMI extends InfConfig {
 
   }
 
-//  def bDMAlt(bt: Pair[Int])(pl: DRData, wts: Option[Weight] = None): RegDataMult = {
-//
-//    def invSS(f: Double) = 1 / (f * pl._1.length)
-//
-//    val l = wts match {
-//      case None => "n"
-//      case Some((wtList, tag)) => tag
-//    }
-//
-//    /*
-//     * determines row/column bin delimiters
-//     * note that these delimiters are applied to both the original and jackknifed datasets
-//     * the resampled datasets DO NOT have their bin delimiters recalculated
-//     */
-//    val rowDelims: Tree = if (signalTree.isEmpty) getBinDelims(pl._1, bt._1) else signalTree
-//    val colDelims: Tree = getBinDelims(pl._2, bt._2)
-//    val table = buildTable(!rand)(pl, bt, rowDelims, colDelims, wts)
-//    val randTable = buildTable(rand)(pl, bt, rowDelims, colDelims, wts)
-//
-//    val subSamples = fracList map (x => subSample(x, table))
-//    val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
-//
-//    def roundFrac(d: Double) = "%.2f" format d
-//    val invFracs = fracList map invSS
-//
-//    val tags = for {
-//      f <- (0 until fracList.length).toList
-//      if (fracList(f) < 1.0)
-//    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
-//
-//    (invFracs, subSamples, randSubSamples.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
-//
-//  }
+  //  def bDMAlt(bt: Pair[Int])(pl: DRData, wts: Option[Weight] = None): RegDataMult = {
+  //
+  //    def invSS(f: Double) = 1 / (f * pl._1.length)
+  //
+  //    val l = wts match {
+  //      case None => "n"
+  //      case Some((wtList, tag)) => tag
+  //    }
+  //
+  //    /*
+  //     * determines row/column bin delimiters
+  //     * note that these delimiters are applied to both the original and jackknifed datasets
+  //     * the resampled datasets DO NOT have their bin delimiters recalculated
+  //     */
+  //    val rowDelims: Tree = if (signalTree.isEmpty) getBinDelims(pl._1, bt._1) else signalTree
+  //    val colDelims: Tree = getBinDelims(pl._2, bt._2)
+  //    val table = buildTable(!rand)(pl, bt, rowDelims, colDelims, wts)
+  //    val randTable = buildTable(rand)(pl, bt, rowDelims, colDelims, wts)
+  //
+  //    val subSamples = fracList map (x => subSample(x, table))
+  //    val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
+  //
+  //    def roundFrac(d: Double) = "%.2f" format d
+  //    val invFracs = fracList map invSS
+  //
+  //    val tags = for {
+  //      f <- (0 until fracList.length).toList
+  //      if (fracList(f) < 1.0)
+  //    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
+  //
+  //    (invFracs, subSamples, randSubSamples.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
+  //
+  //  }
 
   /*
    * calculates regression model for randomized data
@@ -245,6 +245,7 @@ object EstimateMI extends InfConfig {
   // calculates regression model for both original and randomized data
   def calcMultRegs(r: RegDataMult): (SLR, List[Option[SLR]]) = {
     val regLine = new SLR(r._1, r._2 map (_.mutualInformation), r._4.last)
+    //regLine.toFile(s"rd_${regLine.label}.dat")
     val regdataRand = (0 until numRandTables).toList map (x => (r._1, r._2, r._3(x), r._4))
     val regLinesRand = regdataRand map calcRandRegs
     (regLine, regLinesRand)

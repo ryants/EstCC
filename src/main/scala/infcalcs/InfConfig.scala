@@ -26,7 +26,7 @@ trait InfConfig {
   }
   
   //specify signal values (optional)
-  private val signalList: Option[List[Double]] = Some((0.0 to 19.0 by 1.0).toList)
+  private val signalList: Option[List[Double]] = Some((0.0 until 19.0 by 1.0).toList)
   val signalTree = signalList match {
     case Some(l) => buildTree(buildOrderedNodeList(l))
     case None => EmptyTree
@@ -53,7 +53,7 @@ trait InfConfig {
   val numTablesForCutoff = 1  
 
   //fractions for jackknifing proc.
-  private val initFracs = (0.8 until 1 by 0.025).toList
+  private val initFracs = (0.6 until 1.0 by 0.05).toList
   
   //number of jackknife replications
   val numReps = 20

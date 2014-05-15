@@ -60,7 +60,7 @@ object IOFile extends InfConfig {
   def estimatesToFileMult(d: List[(Pair[Int], List[Pair[Double]])], f: String): Unit = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map (x => ("\tMIRand "+x+"\tSDRand "+x))
-    writer.write("# rBins\tcBins\tMI\tSD"+rands)
+    writer.write("# rBins\tcBins\tMI\tSD"+rands.mkString)
     writer.newLine()
     val lines = for (x <- d) yield s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {

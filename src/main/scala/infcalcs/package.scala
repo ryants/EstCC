@@ -5,4 +5,5 @@ package object infcalcs {
   type RegData = (List[Double], List[ConstructedTable], List[ConstructedTable], List[String])
   type RegDataMult = (List[Double], List[ConstructedTable], List[List[ConstructedTable]], List[String])
   type Prt = List[List[Double]]
+  type Parameters = (Map[String, Option[List[Double]]], Map[String, Int], Map[String, String])
 }

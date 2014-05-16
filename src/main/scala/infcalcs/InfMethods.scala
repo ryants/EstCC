@@ -3,14 +3,9 @@ package infcalcs
 import annotation.tailrec
 import math._
 import TreeDef._
-import IOFile._
-import scala.util.matching.Regex._
-import scala.util.Random.shuffle
-import LowProb.{ testWeights }
-import OtherFuncs._
 
 object CTBuild extends InfConfig {
-
+  
   // divides list into sublists with approx. equal elements
   def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
     val avgPerBin = v.length / numBins
@@ -71,7 +66,7 @@ object CTBuild extends InfConfig {
     }
 
     // builds uniformly weighted table
-    val ct = if (randomize) addValues(table, myShuffle(pl._1, rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
+    val ct = if (randomize) addValues(table, OtherFuncs.myShuffle(pl._1, rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
 
     // applies other weights if present
     weights match {
@@ -97,7 +92,7 @@ object EstimateMI extends InfConfig {
     if (frac == 1.0) pl
     else {
       val numToTake = (frac * pl._1.length).toInt
-      val shuffledPairs = myShuffle(pl._1 zip pl._2, rEngine)
+      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, rEngine)
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
 
@@ -236,7 +231,7 @@ object EstimateMI extends InfConfig {
     val MIListRand = r._3 map (_.mutualInformation)
     val regLineRand = new SLR(r._1, r._3 map (_.mutualInformation), r._4.last + "_rand")
     if (regLineRand.intercept.isNaN) {
-      regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" + regLineRand.label + ".dat")
+      IOFile.regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" + regLineRand.label + ".dat")
       // printCTData(r)
       None
     } else Some(regLineRand)
@@ -303,8 +298,7 @@ object EstimateMI extends InfConfig {
 }
 
 object EstimateCC extends InfConfig {
-  import MathFuncs._
-  import EstimateMI._
+  import LowProb.testWeights
 
   // given a function, finds the difference in its application on two numbers
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double = func(hb) - func(lb)
@@ -335,7 +329,7 @@ object EstimateCC extends InfConfig {
     def genWeights(p: Pair[Double]): List[Double] = {
       val mu = p._1; val sigma = p._2
       val boundList = bounds.toList
-      def wtFunc(d: Double) = intUniG(mu, sigma)(d)
+      def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
       val rawWeights = testWeights("uni " + p.toString, firstTerm +: { for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1)) }.toList)
       rawWeights map normWeight(bounds)
@@ -374,7 +368,7 @@ object EstimateCC extends InfConfig {
     def genWeights(t: (Pair[Double], Pair[Double], Pair[Double])): List[Double] = {
       val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
       val boundList = bounds.toList
-      def wtFunc(d: Double) = intBiG(muPair, sigmaPair, pPair)(d)
+      def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
       val rawWeights = testWeights("bi " + t.toString, firstTerm +: { for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1)) }.toList)
       rawWeights map normWeight(bounds)
@@ -386,10 +380,10 @@ object EstimateCC extends InfConfig {
   // calculates maximum MI given List of estimates
   def getResultsMult(est: List[List[(Pair[Int], List[Pair[Double]])]], filePrefix: Option[String]): Double = {
     filePrefix match {
-      case Some(f) => for (e <- 0 until est.length) yield estimatesToFileMult(est(e), filePrefix.get + "_" + e.toString + ".dat")
+      case Some(f) => for (e <- 0 until est.length) yield IOFile.estimatesToFileMult(est(e), filePrefix.get + "_" + e.toString + ".dat")
       case None => {}
     }
-    ((est map optMIMult) map (x => x._2.head._1)).max
+    ((est map EstimateMI.optMIMult) map (x => x._2.head._1)).max
   }
 
   // generates MI estimates for some weighting
@@ -397,6 +391,6 @@ object EstimateCC extends InfConfig {
     for {
       w <- weights
       // filter to make sure weights and row numbers are identical
-    } yield genEstimatesMult(pl, bins filter (x => x._1 == w._1.length), Some(w))
+    } yield EstimateMI.genEstimatesMult(pl, bins filter (x => x._1 == w._1.length), Some(w))
 
 }

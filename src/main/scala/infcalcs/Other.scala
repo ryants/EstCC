@@ -1,9 +1,6 @@
 package infcalcs
 
-import math._
 import cern.jet.stat.Probability.{ errorFunction => erf }
-import scala.util.Random
-import scala.util.Random.shuffle
 import cern.jet.random.engine.MersenneTwister
 
 // deals with instances where weights fail to adequately cover the relevant signal space
@@ -21,6 +18,8 @@ object LowProb {
 }
 
 object MathFuncs {
+  import math.{ log, sqrt, pow }
+  
   //arbitrary integer-based logarithm function
   def logb(b: Int): Double => Double = (a: Double) => log(a) / log(b)
 

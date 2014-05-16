@@ -1,10 +1,6 @@
 package infcalcs
 
 import cern.jet.stat.Probability.{ studentTInverse }
-import math.sqrt
-import java.io.BufferedWriter
-import java.io.FileWriter
-import java.io.File
 
 // takes x and y values as data input and calculates simple least-squares regression line
 class SLR(val xList: List[Double], val yList: List[Double], val label: String) {
@@ -12,7 +8,7 @@ class SLR(val xList: List[Double], val yList: List[Double], val label: String) {
   def this(xList: List[Double], yList: List[Double]) = this(xList, yList, "")
 
   def toFile(f: String) = {
-    val writer = new BufferedWriter(new FileWriter(new File(f)))
+    val writer = new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
     for (i <- (0 until xList.length).toList) {
       writer.write(s"${xList(i)} ${yList(i)}")
       writer.newLine()
@@ -36,8 +32,8 @@ class SLR(val xList: List[Double], val yList: List[Double], val label: String) {
 
   lazy val intercept = alpha
   lazy val slope = beta
-  lazy val iError = sqrt(varAlpha)
-  lazy val sError = sqrt(varBeta)
+  lazy val iError = math.sqrt(varAlpha)
+  lazy val sError = math.sqrt(varBeta)
   lazy val i95Conf = iError * studentTInverse(0.05, xList.length - 2)
   lazy val s95Conf = sError * studentTInverse(0.05, xList.length - 2)
 

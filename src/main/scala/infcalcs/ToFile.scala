@@ -1,12 +1,12 @@
 package infcalcs
 
-import java.io.BufferedWriter
-import java.io.FileWriter
-import java.io.File
-import scala.io.Source.fromFile
-
 object IOFile extends InfConfig {
 
+  import java.io.BufferedWriter
+  import java.io.FileWriter
+  import java.io.File
+  import scala.io.Source.fromFile
+  
   // loads 2D table from file (doubles)
   def importData(f: String): Vector[Vector[Double]] = {
     val readData = fromFile(f).getLines
@@ -17,7 +17,7 @@ object IOFile extends InfConfig {
   }
 
   // loads pair of lists from file
-  def loadPairList(f: String, cols: Pair[Int] = (0,1)): DRData = {
+  def loadPairList(f: String, cols: Pair[Int] = (0, 1)): DRData = {
     val d = importData(f)
     if (d.isEmpty) (Nil, Nil)
     else {
@@ -59,8 +59,8 @@ object IOFile extends InfConfig {
   // writes list of mutual information estimates to file
   def estimatesToFileMult(d: List[(Pair[Int], List[Pair[Double]])], f: String): Unit = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
-    val rands = (0 until numRandTables).toList map (x => ("\tMIRand "+x+"\tSDRand "+x))
-    writer.write("# rBins\tcBins\tMI\tSD"+rands.mkString)
+    val rands = (0 until numRandTables).toList map (x => ("\tMIRand " + x + "\tSDRand " + x))
+    writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
     writer.newLine()
     val lines = for (x <- d) yield s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
@@ -69,6 +69,6 @@ object IOFile extends InfConfig {
     }
     writer.flush()
     writer.close()
-    
+
   }
 }

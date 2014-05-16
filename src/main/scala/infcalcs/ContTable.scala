@@ -1,16 +1,8 @@
 package infcalcs
 
-import TreeDef._
 import IOFile.importData
-import MathFuncs._
-import scala.io.Source._
-import scala.util.matching.Regex._
-import java.io.BufferedWriter
-import java.io.FileWriter
-import java.io.File
 
 // contingency table
-
 trait ContTable {
   val rows: Int
   val cols: Int
@@ -26,7 +18,7 @@ trait ContTable {
   def probVect: Vector[Int] => Double = l => l.sum / numSamples
   
   //returns entropy term given a probability
-  def eTerm(prob: Double): Double = if (prob == 0) 0 else prob * logb(2)(prob)
+  def eTerm(prob: Double): Double = if (prob == 0) 0 else prob * MathFuncs.logb(2)(prob)
 
   //marginal entropy of 2D table
   def margEntropy(t: Vector[Vector[Int]]): Double = -(t map probVect map eTerm).sum
@@ -35,7 +27,7 @@ trait ContTable {
   def condEntropy(t: Vector[Vector[Int]]): Double = {
     val trans = t.transpose
     val probs: Vector[Double] = trans map probVect
-    val entList: Vector[Double] = trans map freqToProb map (r => -(r map eTerm).sum)
+    val entList: Vector[Double] = trans map MathFuncs.freqToProb map (r => -(r map eTerm).sum)
     (for (p <- 0 until probs.length) yield probs(p) * entList(p)).sum
   }
 
@@ -61,7 +53,7 @@ trait ContTable {
 
   //writes a contingency table to file (space-delimited columns)
   def tableToFile(f: String) = {
-    val writer = new BufferedWriter(new FileWriter(new File(f)))
+    val writer = new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
     val lines = for (r <- table) yield (r map (x => x + " "))
     for (l <- lines) {
       writer.write(l.mkString(" ").trim())
@@ -75,7 +67,6 @@ trait ContTable {
 
 //class for reading contingency tables from a file
 class ImportedTable(fileName: String) extends ContTable {
-
   lazy val rows: Int = table.length
   lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
   lazy val table: Vector[Vector[Int]] = importData(fileName) map (x => x map (y => y.toInt))

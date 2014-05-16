@@ -53,24 +53,6 @@ object CTBuild {
     if (t.length != wts.length) { println(t.length, wts.length); throw new Exception }
     else { for (v <- (0 until t.length).toVector) yield (t(v) map (x => (x * wts(v)).round.toInt)) }.toVector
 
-  // checks if each element vector has the same sum
-  def isUniform(t: Vector[Vector[Int]]): Boolean = {
-    val rsums = t map (_.sum)
-    !(rsums exists (_ != rsums.head))
-  }
-
-  // alters 2D vector if it fails uniformity test so that it passes
-  def makeUniformWts(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
-    if (isUniform(t)) t
-    else {
-      val rsums: Vector[Int] = t map (_.sum)
-      val total = rsums.sum.toDouble
-      val uRow = total / t.length.toDouble
-      val uWts: List[Double] = (rsums map (x => uRow / x.toDouble)).toList
-      weightSignalData(t, uWts)
-    }
-  }
-
   // builds contingency table given randomization parameter, dataset, pair of bin sizes, bin-delimiting trees, weighting 
   def buildTable(randomize: Boolean)(pl: DRData, nb: Pair[Int], rbd: Tree, cbd: Tree, weights: Option[Weight] = None): ConstructedTable = {
     val rd = if (rbd.isEmpty) getBinDelims(pl._1, nb._1) else rbd
@@ -88,13 +70,12 @@ object CTBuild {
       }
     }
 
-    // builds uniformly weighted table
-    val ctUniform = makeUniformWts(if (randomize) addValues(table, myShuffle(pl._1, EstCC.rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2))
+    val ct = if (randomize) addValues(table, myShuffle(pl._1, EstCC.rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
 
     // applies other weights if present
     weights match {
-      case None => new ConstructedTable(ctUniform)
-      case Some((x, tag)) => new ConstructedTable(weightSignalData(ctUniform, x))
+      case None => new ConstructedTable(ct)
+      case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 
   }
@@ -102,7 +83,7 @@ object CTBuild {
 }
 
 object EstimateMI {
-  import CTBuild.{ buildTable, getBinDelims, makeUniformWts, weightSignalData }
+  import CTBuild.{ buildTable, getBinDelims, weightSignalData }
 
   //number of data randomizations to determine bin-based calculation bias
   val numRandTables = EstCC.numParameters("numRandom")
@@ -124,6 +105,24 @@ object EstimateMI {
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
 
+  // checks if each element vector has the same sum
+  def isUniform(t: Vector[Vector[Int]]): Boolean = {
+    val rsums = t map (_.sum)
+    !(rsums exists (_ != rsums.head))
+  }
+
+  // alters 2D vector if it fails uniformity test so that it passes
+  def makeUniform(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
+    if (isUniform(t)) t
+    else {
+      val rsums: Vector[Int] = t map (_.sum)
+      val total = rsums.sum.toDouble
+      val uRow = total / t.length.toDouble
+      val uWts: List[Double] = (rsums map (x => uRow / x.toDouble)).toList
+      weightSignalData(t, uWts)
+    }
+  }
+
   // resample fraction of data without replacement by modifying the contingency table
   def subSample(frac: Double, t: ContTable, weights: Option[Weight] = None): ConstructedTable = {
     val numToRemove = ((1 - frac) * t.numSamples).toInt
@@ -142,7 +141,6 @@ object EstimateMI {
       else {
         val numPossible = (validIndices map (x => x._2)).sum
         val randSample = EstCC.rEngine.raw() * numPossible
-
         @tailrec def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int =
           if (cumuVal + validIndices(curIndex)._2 > r) curIndex
           else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
@@ -157,7 +155,7 @@ object EstimateMI {
       }
     }
 
-    val sTable = makeUniformWts(shrinkTable(numToRemove, nonzeroIndices, t.table))
+    val sTable = makeUniform(shrinkTable(numToRemove, nonzeroIndices, t.table))
     weights match {
       case None => new ConstructedTable(sTable)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
@@ -260,6 +258,7 @@ object EstimateMI {
   // calculates regression model for both original and randomized data
   def calcMultRegs(r: RegDataMult): (SLR, List[Option[SLR]]) = {
     val regLine = new SLR(r._1, r._2 map (_.mutualInformation), r._4.last)
+    //regLine.toFile(s"rd_${regLine.label}.dat")
     val regdataRand = (0 until numRandTables).toList map (x => (r._1, r._2, r._3(x), r._4))
     val regLinesRand = regdataRand map calcRandRegs
     (regLine, regLinesRand)

@@ -9,7 +9,7 @@ import scala.util.Random.shuffle
 import LowProb.{ testWeights }
 import OtherFuncs._
 
-object CTBuild extends InfConfig {
+object CTBuild {
 
   // divides list into sublists with approx. equal elements
   def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
@@ -101,7 +101,7 @@ object CTBuild extends InfConfig {
 
 }
 
-object EstimateMI extends InfConfig {
+object EstimateMI {
   import CTBuild.{ buildTable, getBinDelims, makeUniformWts, weightSignalData }
 
   //number of data randomizations to determine bin-based calculation bias
@@ -316,7 +316,7 @@ object EstimateMI extends InfConfig {
 
 }
 
-object EstimateCC extends InfConfig {
+object EstimateCC {
   import MathFuncs._
   import EstimateMI._
 

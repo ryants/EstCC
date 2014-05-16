@@ -5,7 +5,7 @@ import java.io.FileWriter
 import java.io.File
 import scala.io.Source.fromFile
 
-object IOFile extends InfConfig {
+object IOFile {
 
   // loads 2D table from file (doubles)
   def importData(f: String): Vector[Vector[Double]] = {

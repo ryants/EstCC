@@ -8,7 +8,7 @@ import IOFile._
 import OtherFuncs.updateParameters
 import cern.jet.random.engine.MersenneTwister
 
-object EstCC extends App with InfConfig {
+object EstCC extends App {
 
   //initialize PRNG
   val rEngine = new MersenneTwister
@@ -17,7 +17,7 @@ object EstCC extends App with InfConfig {
   val dataFile = args(1)
 
   val rawParameters = importParameters(paramFile)
-  val parameters = updateParameters(rawParameters, defaultParameters)
+  val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
   val listParameters = parameters._1
   val numParameters = parameters._2
   val stringParameters = parameters._3

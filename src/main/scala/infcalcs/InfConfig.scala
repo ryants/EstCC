@@ -1,6 +1,6 @@
 package infcalcs
 
-trait InfConfig {
+object InfConfig {
 
   val listParams: Map[String, Option[List[Double]]] = Map("columnPair" -> Some(List(0.0, 1.0)), "responseValues" -> None,
     "responseBins" -> Some((4.0 to 80.0 by 4.0).toList), "signalValues" -> Some((0.0 to 18.0 by 1.0).toList), "signalBins" -> None,

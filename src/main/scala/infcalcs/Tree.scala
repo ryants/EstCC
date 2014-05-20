@@ -22,7 +22,7 @@ object TreeDef {
     def toList: List[Double] = left.toList ++ List(value.get) ++ right.toList
   }
 
-  // nonexistant node (a child of terminal nodes)
+  // nonexistent node (a child of terminal nodes)
   case object EmptyTree extends Tree {
     val entries = 0
     val index = -1

@@ -1,6 +1,6 @@
 package infcalcs
 
-import EstimateCC.{ uniWeight, biWeight, getResultsMult }
+import EstimateCC.{ uniWeight, biWeight, getResultsMult, calcWithWeightsMult }
 import CTBuild.getBinDelims
 import IOFile.loadPairList
 import TreeDef.Tree
@@ -30,14 +30,14 @@ object EstCC extends App with InfConfig {
   // function to add string to an original string 
   def addLabel(s: Option[String], l: String): Option[String] = s flatMap (x => Some(x ++ l))
 
-  // calculate and output estimated mutual information values given calculated weights
-  //  val ccMult =
-  //  ((for (n <- 0 until w.length) yield {
-  //  List(getResultsMult(calcWithWeightsMult(uw(n), p), addLabel(outF, "_u_s" + bins.unzip._1.distinct(n))),
-  //  getResultsMult(calcWithWeightsMult(bw(n), p), addLabel(outF, "_b_s" + bins.unzip._1.distinct(n)))).max
-  // }) :+ getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))).max
+  // calculate estimated mutual information values given calculated weights
+  // also outputs mutual information estimates per bin number for post hoc analysis
+  val ccMult =
+    ((for (n <- 0 until w.length) yield {
+      List(getResultsMult(calcWithWeightsMult(uw(n), p), addLabel(outF, "_u_s" + bins.unzip._1.distinct(n))),
+        getResultsMult(calcWithWeightsMult(bw(n), p), addLabel(outF, "_b_s" + bins.unzip._1.distinct(n)))).max
+    }) :+ getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))).max
 
-  val ccMult = getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))
   // print estimated channel capacity to stdout
   println(ccMult)
 }

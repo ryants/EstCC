@@ -51,7 +51,7 @@ object MathFuncs {
 
 object OtherFuncs {
 
-  // custom shuffle algorithm using a mersenne twister algorithm and a mutable array
+  // custom shuffle algorithm using a mersenne twister prng and a mutable array
   def myShuffle[A: scala.reflect.ClassTag](l: List[A], e: MersenneTwister): List[A] = {
     val a: Array[A] = l.toArray
     for (i <- (1 until l.length).reverse) {

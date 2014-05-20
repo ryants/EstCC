@@ -14,7 +14,7 @@ into the project/plugins.sbt file. Then run `sbt one-jar` in the project's root
 directory to generate the JAR file.  Additional information on this plugin
 can be found at https://github.com/sbt/sbt-onejar
 
-This code also contains a number of methods from the Colt Project.  This 
+This code also contains a number of methods from the [Colt Project](http://acs.lbl.gov/software/colt/).  This 
 dependency is included in the build.sbt file.
 
 ### USAGE
@@ -29,7 +29,7 @@ the channel capacity can be estimated using the following command:
 
 `java -jar MyEstCC.jar datafile.dat column1 column2`
 
-where 'dataFile.dat' contains the whitespace-delimited columns and column1 
+where 'datafile.dat' contains the whitespace-delimited columns and column1 
 and column2 are integers denoting the signal and response data columns (where
  the first column in the file is 0)
 

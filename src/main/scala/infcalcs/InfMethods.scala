@@ -3,6 +3,7 @@ package infcalcs
 import annotation.tailrec
 import math._
 import TreeDef._
+import scala.collection.parallel._
 
 object CTBuild extends InfConfig {
 
@@ -78,6 +79,7 @@ object CTBuild extends InfConfig {
 
 object EstimateMI extends InfConfig {
   import CTBuild.{ buildTable, getBinDelims, weightSignalData }
+  val tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(100))
 
   // generates all (row, col) bin number tuples
   def genBins(binList: List[Int], otherBinList: List[Int] = List()): List[Pair[Int]] = {
@@ -168,9 +170,14 @@ object EstimateMI extends InfConfig {
     val invFracs = fracList map invSS
     
     // generates data with jackknife method
-    val subSamples = fracList map (x => jackknife(x, pl))
-    val tables = subSamples map (x => buildTable(!rand)(x, bt, rowDelims, colDelims, wts))
-    val randTables = for (n <- 0 until numRandTables) yield subSamples map (x => buildTable(rand)(x, bt, rowDelims, colDelims, wts))
+    val subSamplesX = fracList.par
+    subSamplesX.tasksupport = tasksupport
+    val subSamples = subSamplesX.map (x => jackknife(x, pl))
+    val tables2 = subSamples map (x => buildTable(!rand)(x, bt, rowDelims, colDelims, wts))
+    val tables = tables2.toList
+    val randTablesX = (0 until numRandTables).par
+    randTablesX.tasksupport = tasksupport
+    val randTables = randTablesX.map(n => subSamples map (x => buildTable(rand)(x, bt, rowDelims, colDelims, wts)))
 
     val l = wts match {
       case None => "n"
@@ -182,7 +189,7 @@ object EstimateMI extends InfConfig {
       if (fracList(f) < 1.0)
     } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
 
-    (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
+    (invFracs, tables, randTables.toList.map(a=>a.toList), tags :+ s"${l}_r${bt._1}_c${bt._2}")
 
   }
 

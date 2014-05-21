@@ -33,3 +33,15 @@ and column2 are integers denoting the signal and response data columns (where
 
 Channel capacity calculation parameters are present in the 
 `src/main/scala/infcalcs/InfConfig.scala` file 
+
+### OUTPUT
+
+The output is recorded in a series of files containing the estimated mutual
+information for a particular signal distribution (uniform, unimodal, or
+bimodal). Each file is identified by the signal distribution type (n, u, or
+b) as well as the number of signal bins and an index tracking the particular
+signal distribution (i.e. `out_n_0.dat` or `out_u_s19_5.dat`). Contained
+in each space-delimited file is the number of signal bins, the number of response bins, the
+estimated mutual information, its 95% confidence interval and the 
+estimated mutual information and confidence interval for a series of randomizations
+of the data set.

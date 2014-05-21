@@ -1,12 +1,12 @@
 package infcalcs
 
-import CTBuild._
-import EstimateMI._
-import EstimateCC._
-import TreeDef._
-import IOFile._
 import OtherFuncs.updateParameters
 import cern.jet.random.engine.MersenneTwister
+import EstimateCC.{ uniWeight, biWeight, getResultsMult, calcWithWeightsMult }
+import CTBuild.getBinDelims
+import IOFile.{ loadPairList, importParameters }
+import TreeDef.Tree
+import EstimateMI.genEstimatesMult
 
 object EstCC extends App {
 

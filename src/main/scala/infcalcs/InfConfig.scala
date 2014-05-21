@@ -93,6 +93,6 @@ trait InfConfig {
   val rand = true
   
   //initialize PRNG
-  val rEngine = new MersenneTwister
+  def rEngine() = {new MersenneTwister}
 
 }

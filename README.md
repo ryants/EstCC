@@ -56,7 +56,7 @@ in one of 5 possible formats depending on the nature of the parameter:
 5. a string with no whitespace characters
 
 Parameters can only accommodate one of these option (unless the parameter requires
-a list, in which case it can accommodate options 1. or 2.) and the program will
+a list, in which case it can accommodate options 1-3) and the program will
 throw an Exception if, for example, the string "hello" is passed to the parameter
 governing the number of data randomizations to consider. The file `params.txt`
 contains all possible parameters and their associated default values

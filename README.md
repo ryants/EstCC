@@ -39,21 +39,21 @@ delimited columns, with the parameter string as shown in the 'InfConfig.scala'
 file in the first column. The second column will contain the parameter value 
 in one of 5 possible formats depending on the nature of the parameter:
 
-  #### List parameters:
-    1. 2 or 3 comma-delimited numbers: 'minimum','maximum','increment' where 
-       'maximum' is included and 'increment' is optional, defaulting to 1 
-       (i.e. 0,10,2 produces the list: List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0), 
-       and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))
-    2. a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces the 
-       same list as in option 1.
-    3. "None" to indicate the absence of a list (only applicable for 
-       response/signal value or bin parameters
+##### List parameters:
+1. 2 or 3 comma-delimited numbers: 'minimum','maximum','increment' where 
+   'maximum' is included and 'increment' is optional, defaulting to 1 
+   (i.e. 0,10,2 produces the list: List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0), 
+   and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))
+2. a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces the 
+   same list as in option 1.
+3. "None" to indicate the absence of a list (only applicable for 
+   response/signal value or bin parameters
 
-  #### Integer parameters:
-    4. a single number
+##### Integer parameters:
+4. a single number
 
-  #### String parameters:  
-    5. a string with no whitespace characters
+##### String parameters:  
+5. a string with no whitespace characters
 
 Parameters can only accommodate one of these option (unless the parameter requires
 a list, in which case it can accommodate options 1. or 2.) and the program will

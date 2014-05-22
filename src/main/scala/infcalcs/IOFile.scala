@@ -6,7 +6,7 @@ object IOFile {
   import java.io.FileWriter
   import java.io.File
   import scala.io.Source.fromFile
-  
+
   // loads 2D table from file (doubles)
   def importData(f: String): Vector[Vector[Double]] = {
     val readData = fromFile(f).getLines
@@ -15,11 +15,14 @@ object IOFile {
       if (!l.startsWith("#"))
     } yield (l.split("\\s") map (x => x.toDouble)).toVector
   }
-  
-  def importParameters(f: String): List[Pair[String]] = {
-    val readData = fromFile(f).getLines
-    val splitData = (for (l <- readData.toVector) yield l.split('\t')).toList
-    splitData map (x => (x(0), x(1)))
+
+  def importParameters(f: Option[String]): List[Pair[String]] = f match {
+    case Some(str) => {
+      val readData = fromFile(f.get).getLines.toVector filter (_ != "")
+      val splitData = (for (l <- readData.toVector) yield l.split('\t')).toList
+      splitData map (x => (x(0), x(1)))
+    }
+    case None => List()
   }
 
   // loads pair of lists from file

@@ -67,9 +67,10 @@ object OtherFuncs {
 
   def stringToSList(s: String): Option[List[Double]] = {
     val csv = s.split(',')
-    if (csv.length > 3) throw new Exception(s"Illegal number of arguments: ${csv.length}")
-    else if (csv.length == 3) Some((csv(0).toDouble to csv(1).toDouble by csv(2).toDouble).toList)
+    if (csv.length == 3) Some((csv(0).toDouble to csv(1).toDouble by csv(2).toDouble).toList)
     else if (csv.length == 2) Some((csv(0).toDouble to csv(1).toDouble by 1.0).toList)
+    else if (csv.length > 3) throw new Exception(s"Illegal number of arguments: ${csv.length}")
+    else if (csv.length == 1 && csv(0) == "None") None
     else Some(s.split("\\s").toList map (_.toDouble))
   }  
     

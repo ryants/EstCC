@@ -13,9 +13,9 @@ object EstCC extends App {
   //initialize PRNG
   val rEngine = new MersenneTwister
 
-  val paramFile = args(0)
-  val dataFile = args(1)
-
+  val dataFile = args(0)
+  val paramFile = if (args.length == 2) Some(args(1)) else None
+  
   val rawParameters = importParameters(paramFile)
   val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
   val listParameters = parameters._1

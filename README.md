@@ -33,33 +33,28 @@ of data
 
 Default channel capacity calculation parameters are present in both the 
 `src/main/scala/infcalcs/InfConfig.scala` file and the example `params.txt` 
-file.  As mentioned previously, these values can be changed upon introduction 
-of a parameter file.  The parameter file should be formatted in two tab-
-delimited columns, with the parameter string as shown in the 'InfConfig.scala' 
-file in the first column. The second column will contain the parameter value 
-in one of 5 possible formats depending on the nature of the parameter:
+file, which contains all possible parameters and their associated default 
+values formatted for input to the executable JAR file. As mentioned 
+previously, these values can be changed upon introduction of a parameter 
+file.  The parameter file is formatted with two tab-delimited columns,
+so that the parameter string is in the first column and the parameter value
+in one of 5 possible (parameter-dependent) formats is in the second column:
 
 ##### List parameters:
-1. 2 or 3 comma-delimited numbers: 'minimum','maximum','increment' where 
+- 2 or 3 comma-delimited numbers: 'minimum','maximum','increment' where 
    'maximum' is included and 'increment' is optional, defaulting to 1 
    (i.e. 0,10,2 produces the list: List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0), 
    and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))
-2. a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces the 
+- a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces the 
    same list as in option 1.
-3. "None" to indicate the absence of a list (only applicable for 
+- "None" to indicate the absence of a list (only applicable for 
    response/signal value or bin parameters
 
-##### Integer parameters:
-4. a single number
+##### Numeric parameters:
+- a single number
 
 ##### String parameters:  
-5. a string with no whitespace characters
-
-Parameters can only accommodate one of these option (unless the parameter requires
-a list, in which case it can accommodate options 1-3) and the program will
-throw an Exception if, for example, the string "hello" is passed to the parameter
-governing the number of data randomizations to consider. The file `params.txt`
-contains all possible parameters and their associated default values
+- a string with no whitespace characters
 
 ### OUTPUT
 

@@ -1,0 +1,20 @@
+columnPair	0 1
+responseValues	None
+responseBins	4,80,4
+signalValues	0,18,1
+signalBins	None
+sampleFractions	0.8,0.975,0.025
+biPeakWeights	0.4 0.5 0.6
+
+numRandom	10
+numForCutoff	1
+cutoffValue	0.0
+uniMuNumber	4
+uniSigmaNumber	5
+biMuNumber	5
+biSigmaNumber	5
+repsPerFraction	20
+
+directory	./
+filePrefix	out
+logSpace	false

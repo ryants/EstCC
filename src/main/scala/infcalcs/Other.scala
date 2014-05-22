@@ -2,10 +2,12 @@ package infcalcs
 
 import cern.jet.stat.Probability.{ errorFunction => erf }
 import cern.jet.random.engine.MersenneTwister
+import annotation.tailrec
+
 
 // deals with instances where weights fail to adequately cover the relevant signal space
 object LowProb {
-  
+
   // exception thrown if weights are inappropriate
   class LowProbError(msg: String) extends Exception {
     println(msg)
@@ -62,6 +64,24 @@ object OtherFuncs {
     }
     a.toList
   }
- 
+
+  def stringToSList(s: String): Option[List[Double]] = {
+    val csv = s.split(',')
+    if (csv.length == 3) Some((csv(0).toDouble to csv(1).toDouble by csv(2).toDouble).toList)
+    else if (csv.length == 2) Some((csv(0).toDouble to csv(1).toDouble by 1.0).toList)
+    else if (csv.length > 3) throw new Exception(s"Illegal number of arguments: ${csv.length}")
+    else if (csv.length == 1 && csv(0) == "None") None
+    else Some(s.split("\\s").toList map (_.toDouble))
+  }  
+    
+  @tailrec def updateParameters(l: List[Pair[String]], p: Parameters): Parameters = {
+    if (l.isEmpty) p
+    else
+	  if (p._1 contains l.head._1) updateParameters(l.tail, (p._1 updated (l.head._1, stringToSList(l.head._2)), p._2, p._3))
+	  else if (p._2 contains l.head._1) updateParameters(l.tail, (p._1, p._2 updated (l.head._1, l.head._2.toInt), p._3))
+	  else if (p._3 contains l.head._1) updateParameters(l.tail, (p._1, p._2, p._3 updated (l.head._1, l.head._2)))
+	  else throw new Exception(s"illegal parameter: ${l.head._1}")
+  }
+
 }
 

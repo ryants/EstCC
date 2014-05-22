@@ -1,12 +1,12 @@
 package infcalcs
 
-object IOFile extends InfConfig {
+object IOFile {
 
   import java.io.BufferedWriter
   import java.io.FileWriter
   import java.io.File
   import scala.io.Source.fromFile
-  
+
   // loads 2D table from file (doubles)
   def importData(f: String): Vector[Vector[Double]] = {
     val readData = fromFile(f).getLines
@@ -14,6 +14,15 @@ object IOFile extends InfConfig {
       l <- readData.toVector
       if (!l.startsWith("#"))
     } yield (l.split("\\s") map (x => x.toDouble)).toVector
+  }
+
+  def importParameters(f: Option[String]): List[Pair[String]] = f match {
+    case Some(str) => {
+      val readData = fromFile(f.get).getLines.toVector filter (_ != "")
+      val splitData = (for (l <- readData.toVector) yield l.split('\t')).toList
+      splitData map (x => (x(0), x(1)))
+    }
+    case None => List()
   }
 
   // loads pair of lists from file
@@ -28,6 +37,7 @@ object IOFile extends InfConfig {
 
   // loads multiple list pairs
   def loadSeries(cvs: List[Double], pop: Boolean, kd: Int): List[(DRData, Double)] = {
+    val outputDir = EstCC.stringParameters("directory")
     val pref = outputDir + { if (pop) "pc" else "sc" }
     val fileNames = cvs map (x => pref + "_sig_" + kd + "_" + x + ".dat")
     for (x <- (0 until fileNames.length).toList) yield (loadPairList(fileNames(x)), cvs(x))
@@ -58,6 +68,7 @@ object IOFile extends InfConfig {
 
   // writes list of mutual information estimates to file
   def estimatesToFileMult(d: List[(Pair[Int], List[Pair[Double]])], f: String): Unit = {
+    val numRandTables = EstCC.numParameters("numRandom")
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map (x => ("\tMIRand " + x + "\tSDRand " + x))
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)

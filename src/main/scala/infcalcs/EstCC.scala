@@ -1,20 +1,45 @@
 package infcalcs
 
+import OtherFuncs.updateParameters
+import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{ uniWeight, biWeight, getResultsMult, calcWithWeightsMult }
 import CTBuild.getBinDelims
-import IOFile.loadPairList
+import IOFile.{ loadPairList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
 
-object EstCC extends App with InfConfig {
+object EstCC extends App {
 
-  // three arguments required: file, column for signal values, column for response values
-  val inF = args(0)
-  val col1: Int = args(1).toInt
-  val col2: Int = args(2).toInt
+  //initialize PRNG
+  val rEngine = new MersenneTwister
 
-  // use above parameters to extract data from file
-  val p = loadPairList(inF, (col1, col2))
+  val dataFile = args(0)
+  val paramFile = if (args.length == 2) Some(args(1)) else None
+  
+  val rawParameters = importParameters(paramFile)
+  val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
+  val listParameters = parameters._1
+  val numParameters = parameters._2
+  val stringParameters = parameters._3
+
+  //load data given pair of columns
+  val colPair = (listParameters("columnPair").get(0).toInt, listParameters("columnPair").get(1).toInt)
+  val p = loadPairList(dataFile, colPair)
+
+  //determine number of response bins
+  val responseBins: List[Int] = listParameters("responseValues") match {
+    case None => listParameters("responseBins").get map (_.toInt)
+    case Some(x) => List(x.length)
+  }
+
+  //determine number of signal bins
+  val signalBins: List[Int] = listParameters("signalValues") match {
+    case None => listParameters("signalBins").get map (_.toInt)
+    case Some(x) => List(x.length)
+  }
+
+  //list of bin pairs
+  val bins = EstimateMI.genBins(signalBins, responseBins)
 
   // build list of weight pairs (unimodal and bimodal) given a list of bin sizes specified in 'InfConfig.scala'
   val w: List[Pair[List[Weight]]] = {
@@ -30,8 +55,9 @@ object EstCC extends App with InfConfig {
   // function to add string to an original string 
   def addLabel(s: Option[String], l: String): Option[String] = s flatMap (x => Some(x ++ l))
 
-  // calculate estimated mutual information values given calculated weights
-  // also outputs mutual information estimates per bin number for post hoc analysis
+  // calculate and output estimated mutual information values given calculated weights
+
+  val outF = Some(stringParameters("filePrefix"))
   val ccMult =
     ((for (n <- 0 until w.length) yield {
       List(getResultsMult(calcWithWeightsMult(uw(n), p), addLabel(outF, "_u_s" + bins.unzip._1.distinct(n))),

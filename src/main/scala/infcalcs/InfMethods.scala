@@ -4,7 +4,7 @@ import annotation.tailrec
 import math._
 import TreeDef._
 
-object CTBuild extends InfConfig {
+object CTBuild {
 
   // divides list into sublists with approx. equal elements 
   def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
@@ -64,7 +64,7 @@ object CTBuild extends InfConfig {
     }
 
     // builds table given randomization parameter
-    val ct = if (randomize) addValues(table, OtherFuncs.myShuffle(pl._1, rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
+    val ct = if (randomize) addValues(table, OtherFuncs.myShuffle(pl._1, EstCC.rEngine) zip pl._2) else addValues(table, pl._1 zip pl._2)
 
     // applies weights if present and produces instance of contingency table data structure
     weights match {
@@ -76,8 +76,13 @@ object CTBuild extends InfConfig {
 
 }
 
-object EstimateMI extends InfConfig {
+object EstimateMI {
   import CTBuild.{ buildTable, getBinDelims, weightSignalData }
+
+  //number of data randomizations to determine bin-based calculation bias
+  val numRandTables = EstCC.numParameters("numRandom")
+  // indicates the number of randomized tables that must fall below MIRandCutoff to produce a valid estimate
+  val numTablesForCutoff = EstCC.numParameters("numForCutoff")
 
   // generates all (row, col) bin number tuples
   def genBins(binList: List[Int], otherBinList: List[Int] = List()): List[Pair[Int]] = {
@@ -91,7 +96,7 @@ object EstimateMI extends InfConfig {
     if (frac == 1.0) pl
     else {
       val numToTake = (frac * pl._1.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, rEngine)
+      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, EstCC.rEngine)
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
 
@@ -131,8 +136,7 @@ object EstimateMI extends InfConfig {
       if (counter == 0) st
       else {
         val numPossible = (validIndices map (x => x._2)).sum
-        val randSample = rEngine.raw() * numPossible
-
+        val randSample = EstCC.rEngine.raw() * numPossible
         @tailrec def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int =
           if (cumuVal + validIndices(curIndex)._2 > r) curIndex
           else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
@@ -158,19 +162,33 @@ object EstimateMI extends InfConfig {
   // build data structure composed of (inverse sample size, CT, randomized CT list, label) 
   def buildDataMult(bt: Pair[Int])(pl: DRData, wts: Option[Weight] = None): RegDataMult = {
 
+    val numReps = EstCC.numParameters("repsPerFraction")
+    val fracList = ({
+      for {
+        f <- EstCC.listParameters("sampleFractions").get
+        n <- 0 until numReps
+      } yield f
+    } :+ 1.0).toList
+
     def invSS(f: Double) = 1 / (f * pl._1.length)
 
-    // determines row/column bin delimiters
-    val rowDelims: Tree = if (signalTree.isEmpty) getBinDelims(pl._1, bt._1) else signalTree
-    val colDelims: Tree = if (responseTree.isEmpty) getBinDelims(pl._2, bt._2) else responseTree
+    //determines row/column bin delimiters
+    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
+      case None => getBinDelims(pl._1, bt._1)
+      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    }
+    val colDelims: Tree = EstCC.listParameters("responseValues") match {
+      case None => getBinDelims(pl._2, bt._2)
+      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    }
 
     def roundFrac(d: Double) = "%.2f" format d
     val invFracs = fracList map invSS
-    
+
     // generates data with jackknife method
     val subSamples = fracList map (x => jackknife(x, pl))
-    val tables = subSamples map (x => buildTable(!rand)(x, bt, rowDelims, colDelims, wts))
-    val randTables = for (n <- 0 until numRandTables) yield subSamples map (x => buildTable(rand)(x, bt, rowDelims, colDelims, wts))
+    val tables = subSamples map (x => buildTable(false)(x, bt, rowDelims, colDelims, wts))
+    val randTables = for (n <- 0 until numRandTables) yield subSamples map (x => buildTable(true)(x, bt, rowDelims, colDelims, wts))
 
     val l = wts match {
       case None => "n"
@@ -189,15 +207,29 @@ object EstimateMI extends InfConfig {
   // same purpose as buildDataMult, but uses alternate resampling method
   def bDMAlt(bt: Pair[Int])(pl: DRData, wts: Option[Weight] = None): RegDataMult = {
 
+    val numReps = EstCC.numParameters("repsPerFraction")
+    val fracList = ({
+      for {
+        f <- EstCC.listParameters("sampleFractions").get
+        n <- 0 until numReps
+      } yield f
+    } :+ 1.0).toList
+
     def invSS(f: Double) = 1 / (f * pl._1.length)
 
-    // determines row/column bin delimiters
-    val rowDelims: Tree = if (signalTree.isEmpty) getBinDelims(pl._1, bt._1) else signalTree
-    val colDelims: Tree = if (responseTree.isEmpty) getBinDelims(pl._2, bt._2) else responseTree
+    //determines row/column bin delimiters
+    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
+      case None => getBinDelims(pl._1, bt._1)
+      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    }
+    val colDelims: Tree = EstCC.listParameters("responseValues") match {
+      case None => getBinDelims(pl._2, bt._2)
+      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    }
 
     // generates data with subSample method
-    val table = buildTable(!rand)(pl, bt, rowDelims, colDelims, wts)
-    val randTable = buildTable(rand)(pl, bt, rowDelims, colDelims, wts)
+    val table = buildTable(false)(pl, bt, rowDelims, colDelims, wts)
+    val randTable = buildTable(true)(pl, bt, rowDelims, colDelims, wts)
     val subSamples = fracList map (x => subSample(x, table))
     val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
 
@@ -282,7 +314,7 @@ object EstimateMI extends InfConfig {
       // determines if estimate is biased given mutual information of randomized data
       @tailrec def bFilter(plt: List[Pair[Double]], numTrue: Int): Boolean = {
         if (plt.isEmpty) numTrue >= numTablesForCutoff
-        else if (plt.head._1 - plt.head._2 <= MIRandCutoff) bFilter(plt.tail, numTrue + 1)
+        else if (plt.head._1 - plt.head._2 <= EstCC.numParameters("cutoffValue")) bFilter(plt.tail, numTrue + 1)
         else bFilter(plt.tail, numTrue)
       }
       l filter (x => bFilter(x._2, 0))
@@ -293,8 +325,11 @@ object EstimateMI extends InfConfig {
 
 }
 
-object EstimateCC extends InfConfig {
+object EstimateCC {
   import LowProb.testWeights
+
+  //is the signal distributed logarithmically
+  val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
   // given a function, finds the difference in its evaluation of two numbers
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double = func(hb) - func(lb)
@@ -309,15 +344,18 @@ object EstimateCC extends InfConfig {
 
   //generates list of unimodal (Gaussian) weights
   def uniWeight(bounds: Tree)(pl: DRData): List[Weight] = {
+    val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
+    val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+
     val minVal = if (logSpace) log(pl._1.min) else pl._1.min
     val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
-    val muList = (uMuFracMin until 1.0 by uMuFracIncr).toList map (x => minVal + (maxVal - minVal) * x)
+    val muList = (uMuFracMin until 1.0 by uMuFracMin).toList map (x => minVal + (maxVal - minVal) * x)
 
     //attach number of sigma values to mu values
     val wtParams = {
       for {
         mu <- muList
-        i <- (uSigFracMin to 1.0 by uSigFracIncr).toList
+        i <- (uSigFracMin to 1.0 by uSigFracMin).toList
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
     }
 
@@ -340,7 +378,7 @@ object EstimateCC extends InfConfig {
 
     val minVal = if (logSpace) log(pl._1.min) else pl._1.min
     val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
-    val minMuDiff = (maxVal - minVal) / bMuNum
+    val minMuDiff = (maxVal - minVal) / EstCC.numParameters("biMuNumber").toDouble
 
     // finds maximum SD given certain conditions to parameterize one of the two Gaussians in the bimodal distribution
     def maxSD(mPair: Pair[Double], b: Double): Double =
@@ -353,9 +391,11 @@ object EstimateCC extends InfConfig {
     } yield (m1, m2)
 
     // add sigma values and relative contributions from the two Gaussians for each mu pair
+    val bSigListMin = 1.0 / EstCC.numParameters("biSigmaNumber").toDouble
+    val bRelCont = EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
     val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
       p <- mp
-      s <- (bSigListIncr until 1.0 by bSigListIncr).toList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
+      s <- (bSigListMin until 1.0 by bSigListMin).toList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
       if (s._1 > 0.0001 && s._2 > 0.0001)
       w <- bRelCont
     } yield (p, s, w)
@@ -366,7 +406,10 @@ object EstimateCC extends InfConfig {
       val boundList = bounds.toList
       def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
-      val rawWeights = testWeights("bi " + t.toString, firstTerm +: { for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1)) }.toList)
+      val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
+        for (x <- 0 until (boundList.length - 1))
+          yield calcWeight(wtFunc, boundList(x), boundList(x + 1))
+      }.toList)
       rawWeights map normWeight(bounds)
     }
 
@@ -387,6 +430,6 @@ object EstimateCC extends InfConfig {
     for {
       w <- weights
       // filter to make sure weights are applied to correct set of signal bins
-    } yield EstimateMI.genEstimatesMult(pl, bins filter (x => x._1 == w._1.length), Some(w))
+    } yield EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x => x._1 == w._1.length), Some(w))
 
 }

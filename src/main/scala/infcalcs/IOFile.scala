@@ -36,11 +36,15 @@ object IOFile {
   }
 
   // loads multiple list pairs
-  def loadSeries(cvs: List[Double], pop: Boolean, kd: Int): List[(DRData, Double)] = {
+  def loadSeries(
+      cvs: List[Double],
+      pop: Boolean,
+      kd: Int): List[(DRData, Double)] = {
     val outputDir = EstCC.stringParameters("directory")
     val pref = outputDir + { if (pop) "pc" else "sc" }
     val fileNames = cvs map (x => pref + "_sig_" + kd + "_" + x + ".dat")
-    for (x <- (0 until fileNames.length).toList) yield (loadPairList(fileNames(x)), cvs(x))
+    for (x <- (0 until fileNames.length).toList) yield
+      (loadPairList(fileNames(x)), cvs(x))
   }
 
   // writes list of pairs to 2-column file
@@ -56,7 +60,9 @@ object IOFile {
   }
 
   // print regression data to file
-  def regDataToFile(d: (List[Double], List[Double], List[Double]), f: String) = {
+  def regDataToFile(
+      d: (List[Double], List[Double], List[Double]),
+      f: String) = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {
       writer.write(s"${d._1(i)} ${d._2(i)} ${d._3(i)}")
@@ -67,19 +73,24 @@ object IOFile {
   }
 
   // writes list of mutual information estimates to file
-  def estimatesToFileMult(d: List[(Pair[Int], List[Pair[Double]])], f: String): Unit = {
+  def estimatesToFileMult(
+      d: List[(Pair[Int], List[Pair[Double]])],
+      f: String): Unit = {
     val numRandTables = EstCC.numParameters("numRandom")
     val writer = new BufferedWriter(new FileWriter(new File(f)))
-    val rands = (0 until numRandTables).toList map (x => ("\tMIRand " + x + "\tSDRand " + x))
+    val rands = (0 until numRandTables).toList map
+      (x => ("\tMIRand " + x + "\tSDRand " + x))
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
     writer.newLine()
-    val lines = for (x <- d) yield s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
+    val lines =
+      for (x <- d) yield
+        s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " +
+        (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)
       writer.newLine()
     }
     writer.flush()
     writer.close()
-
   }
 }

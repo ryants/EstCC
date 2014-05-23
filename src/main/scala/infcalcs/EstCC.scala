@@ -15,7 +15,7 @@ object EstCC extends App {
 
   val dataFile = args(0)
   val paramFile = if (args.length == 2) Some(args(1)) else None
-  
+
   val rawParameters = importParameters(paramFile)
   val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
   val listParameters = parameters._1
@@ -23,7 +23,8 @@ object EstCC extends App {
   val stringParameters = parameters._3
 
   //load data given pair of columns
-  val colPair = (listParameters("columnPair").get(0).toInt, listParameters("columnPair").get(1).toInt)
+  val colPair = (listParameters("columnPair").get(0).toInt,
+    listParameters("columnPair").get(1).toInt)
   val p = loadPairList(dataFile, colPair)
 
   //determine number of response bins
@@ -41,10 +42,12 @@ object EstCC extends App {
   //list of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)
 
-  // build list of weight pairs (unimodal and bimodal) given a list of bin sizes specified in 'InfConfig.scala'
+  // build list of weight pairs (unimodal and bimodal) given signal parameters 
   val w: List[Pair[List[Weight]]] = {
-    val signalBins: List[Int] = bins.unzip._1.distinct
-    val sBoundList: List[Tree] = signalBins map (x => getBinDelims(p._1, x))
+    val sBoundList: List[Tree] = listParameters("signalValues") match {
+      case None => signalBins map (x => getBinDelims(p._1, x))
+      case Some(x) => List(TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))
+    }
     sBoundList map (x => (uniWeight(x)(p), biWeight(x)(p)))
   }
 
@@ -53,16 +56,25 @@ object EstCC extends App {
   val bw: List[List[Weight]] = w map (_._2)
 
   // function to add string to an original string 
-  def addLabel(s: Option[String], l: String): Option[String] = s flatMap (x => Some(x ++ l))
+  def addLabel(s: Option[String], l: String): Option[String] =
+    s flatMap (x => Some(x ++ l))
 
   // calculate and output estimated mutual information values given calculated weights
 
   val outF = Some(stringParameters("filePrefix"))
-  val ccMult =
-    ((for (n <- 0 until w.length) yield {
-      List(getResultsMult(calcWithWeightsMult(uw(n), p), addLabel(outF, "_u_s" + bins.unzip._1.distinct(n))),
-        getResultsMult(calcWithWeightsMult(bw(n), p), addLabel(outF, "_b_s" + bins.unzip._1.distinct(n)))).max
-    }) :+ getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))).max
+  val weightIndices = (0 until w.length).toList
+  val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
+
+  val bRes: List[Double] = weightIndices map (n => getResultsMult(
+    calcWithWeightsMult(bw(n), p),
+    addLabel(outF, "_u_s" + binIndices(n))))
+  val uRes: List[Double] = weightIndices map (n => getResultsMult(
+    calcWithWeightsMult(uw(n), p),
+    addLabel(outF, "_u_s" + binIndices(n))))
+  val nRes: Double = 
+    getResultsMult(List(genEstimatesMult(p,bins)), addLabel(outF, "_n"))
+  
+  val ccMult: Double = (List(bRes, uRes, List(nRes)) map (_.max)).max
 
   // print estimated channel capacity to stdout
   println(ccMult)

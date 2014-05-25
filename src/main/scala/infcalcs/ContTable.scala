@@ -2,31 +2,49 @@ package infcalcs
 
 import IOFile.importData
 
-// contingency table
+/** A mixin for implementing contingency tables. */
 trait ContTable {
+  /** The number of rows in the table. */
   val rows: Int
+  /** The number of columns in the table. */
   val cols: Int
 
-  //due to weighting scheme, this number may be 0 leading to NaN in output
+  /** The total number of samples, i.e, the sum of all counts in the table.
+    *
+    * Note: depending on the weighting scheme being used, this number may be 0,
+    * leading to NaN in output.
+    */
   lazy val numSamples: Double = (table map (x => x.sum)).sum
 
-  //table and transposed table
+  /** The table of counts, as a matrix of integers. */
   val table: Vector[Vector[Int]]
+  /** The table of counts, transposed. */
   lazy val ttable: Vector[Vector[Int]] = table.transpose
 
-  //vector converted to probability
+  /** Converts a vector of counts to a marginal probability.
+    *
+    * Takes the sum of all counts in the vector and divides by the total number
+    * of samples in the table to give the probability of observing any of the
+    * events tabulated in that vector.
+    */
   def probVect: Vector[Int] => Double = l => l.sum / numSamples
 
-  //returns entropy term given a probability
-  def eTerm(prob: Double): Double = 
-    if (prob == 0) 0 
+  /** Calculates an entropy term from a probability.
+    *
+    * Note that this function returns the term p*log2(p) for a probability p,
+    * which is always negative. Callers of this function must therefore take
+    * the negative of sums of entropies calculated using this function, as the
+    * definition of entropy is E[-log(P(X)] (note the negative sign).
+    */
+  def eTerm(prob: Double): Double =
+    if (prob == 0) 0
     else prob * MathFuncs.logb(2)(prob)
 
-  //marginal entropy of 2D table
-  def margEntropy(t: Vector[Vector[Int]]): Double = 
+  /** Returns the marginal entropy of a 2D table. */
+  def margEntropy(t: Vector[Vector[Int]]): Double =
     -(t map probVect map eTerm).sum
-  
-  //conditional entropy of 2D table
+
+  /** Returns the conditional entropy of a 2D table. */
   def condEntropy(t: Vector[Vector[Int]]): Double = {
     val trans = t.transpose
     val probs: Vector[Double] = trans map probVect
@@ -42,21 +60,21 @@ trait ContTable {
   lazy val condRowEntropy: Double = condEntropy(table)
   lazy val condColEntropy: Double = condEntropy(ttable)
 
-  //mutual information calculated via entropies
+  /** Mutual information calculated via entropies. */
   lazy val mutualInformation: Double = margRowEntropy - condRowEntropy
 
-  //transfer efficiency (amount of information transmitted normalized by the
-  //maximum possible information transfer, i.e. the marginal entropy of the
-  //input distribution
+  /** The transfer efficiency is the amount of information transmitted
+    * normalized by the maximum possible information transfer, i.e. the
+    * marginal entropy of the input distribution.  */
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
-  //equates two contingency tables
+  /** Checks two contingency tables for equality. */
   override def equals(ct: Any): Boolean = ct match {
     case that: ContTable => this.table == that.table
     case _ => false
   }
 
-  //writes a contingency table to file (space-delimited columns)
+  /** Writes a contingency table to a file (with space-delimited columns). */
   def tableToFile(f: String) = {
     val writer =
       new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
@@ -70,7 +88,7 @@ trait ContTable {
   }
 }
 
-//class for reading contingency tables from a file
+/** Class for reading contingency tables from a file. */
 class ImportedTable(fileName: String) extends ContTable {
   lazy val rows: Int = table.length
   lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
@@ -78,12 +96,12 @@ class ImportedTable(fileName: String) extends ContTable {
     importData(fileName) map (x => x map (y => y.toInt))
 }
 
-//class for building a contingency table from scratch
+/** Class for building a contingency table from scratch. */
 class ConstructedTable(v: Vector[Vector[Int]]) extends ContTable {
   lazy val rows = table.length
   lazy val cols = if (table.isEmpty) 0 else table(0).length
   lazy val table = v
 
-  //neat printing of contingency table to stdout
+  /** Pretty-prints contingency table to stdout. */
   override def toString = (for (x <- v) yield (x mkString " ")).mkString("\n")
 }

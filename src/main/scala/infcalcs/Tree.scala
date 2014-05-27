@@ -34,7 +34,7 @@ object TreeDef {
     val right: Tree
     /** The value associated with this node. */
     val value: Option[Double]
-    /** The maximum value contained within the subtree. */
+    /** The index of the node containing the maximum value within the subtree. */
     def maxValIndex: Int
   }
 

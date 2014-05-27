@@ -30,13 +30,24 @@ class TreeTest extends FlatSpec with Matchers {
     val l = List(4.0, 3.0, 2.0, 1.0)
     val orderedNodes = buildOrderedNodeList(l)
     val bt = buildTree(orderedNodes)
+    // The root node (2.0)
     bt.value shouldBe Some(2.0)
-    bt.left.value shouldBe Some(1.0)
-    bt.right.value shouldBe Some(3.0)
-    bt.right.left.value shouldBe None
-    bt.right.right.value shouldBe Some(4.0)
     bt.entries shouldBe 4
+    bt.maxValIndex shouldBe 3
+    // Left (1.0)
+    bt.left.value shouldBe Some(1.0)
+    bt.left.entries shouldBe 1
+    bt.left.maxValIndex shouldBe 0
+    // Right (3.0)
+    bt.right.value shouldBe Some(3.0)
     bt.right.entries shouldBe 2
+    bt.right.maxValIndex shouldBe 3
+    // Right->Left (Empty)
+    bt.right.left.value shouldBe None
+    bt.right.left.maxValIndex shouldBe -1
+    // Right->Right (4.0)
+    bt.right.right.value shouldBe Some(4.0)
+    bt.right.right.maxValIndex shouldBe 3
   }
 
   it should "build an empty tree from an empty list" in {

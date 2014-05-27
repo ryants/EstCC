@@ -16,7 +16,7 @@ trait ContTable {
 
   //vector converted to probability
   def probVect: Vector[Int] => Double = l => l.sum / numSamples
-  
+
   //returns entropy term given a probability
   def eTerm(prob: Double): Double = 
     if (prob == 0) 0 
@@ -30,7 +30,7 @@ trait ContTable {
   def condEntropy(t: Vector[Vector[Int]]): Double = {
     val trans = t.transpose
     val probs: Vector[Double] = trans map probVect
-    val entList: Vector[Double] = 
+    val entList: Vector[Double] =
       trans map MathFuncs.freqToProb map (r => -(r map eTerm).sum)
     (for (p <- 0 until probs.length) yield probs(p) * entList(p)).sum
   }
@@ -44,10 +44,10 @@ trait ContTable {
 
   //mutual information calculated via entropies
   lazy val mutualInformation: Double = margRowEntropy - condRowEntropy
-  
-  // transfer efficiency (amount of information transmitted normalized 
-  // by the maximum possible information transfer
-  // i.e. the marginal entropy of the input distribution
+
+  //transfer efficiency (amount of information transmitted normalized by the
+  //maximum possible information transfer, i.e. the marginal entropy of the
+  //input distribution
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
   //equates two contingency tables
@@ -58,7 +58,7 @@ trait ContTable {
 
   //writes a contingency table to file (space-delimited columns)
   def tableToFile(f: String) = {
-    val writer = 
+    val writer =
       new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
     val lines = for (r <- table) yield (r map (x => x + " "))
     for (l <- lines) {
@@ -68,14 +68,13 @@ trait ContTable {
     writer.flush()
     writer.close()
   }
-
 }
 
 //class for reading contingency tables from a file
 class ImportedTable(fileName: String) extends ContTable {
   lazy val rows: Int = table.length
   lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
-  lazy val table: Vector[Vector[Int]] = 
+  lazy val table: Vector[Vector[Int]] =
     importData(fileName) map (x => x map (y => y.toInt))
 }
 
@@ -84,8 +83,7 @@ class ConstructedTable(v: Vector[Vector[Int]]) extends ContTable {
   lazy val rows = table.length
   lazy val cols = if (table.isEmpty) 0 else table(0).length
   lazy val table = v
-  
+
   //neat printing of contingency table to stdout
   override def toString = (for (x <- v) yield (x mkString " ")).mkString("\n")
-  
 }

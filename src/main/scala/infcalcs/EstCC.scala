@@ -8,13 +8,20 @@ import IOFile.{ loadPairList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
 
-object EstCC extends App {
+object EstCC extends App with CLOpts {
 
+  val config = parser.parse(args, Config()) getOrElse {
+    throw new Exception("bad arguments")
+  }
+  
   //initialize PRNG
   val rEngine = new MersenneTwister
 
-  val dataFile = args(0)
-  val paramFile = if (args.length == 2) Some(args(1)) else None
+  val dataFile = config.dataFile
+  val paramFile = if (config.paramFile == "") None else Some(config.paramFile)
+  if (config.verbose) {
+    println("test")
+  }
 
   val rawParameters = importParameters(paramFile)
   val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)

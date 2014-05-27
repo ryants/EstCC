@@ -4,9 +4,29 @@ import annotation.tailrec
 import math._
 import TreeDef._
 
+/**
+  * Contains methods for building contingency tables from data.
+  *
+  * The method In
+  *
+  * weightSignalData buildTable
+  */
 object CTBuild {
 
-  // divides list into sublists with approx. equal elements 
+  /** Divides list into sublists with approximately equal numbers of elements.
+    *
+    * If the items in the list v can be divided equally into numBins
+    * sublists, each sublist will contain k = len(v) / numBins items. If the
+    * elements cannot be divided evenly, then there are r = len(v) mod
+    * numBins elements forming the remainder. In this case the last r bins
+    * will contain k+1 elements, while all preceding bins will contain k
+    * elements. Therefore the number of elements in the bins will not differ by
+    * more than one.
+    *
+    * @param v The list of doubles to be partitioned.
+    * @param numBins The number of bins to divide the list into.
+    * @return A list of length numBins containing each of the sublists.
+    */
   def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
     val avgPerBin = v.length / numBins
     val rem = v.length % numBins
@@ -27,17 +47,37 @@ object CTBuild {
     buildPartList(elemPerBin, sv)
   }
 
-  /*
-   * builds tree governing bounds of contingency table rows/columns;
-   * each val in delimList is upper inclusive bin bound (i.e. last value is
-   * max of dataset)
-   */
+  /** Returns binary tree giving the values delimiting the bounds of each bin.
+    *
+    * The tree returned by this function has numBins nodes; the value
+    * associated with each node represents the maximum data value contained in
+    * that bin, ie, the upper inclusive bin bound.
+    *
+    * @param v The list of doubles to be partitioned.
+    * @param numBins The number of bins to divide the list into.
+    * @return Binary tree containing the maximum value in each bin.
+    */
   def getBinDelims(v: List[Double], numBins: Int): Tree = {
     val delimList = partitionList(v, numBins) map (_.max)
     buildTree(buildOrderedNodeList(delimList))
   }
 
-  // use tree to find insertion row/col for value into cont. table 
+  /** Returns the index of the bin for insertion of a value into the table.
+    *
+    * This function is used to populate the contingency table once the bin
+    * boundaries have been determined. Note that if for some reason this
+    * function is called with a value that is greater than the maximum of the
+    * dataset (i.e., higher than the upper bound of the highest bin), it will
+    * nevertheless return the index of the highest bin.
+    *
+    * Note also that if there is more than one bin with the same boundary
+    * (as can happen if there are many identical values subdivided among more
+    * than one bin), this function will return the lower-index bin.
+    *
+    * @param value The number to be inserted.
+    * @param dim The binary tree specifying the bounds of each bin.
+    * @return The index of the bin that should contain the value.
+    */
   def findIndex(value: Double, dim: Tree): Int = {
     def trace(curIndex: Int, curNode: Tree): Int = {
       if (curNode.isEmpty) curIndex
@@ -47,8 +87,16 @@ object CTBuild {
     trace(dim.maxValIndex, dim)
   }
 
-  // multiplies each value in a row by a weight (length of 'wts' should equal
-  // length of 't')
+  /** Multiplies the values in each row of a contingency table by a weight.
+    *
+    * The length of 'wts' should equal length of 't'. Note that after
+    * multiplication by the weight values the entries in the contingency table
+    * are rounded to the nearest integer.
+    *
+    * @param t A contingency table, as a matrix of integers.
+    * @param wts List of weights.
+    * @return The weighted contingency table, as a matrix of integers.
+    */
   def weightSignalData(
       t: Vector[Vector[Int]],
       wts: List[Double]): Vector[Vector[Int]] =
@@ -61,44 +109,68 @@ object CTBuild {
         (t(v) map (x => (x * wts(v)).round.toInt))).toVector
     }
 
-  // builds contingency table given randomization parameter, dataset, pair of
-  // bin sizes, bin-delimiting trees, weighting
+  /** Builds a (possibly randomized) contingency table from data.
+    *
+    * Randomized contingency tables are used as a control to determine the
+    * number of bins to use for calculating the mutual information.
+    *
+    * @param randomize Whether to randomize the data in the table.
+    * @param pl The dose-response data.
+    * @param nb The numbers of bins to use for the rows and columns of the table.
+    * @param rd Binary tree giving bounds of the row bins.
+    * @param cd Binary tree giving bounds of the column bins.
+    * @param weights List specifying the input weights, or None for no weighting.
+    *
+    * @return The contingency table.
+    */
   def buildTable (randomize: Boolean)(
       pl: DRData,
       nb: Pair[Int],
       rd: Tree,
       cd: Tree,
       weights: Option[Weight] = None): ConstructedTable = {
+    // Initialize the contingency table to have dimensions (num_rows, num_cols)
+    // and fill with zeros
     val table = {
       for (r <- Range(0, rd.entries)) yield
         Range(0, cd.entries).map(x => 0).toVector
     }.toVector
 
-    // accumulator for populating cont. table
+    // Accumulator for populating the contingency table
     def addValues(
         acc: Vector[Vector[Int]],
         p: List[Pair[Double]]): Vector[Vector[Int]] = {
+      // Base case: we've reached the end of the data, return the table
+      // unchanged
       if (p.isEmpty) acc
+      // Recursive case: update the table
       else {
+        // Figure which bin the row/dose value should go into
         val rIndex = findIndex(p.head._1, rd)
+        // Figure which bin the col/response value should go into
         val cIndex = findIndex(p.head._2, cd)
+        // Sanity check
         if (rIndex < 0 || cIndex < 0) {
           throw new Exception(
             "negative indices" + println(rIndex, cIndex) + println(p.head))
         }
+        // Increment the count at (rIndex, cIndex) by 1
         addValues(acc updated (rIndex, acc(rIndex) updated
           (cIndex, acc(rIndex)(cIndex) + 1)), p.tail)
       }
     }
 
-    // builds table given randomization parameter
+    // Build the table from the data
     val ct =
+      // If randomized, shuffle the row values (while keeping the column values
+      // in place) before building the table
       if (randomize)
         addValues(table, OtherFuncs.myShuffle(pl._1, EstCC.rEngine) zip pl._2)
+      // Otherwise, don't randomize
       else
         addValues(table, pl._1 zip pl._2)
 
-    // applies weights if present and produces instance of contingency table
+    // Apply weights if present and produces instance of contingency table
     // data structure
     weights match {
       case None => new ConstructedTable(ct)

@@ -15,7 +15,11 @@ object TreeDef {
   }
 
   // node in a binary tree (contains both an index and a value)
-  case class Node(val index: Int, val value: Some[Double], val left: Tree, val right: Tree) extends Tree {
+  case class Node(
+      val index: Int,
+      val value: Some[Double],
+      val left: Tree,
+      val right: Tree) extends Tree {
     def isEmpty: Boolean = false
     val entries: Int = 1 + left.entries + right.entries
     def maxValIndex: Int = if (right.isEmpty) index else right.maxValIndex
@@ -43,10 +47,12 @@ object TreeDef {
   // determines if a list has odd length
   def lOdd[T](l: List[T]): Boolean = l.length % 2 != 0
 
-  // builds list of unconnected nodes with increasing values (index enumerates nodes)
+  // builds list of unconnected nodes with increasing values (index enumerates
+  // nodes)
   def buildOrderedNodeList(l: List[Double]): List[Node] = {
     val s = l.sorted
-    (0 until s.length).toList map (x => Node(x, Some(s(x)), EmptyTree, EmptyTree))
+    (0 until s.length).toList map
+      (x => Node(x, Some(s(x)), EmptyTree, EmptyTree))
   }
 
   // constructs a binary tree from ordered list of nodes
@@ -56,5 +62,4 @@ object TreeDef {
       val m = medSplit(l)
       new Node(l(m._1).index, l(m._1).value, buildTree(m._2), buildTree(m._3))
     }
-
 }

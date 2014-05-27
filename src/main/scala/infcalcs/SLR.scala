@@ -2,13 +2,15 @@ package infcalcs
 
 import cern.jet.stat.Probability.{ studentTInverse }
 
-// takes x and y values as data input and calculates simple least-squares regression line
+// takes x and y values as data input and calculates simple least-squares
+// regression line
 class SLR(val xList: List[Double], val yList: List[Double], val label: String) {
 
   def this(xList: List[Double], yList: List[Double]) = this(xList, yList, "")
 
   def toFile(f: String) = {
-    val writer = new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
+    val writer =
+      new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
     for (i <- (0 until xList.length).toList) {
       writer.write(s"${xList(i)} ${yList(i)}")
       writer.newLine()
@@ -26,7 +28,9 @@ class SLR(val xList: List[Double], val yList: List[Double], val label: String) {
 
   private lazy val beta = (n * Sxy - Sx * Sy) / (n * Sxx - Sx * Sx)
   private lazy val alpha = Sy / n - beta * Sx / n
-  private lazy val varEps = (1 / (n * (n - 2))) * (n * Syy - Sy * Sy - beta * beta * (n * Sxx - Sx * Sx))
+  private lazy val varEps =
+    (1 / (n * (n - 2))) *
+      (n * Syy - Sy * Sy - beta * beta * (n * Sxx - Sx * Sx))
   private lazy val varBeta = n * varEps / (n * Sxx - Sx * Sx)
   private lazy val varAlpha = varBeta * Sxx / n
 

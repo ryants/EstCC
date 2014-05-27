@@ -23,8 +23,9 @@ object EstCC extends App {
   val stringParameters = parameters._3
 
   //load data given pair of columns
-  val colPair = (listParameters("columnPair").get(0).toInt,
-    listParameters("columnPair").get(1).toInt)
+  val colPair =
+    (listParameters("columnPair").get(0).toInt,
+     listParameters("columnPair").get(1).toInt)
   val p = loadPairList(dataFile, colPair)
 
   //determine number of response bins
@@ -42,7 +43,8 @@ object EstCC extends App {
   //list of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)
 
-  // build list of weight pairs (unimodal and bimodal) given signal parameters 
+  // build list of weight pairs (unimodal and bimodal) given a list of bin
+  // sizes specified in 'InfConfig.scala'
   val w: List[Pair[List[Weight]]] = {
     val sBoundList: List[Tree] = listParameters("signalValues") match {
       case None => signalBins map (x => getBinDelims(p._1, x))
@@ -59,9 +61,10 @@ object EstCC extends App {
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))
 
-  // calculate and output estimated mutual information values given calculated weights
-
+  // calculate and output estimated mutual information values given calculated
+  // weights
   val outF = Some(stringParameters("filePrefix"))
+
   val weightIndices = (0 until w.length).toList
   val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 

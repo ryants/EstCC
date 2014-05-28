@@ -314,11 +314,47 @@ object EstimateMI {
     }
   }
 
-  // build data structure composed of (inverse sample size, CT,
-  // randomized CT list, label)
+  /** Returns resampled and randomized contingency tables for estimation of MI.
+    *
+    * The data structure returned by this function contains all of the
+    * information required to calculate the MI, including contingency tables
+    * for randomly subsampled datasets (for unbiased estimation of MI at each
+    * bins size) and randomly shuffled contingency tables (for selection of the
+    * appropriate bin size).
+    *
+    * Resampling of the dataset is performed using the [[EstimateMI.jackknife]]
+    * method.
+    *
+    * The return value is a tuple containing:
+    * - a list of the inverse sample sizes for each resampling fraction. This
+    *   list has length (repsPerFraction * number of fractions) + 1. The extra
+    *   entry in the list (the + 1 in the expression) is due to the inclusion
+    *   of the full dataset (with fraction 1.0) in the list of sampling
+    *   fractions.
+    * - a list of contingency tables for subsamples of the data, length as for
+    *   the inverse sample size list.
+    * - a list of lists of randomized contingency tables. Because there are
+    *   numRandTables randomized tables used for every estimate, the outer list
+    *   contains numRandTables entries; each entry consists of (repsPerFraction *
+    *   number of fractions) + 1 randomized contingency tables.
+    * - a list of string labels for output and logging purposes, length as for
+    *   the inverse sample size list.
+    *
+    * @param bt Pair containing the numbers of row and column bins.
+    * @param pl The input/output dataset.
+    * @param wts An optional weights vector to be applied to the rows.
+    *
+    * @return (inverse sample sizes, CTs, randomized CTs, labels)
+    */
   def buildDataMult(bt: Pair[Int])(
       pl: DRData, wts: Option[Weight] = None): RegDataMult = {
+    // The number of resampling reps to do for each sampling fraction
     val numReps = EstCC.numParameters("repsPerFraction")
+
+    // A list with the sampling fractions to use for each iteration; each
+    // sampling fraction is repeated numReps times in the list. The value 1.0
+    // is appended so that the full dataset is also used after subsampling is
+    // completed.
     val fracList = ({
       for {
         f <- EstCC.listParameters("sampleFractions").get
@@ -326,9 +362,10 @@ object EstimateMI {
       } yield f
     } :+ 1.0).toList
 
+    // Calculates the inverse sample size of the subsampled data
     def invSS(f: Double) = 1 / (f * pl._1.length)
 
-    //determines row/column bin delimiters
+    // Determines row/column bin delimiters
     val rowDelims: Tree = EstCC.listParameters("signalValues") match {
       case None => getBinDelims(pl._1, bt._1)
       case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
@@ -338,30 +375,37 @@ object EstimateMI {
       case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
     }
 
-    def roundFrac(d: Double) = "%.2f" format d
+    // List of inverse sample sizes for all of the resampling reps
     val invFracs = fracList map invSS
 
-    // generates data with jackknife method
+    // Subsamples the data with the jackknife method
     val subSamples = fracList map (x => jackknife(x, pl))
+    // For each subsampled dataset, build the contingency table
     val tables = subSamples map
       (x => buildTable(false)(x, bt, rowDelims, colDelims, wts))
+    // For each subsampled dataset, build numRandTables randomized contingency
+    // tables
     val randTables = for (n <- 0 until numRandTables) yield
       subSamples map (x => buildTable(true)(x, bt, rowDelims, colDelims, wts))
 
+    // Extracts the string tag associated with the weight vector
     val l = wts match {
       case None => "n"
       case Some((wtList, tag)) => tag
     }
-
+    // Rounds numbers to two decimal places for string output
+    def roundFrac(d: Double) = "%.2f" format d
+    // List of labels describing features of each resampling result
     val tags = for {
       f <- (0 until fracList.length).toList
       if (fracList(f) < 1.0)
     } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
 
+    // Return the assembled outputs
     (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
   }
 
-  // same purpose as buildDataMult, but uses alternate resampling method
+  /** Same purpose as buildDataMult, but uses alternate resampling method. */
   def bDMAlt(bt: Pair[Int])(
       pl: DRData, wts: Option[Weight] = None): RegDataMult = {
     val numReps = EstCC.numParameters("repsPerFraction")

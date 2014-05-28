@@ -115,6 +115,10 @@ class EstimateMITest extends FlatSpec with Matchers {
   EstCC.numParameters = parameters._2
   EstCC.stringParameters = parameters._3
   EstCC.rEngine = new MersenneTwister
+  // Reset the default signal/response values to None so that we use the
+  // number of bins to get the bin limits instead
+  EstCC.listParameters = EstCC.listParameters updated ("signalValues", None)
+  EstCC.listParameters = EstCC.listParameters updated ("responseValues", None)
 
   "genBins" should "generate all (row, col) bin number tuples" in {
     val binList = List(1, 2, 3)
@@ -208,4 +212,39 @@ class EstimateMITest extends FlatSpec with Matchers {
     ct.numSamples shouldBe 8
     sample.numSamples shouldBe 4
   }
+
+  "buildDataMult" should "return an appropriate RegDataMult data structure" in {
+    val pl = Pair(doses1, responses)
+    val numBins = Pair(2, 4)
+    val rd = getBinDelims(doses1, numBins._1)
+    val cd = getBinDelims(responses, numBins._2)
+    val ct = buildTable(false)(pl, numBins, rd, cd)
+    val sample = subSample(0.5, ct)
+    // Get the RegDataMult result
+    val numReps = EstCC.numParameters("repsPerFraction")
+    val rdm = buildDataMult(numBins)(pl)
+    // Check the inverse sample sizes
+    val fracs = EstCC.listParameters("sampleFractions").get
+    val invss = rdm._1
+    // Check the length of the inverse sample sizes
+    val fracListLength = (fracs.length * numReps) + 1
+    invss.length shouldBe fracListLength // check the length
+    // Check the first inverse sample size
+    invss(0) shouldBe 1 / (fracs(0) * doses1.length)
+    // Check the resampled contingency tables
+    val cts = rdm._2
+    // Check the length of the CT list
+    cts.length shouldBe fracListLength
+    // The last contingency table (fraction 1.0) should be the same as the
+    // original
+    cts(fracListLength - 1) shouldBe ct
+    // Check the randomized contingency tables
+    val rcts = rdm._3
+    rcts.length shouldBe numRandTables
+    rcts(0).length shouldBe fracListLength
+    // Check the label list
+    val labels = rdm._4
+    labels.length shouldBe fracListLength
+  }
+
 }

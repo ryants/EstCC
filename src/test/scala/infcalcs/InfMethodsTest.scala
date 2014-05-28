@@ -108,6 +108,12 @@ class EstimateMITest extends FlatSpec with Matchers {
   val doses2 = List(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0)
   val responses = List(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
 
+  val pl = Pair(doses1, responses)
+  val numBins = Pair(2, 4)
+  val rd = getBinDelims(doses1, numBins._1)
+  val cd = getBinDelims(responses, numBins._2)
+  val ct = buildTable(false)(pl, numBins, rd, cd)
+
   // Mock up the global parameters in EstCC
   val parameters = InfConfig.defaultParameters
   EstCC.parameters = parameters
@@ -151,11 +157,6 @@ class EstimateMITest extends FlatSpec with Matchers {
     // r1  2   2   0   0
     // r2  0   0   2   2
     // i.e., it's uniform
-    val pl = Pair(doses1, responses)
-    val numBins = Pair(2, 4)
-    val rd = getBinDelims(doses1, numBins._1)
-    val cd = getBinDelims(responses, numBins._2)
-    val ct = buildTable(false)(pl, numBins, rd, cd)
     isUniform(ct.table) shouldBe true
   }
 
@@ -168,7 +169,6 @@ class EstimateMITest extends FlatSpec with Matchers {
     // r2   0   2   2   2
     // r3   0   0   0   0
     // i.e., it's not uniform
-    val pl = Pair(doses1, responses)
     val numBins2 = Pair(3, 4)
     val rd2 = getBinDelims(doses1, numBins2._1)
     val cd2 = getBinDelims(responses, numBins2._2)
@@ -178,18 +178,12 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "makeUniform" should "leave a uniform contingency table unchanged" in {
     // See tests above for the underlying contingency tables for these examples.
-    val pl = Pair(doses1, responses)
-    val numBins = Pair(2, 4)
-    val rd = getBinDelims(doses1, numBins._1)
-    val cd = getBinDelims(responses, numBins._2)
-    val ct = buildTable(false)(pl, numBins, rd, cd)
     val uni = makeUniform(ct.table)
     uni shouldBe ct.table
   }
 
   it should "reweight a nonuniform contingency table to be uniform" in {
     // See tests above for the underlying contingency tables for these examples.
-    val pl = Pair(doses1, responses)
     val numBins2 = Pair(3, 4)
     val rd2 = getBinDelims(doses1, numBins2._1)
     val cd2 = getBinDelims(responses, numBins2._2)
@@ -203,23 +197,12 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "subSample" should
     "shrink the number of observations in a contingency table" in {
-    val pl = Pair(doses1, responses)
-    val numBins = Pair(2, 4)
-    val rd = getBinDelims(doses1, numBins._1)
-    val cd = getBinDelims(responses, numBins._2)
-    val ct = buildTable(false)(pl, numBins, rd, cd)
     val sample = subSample(0.5, ct)
     ct.numSamples shouldBe 8
     sample.numSamples shouldBe 4
   }
 
   "buildDataMult" should "return an appropriate RegDataMult data structure" in {
-    val pl = Pair(doses1, responses)
-    val numBins = Pair(2, 4)
-    val rd = getBinDelims(doses1, numBins._1)
-    val cd = getBinDelims(responses, numBins._2)
-    val ct = buildTable(false)(pl, numBins, rd, cd)
-    val sample = subSample(0.5, ct)
     // Get the RegDataMult result
     val numReps = EstCC.numParameters("repsPerFraction")
     val rdm = buildDataMult(numBins)(pl)
@@ -245,6 +228,31 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Check the label list
     val labels = rdm._4
     labels.length shouldBe fracListLength
+  }
+
+  "calcMultRegs" should "produce the correct number of regression results" in {
+    val rdm = buildDataMult(numBins)(pl)
+    val regs = calcMultRegs(rdm)
+    regs._2.length shouldBe numRandTables
+  }
+
+  "genEstimatesMult" should
+    "get a list of MI results for a small sample dataset" in {
+    val rdm = buildDataMult(numBins)(pl)
+    val regs = calcMultRegs(rdm)
+    val intercepts = multIntercepts(regs)
+    val binSizes = List((2, 4))
+    val genResult = genEstimatesMult(pl, binSizes)
+    // We should get one result back because we only gave one bin size
+    genResult.length shouldBe 1
+    // The first tuple in the list
+    val firstResult = genResult(0)
+    // The first entry in the tuple should be the bin size we provided
+    firstResult._1 shouldBe binSizes(0)
+    // The second entry should be the same length as the list of intercepts
+    // we calculated; we can't explicitly compare them because they have been
+    // randomized differently
+    firstResult._2.length shouldBe intercepts.length
   }
 
 }

@@ -319,7 +319,7 @@ object EstimateMI {
     * The data structure returned by this function contains all of the
     * information required to calculate the MI, including contingency tables
     * for randomly subsampled datasets (for unbiased estimation of MI at each
-    * bins size) and randomly shuffled contingency tables (for selection of the
+    * bin size) and randomly shuffled contingency tables (for selection of the
     * appropriate bin size).
     *
     * Resampling of the dataset is performed using the [[EstimateMI.jackknife]]
@@ -452,10 +452,13 @@ object EstimateMI {
       s"${l}_r${bt._1}_c${bt._2}")
   }
 
-  /*
-   * calculates regression model for randomized data
-   * note Option monad present to accommodate failed intercept calculations
-   */
+  /** Calculates regression model for randomized data.
+    *
+    * Note Option monad present to accommodate failed intercept calculations.
+    *
+    * @param r (inverse sample sizes, CTs, randomized CTs, labels)
+    * @return Regression line, None if regression failed.
+    */
   def calcRandRegs(r: RegData): Option[SLR] = {
     val MIList = r._2 map (_.mutualInformation)
     val MIListRand = r._3 map (_.mutualInformation)
@@ -469,28 +472,50 @@ object EstimateMI {
     } else Some(regLineRand)
   }
 
-  // calculates regression model for both original and randomized data
+  /** Calculates regression model for both original and randomized data.
+    *
+    * Calculates a linear regression of the mutual information of each
+    * subsampled or randomized dataset vs. the inverse sample size. Returns
+    * results as a tuple: the first entry in the tuple contains the regression
+    * line (as an instance of [[SLR]]) for the original dataset; the second
+    * entry in the tuple contains a list of regression lines ([[SLR]] objects),
+    * one for each of numRandTables rounds of randomization. Because linear
+    * regression may fail on the randomized data, some entries in the list may
+    * be None.
+    *
+    * @param r RegDataMult structure, eg as returned by [[buildDataMult]].
+    * @return (regression on original data, list of regressions on random data)
+    */
   def calcMultRegs(r: RegDataMult): (SLR, List[Option[SLR]]) = {
+    // Regression on original data
     val regLine = new SLR(r._1, r._2 map (_.mutualInformation), r._4.last)
     //regLine.toFile(s"rd_${regLine.label}.dat")
+    // Regression on randomized data
     val regdataRand =
       (0 until numRandTables).toList map (x => (r._1, r._2, r._3(x), r._4))
     val regLinesRand = regdataRand map calcRandRegs
     (regLine, regLinesRand)
   }
 
-  // prints out all contingency tables for a particular set of regression data
+  /** Prints out all contingency tables for a particular set of regression data.
+    * Useful for debugging purposes. */
   def printCTData(r: RegData): Unit =
     for (i <- 0 until r._1.length) yield {
       r._2(i).tableToFile("ct_" + r._4(i) + ".dat")
       r._3(i).tableToFile("ct_" + r._4(i) + "_rand.dat")
     }
 
-  // calculates intercepts given regression data
+  /** Returns intercepts and confidence intervals given multiple regression data.
+    *
+    * The list of intercepts and intervals returned will be the same length as
+    * the list of regression lines forming the second entry in the tuple
+    * passed as an argument.
+    *
+    * @param regs (regression, list of regressions), eg, as from [[calcMultRegs]]
+    * @return list of (intercept, intercept 95% conf interval)
+    */
   def multIntercepts(regs: (SLR, List[Option[SLR]])): List[Pair[Double]] = {
-
-    // retrieves intercept and associated confidence interval for a regression
-    // model
+    // Retrieves intercept and associated conf. interval for a regression model
     def getStats(
         ls: List[Option[SLR]], acc: List[Pair[Double]]): List[Pair[Double]] =
       if (ls.isEmpty) acc
@@ -498,12 +523,24 @@ object EstimateMI {
         case Some(x) => getStats(ls.tail, acc :+ (x.intercept, x.i95Conf))
         case None => getStats(ls.tail, acc)
       }
-
     (regs._1.intercept, regs._1.i95Conf) :: getStats(regs._2, List())
   }
 
-  // generates mutual information estimates using regression models for a range
-  // of possible row and column bin sizes
+  /** Gets mutual information estimates for range of bin sizes by regression.
+    *
+    * For each set of bin sizes given, this function:
+    * - builds the randomized and resampled contingency tables by calling
+    *   [[buildDataMult]]
+    * - estimates the unbiased mutual information for the resampled and/or
+    *   randomized datasets by linear regression, by calling [[calcMultRegs]]
+    * - extracts the intercepts and confidence intervals from the regression
+    *   results by calling [[multIntercepts]].
+    *
+    * @param pl The input/output dataset
+    * @param binTupList Various (nRowBins, nColBins) bin size combinations
+    * @param wts Optional weight vector for inputs
+    * @return List of (bin size combo, list of (intercept, conf. int.))
+    */
   def genEstimatesMult(
       pl: DRData,
       binTupList: List[Pair[Int]],

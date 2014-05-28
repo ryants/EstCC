@@ -143,9 +143,9 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Divides rows into bins (0, 1, 2, 2) and (3, 3, 3, 3)
     // Divides columns into bins (1, 2), (3, 4), (5, 6), (7, 8)
     // Contingency table is
-    //    c1  c2
-    // r1  2   2
-    // r2  2   2
+    //    c1  c2  c3  c4
+    // r1  2   2   0   0
+    // r2  0   0   2   2
     // i.e., it's uniform
     val pl = Pair(doses1, responses)
     val numBins = Pair(2, 4)
@@ -191,11 +191,21 @@ class EstimateMITest extends FlatSpec with Matchers {
     val cd2 = getBinDelims(responses, numBins2._2)
     val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
     val uni2 = makeUniform(ct2.table)
-    println(uni2)
     // These two rows should have the same sum after weighting
     uni2(0).sum shouldBe uni2(1).sum
     // The zero row should remain 0
     uni2(2). sum shouldBe 0
   }
 
+  "subSample" should
+    "shrink the number of observations in a contingency table" in {
+    val pl = Pair(doses1, responses)
+    val numBins = Pair(2, 4)
+    val rd = getBinDelims(doses1, numBins._1)
+    val cd = getBinDelims(responses, numBins._2)
+    val ct = buildTable(false)(pl, numBins, rd, cd)
+    val sample = subSample(0.5, ct)
+    ct.numSamples shouldBe 8
+    sample.numSamples shouldBe 4
+  }
 }

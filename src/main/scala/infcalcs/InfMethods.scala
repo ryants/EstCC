@@ -245,24 +245,39 @@ object EstimateMI {
     }
   }
 
-  // resample fraction of data without replacement by modifying the contingency
-  // table; potential alternative to jackknife function
+  /** Resample a fraction of data by modifying the contingency table.
+    *
+    * An alternative to the [[EstimateMI.jackknife]] function.  Resamples the
+    * data by decrementing (nonzero) counts in the contingency table at
+    * randomly chosen indices. After shrinking the number of observations, the
+    * rows are re-weighted to be uniform using [[EstimateMI.makeUniform]].
+    * Finally, an optional weights vector is applied to the rows.
+    *
+    * @param frac Fraction of the observations to keep in the resampled table.
+    * @param t The contingency table to be resampled.
+    * @param weights Weights to be applied to rows after resampling (if any).
+    * @return The resampled contingency table.
+    */
   def subSample(
       frac: Double,
       t: ContTable,
       weights: Option[Weight] = None): ConstructedTable = {
+
+    // The fraction of observations to remove from the dataset
     val numToRemove = ((1 - frac) * t.numSamples).toInt
+
+    // All (row, column) index pairs
     val allIndices: List[Pair[Int]] = for {
       r <- (0 until t.rows).toList
       c <- (0 until t.cols).toList
     } yield (r, c)
 
-    // constructs weighted ordering of indices with shrinkable (positive) values
+    // Constructs list of (row, col) indices with shrinkable (nonzero) values,
+    // sorted in order of the number of observations
     val nonzeroIndices = allIndices filter (x => t.table(x._1)(x._2) > 0) map
       (x => (x, t.table(x._1)(x._2))) sortBy (x => x._2)
-    println(nonzeroIndices)
 
-    // randomly samples values to be removed from a contingency table and
+    // Randomly samples values to be removed from a contingency table and
     // returns the updated table
     @tailrec
     def shrinkTable(
@@ -289,8 +304,10 @@ object EstimateMI {
         shrinkTable(counter - 1, updatedIndices, newTable)
       }
     }
-
+    // Shrink the table and then make it uniform
     val sTable = makeUniform(shrinkTable(numToRemove, nonzeroIndices, t.table))
+
+    // Apply weights, if any
     weights match {
       case None => new ConstructedTable(sTable)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))

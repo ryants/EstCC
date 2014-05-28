@@ -116,25 +116,86 @@ class EstimateMITest extends FlatSpec with Matchers {
   EstCC.stringParameters = parameters._3
   EstCC.rEngine = new MersenneTwister
 
-  "MI helper functions" should "subsample data by the jackknife method" in {
-    val data = Pair(doses1, responses)
+  "genBins" should "generate all (row, col) bin number tuples" in {
+    val binList = List(1, 2, 3)
+    val otherBinList = List(11, 12, 13)
+    val bins = genBins(binList, otherBinList)
+    bins shouldBe List((1, 11), (1, 12), (1, 13),
+                       (2, 11), (2, 12), (2, 13),
+                       (3, 11), (3, 12), (3, 13))
+  }
+
+  "jackknife" should "subsample data" in {
+    val data = Pair(responses, responses)
     val jkData = jackknife(0.5, data)
     jkData._1.length shouldBe 4
     jkData._2.length shouldBe 4
+    // Show that the doses and responses are shuffled together, not independently
+    val inputs =  jkData._1
+    val outputs = jkData._2
+    inputs(0) shouldBe outputs(0)
+    inputs(1) shouldBe outputs(1)
+    inputs(2) shouldBe outputs(2)
+    inputs(3) shouldBe outputs(3)
   }
 
-  it should "test an input distribution for uniformity" in {
+  "isUniform" should "identify a uniform contingency table as uniform" in {
+    // Divides rows into bins (0, 1, 2, 2) and (3, 3, 3, 3)
+    // Divides columns into bins (1, 2), (3, 4), (5, 6), (7, 8)
+    // Contingency table is
+    //    c1  c2
+    // r1  2   2
+    // r2  2   2
+    // i.e., it's uniform
     val pl = Pair(doses1, responses)
     val numBins = Pair(2, 4)
     val rd = getBinDelims(doses1, numBins._1)
     val cd = getBinDelims(responses, numBins._2)
     val ct = buildTable(false)(pl, numBins, rd, cd)
     isUniform(ct.table) shouldBe true
+  }
 
+  it should "identify a non-uniform contingency table as non-uniform" in {
+    // Divides rows into bins (0, 1), (2, 2, 3) and (3, 3, 3)
+    // Divides columns into bins (1, 2), (3, 4), (5, 6), (7, 8)
+    // Contingency table is
+    //     c1  c2  c3  c4
+    // r1   2   0   0   0
+    // r2   0   2   2   2
+    // r3   0   0   0   0
+    // i.e., it's not uniform
+    val pl = Pair(doses1, responses)
     val numBins2 = Pair(3, 4)
     val rd2 = getBinDelims(doses1, numBins2._1)
     val cd2 = getBinDelims(responses, numBins2._2)
     val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
     isUniform(ct2.table) shouldBe false
   }
+
+  "makeUniform" should "leave a uniform contingency table unchanged" in {
+    // See tests above for the underlying contingency tables for these examples.
+    val pl = Pair(doses1, responses)
+    val numBins = Pair(2, 4)
+    val rd = getBinDelims(doses1, numBins._1)
+    val cd = getBinDelims(responses, numBins._2)
+    val ct = buildTable(false)(pl, numBins, rd, cd)
+    val uni = makeUniform(ct.table)
+    uni shouldBe ct.table
+  }
+
+  it should "reweight a nonuniform contingency table to be uniform" in {
+    // See tests above for the underlying contingency tables for these examples.
+    val pl = Pair(doses1, responses)
+    val numBins2 = Pair(3, 4)
+    val rd2 = getBinDelims(doses1, numBins2._1)
+    val cd2 = getBinDelims(responses, numBins2._2)
+    val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
+    val uni2 = makeUniform(ct2.table)
+    println(uni2)
+    // These two rows should have the same sum after weighting
+    uni2(0).sum shouldBe uni2(1).sum
+    // The zero row should remain 0
+    uni2(2). sum shouldBe 0
+  }
+
 }

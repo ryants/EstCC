@@ -182,13 +182,18 @@ object CTBuild {
 object EstimateMI {
   import CTBuild.{ buildTable, getBinDelims, weightSignalData }
 
-  //number of data randomizations to determine bin-based calculation bias
+  /** Number of data randomizations to determine bin-based calculation bias. */
   val numRandTables = EstCC.numParameters("numRandom")
-  // indicates the number of randomized tables that must fall below
-  // MIRandCutoff to produce a valid estimate
+
+  /** The number of randomized tables that must fall below MIRandCutoff to
+    * produce a valid estimate. */
   val numTablesForCutoff = EstCC.numParameters("numForCutoff")
 
-  // generates all (row, col) bin number tuples
+  /** Generates all (row, col) bin number tuples.
+    *
+    * For example, given (1, 2) and (3, 4) as arguments, returns List((1, 3),
+    * (1, 4), (2, 3), (2, 4)).
+    */
   def genBins(
       binList: List[Int],
       otherBinList: List[Int] = List()): List[Pair[Int]] = {
@@ -196,9 +201,14 @@ object EstimateMI {
     for (r <- binList; c <- cBinList) yield (r, c)
   }
 
-  // resample fraction of data without replacement by shuffling the DRData
-  // data type
-  // **** likely bottleneck in calculation for large DRData ****
+  /** Resample data by shuffling and then extracting the first frac entries.
+    *
+    * Note: A likely bottleneck for calculations with large datasets.
+    *
+    * @param frac Fraction of the full dataset to take (between 0 and 1).
+    * @param pl The dose/response data.
+    * @return Randomly selected fraction of the dataset.
+    */
   def jackknife(frac: Double, pl: DRData): DRData =
     if (frac == 1.0) pl
     else {
@@ -207,13 +217,23 @@ object EstimateMI {
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
 
-  // checks if each element vector has the same sum
+  /** Checks if each row vector in a matrix has the same sum.
+    *
+    * Used for testing contingency tables to see if every input (row) value has
+    * the same number of observations associated with it.
+    */
   def isUniform(t: Vector[Vector[Int]]): Boolean = {
     val rsums = t map (_.sum)
     !(rsums exists (_ != rsums.head))
   }
 
-  // weights 2D vector to have approximately equal sums of its elements
+  /** Re-weights rows in a matrix to have approximately equal sums across rows.
+    *
+    * Empty rows with no observations (sums of 0) remain empty after weighting.
+    *
+    * @param t A 2D matrix of Ints (e.g., a contingency table)
+    * @return A re-weighted matrix.
+    */
   def makeUniform(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
     if (isUniform(t)) t
     else {

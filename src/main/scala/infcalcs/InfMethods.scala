@@ -4,13 +4,7 @@ import annotation.tailrec
 import math._
 import TreeDef._
 
-/**
-  * Contains methods for building contingency tables from data.
-  *
-  * The method In
-  *
-  * weightSignalData buildTable
-  */
+/** Contains methods for building contingency tables from data. */
 object CTBuild {
 
   /** Divides list into sublists with approximately equal numbers of elements.

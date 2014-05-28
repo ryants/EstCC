@@ -548,12 +548,23 @@ object EstimateMI {
     binTupList map
       (bt => (bt, multIntercepts(calcMultRegs(buildDataMult(bt)(pl, wts)))))
 
-  // finds maximum mutual information value given a list of intercept estimates
+  /** Returns MI estimate that is maximized for real but not randomized data.
+    *
+    * Takes a list of MI estimates for a range of bin sizes, extracted by
+    * linear regression for both real and randomized data (eg, as provided by
+    * [[genEstimatesMult]] and finds the bin size/MI combination that maximizes
+    * the mutual information while still maintaining the estimated MI of the
+    * randomized data below the cutoff specified by the "cutoffValue"
+    * parameter.
+    *
+    * @param d List of (bin size combo, list of (intercept, conf. int.))
+    * @return Entry from the list d the optimizes the MI estimate.
+    */
   def optMIMult(
       d: List[(Pair[Int], List[Pair[Double]])]):
       (Pair[Int], List[Pair[Double]]) = {
 
-    //finds maximum value
+    // Finds maximum value
     @tailrec
     def opt(
         i: (Pair[Int], List[Pair[Double]]),
@@ -566,12 +577,12 @@ object EstimateMI {
       }
     val base = ((0, 0), (0 until d.length).toList map (x => (0.0, 0.0)))
 
-    // determines if estimates are biased using randomization data sets
+    // Determines if estimates are biased using randomization data sets
     def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]):
         List[(Pair[Int], List[Pair[Double]])] = {
 
-      // determines if estimate is biased given mutual information of
-      // randomized data
+      // Determines if estimate is biased given mutual information of
+      // randomized data and the specified cutoff value
       @tailrec
       def bFilter(plt: List[Pair[Double]], numTrue: Int): Boolean = {
         if (plt.isEmpty) numTrue >= numTablesForCutoff

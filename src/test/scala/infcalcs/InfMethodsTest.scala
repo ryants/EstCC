@@ -1,8 +1,10 @@
 package infcalcs
 
 import org.scalatest._
+import cern.jet.random.engine.MersenneTwister
 
 import CTBuild._
+import EstimateMI._
 
 class CTBuildTest extends FlatSpec with Matchers {
   val dList1 = List(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
@@ -101,3 +103,38 @@ class CTBuildTest extends FlatSpec with Matchers {
   }
 }
 
+class EstimateMITest extends FlatSpec with Matchers {
+  val doses1 = List(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0)
+  val doses2 = List(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0)
+  val responses = List(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
+
+  // Mock up the global parameters in EstCC
+  val parameters = InfConfig.defaultParameters
+  EstCC.parameters = parameters
+  EstCC.listParameters = parameters._1
+  EstCC.numParameters = parameters._2
+  EstCC.stringParameters = parameters._3
+  EstCC.rEngine = new MersenneTwister
+
+  "MI helper functions" should "subsample data by the jackknife method" in {
+    val data = Pair(doses1, responses)
+    val jkData = jackknife(0.5, data)
+    jkData._1.length shouldBe 4
+    jkData._2.length shouldBe 4
+  }
+
+  it should "test an input distribution for uniformity" in {
+    val pl = Pair(doses1, responses)
+    val numBins = Pair(2, 4)
+    val rd = getBinDelims(doses1, numBins._1)
+    val cd = getBinDelims(responses, numBins._2)
+    val ct = buildTable(false)(pl, numBins, rd, cd)
+    isUniform(ct.table) shouldBe true
+
+    val numBins2 = Pair(3, 4)
+    val rd2 = getBinDelims(doses1, numBins2._1)
+    val cd2 = getBinDelims(responses, numBins2._2)
+    val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
+    isUniform(ct2.table) shouldBe false
+  }
+}

@@ -11,16 +11,19 @@ import EstimateMI.genEstimatesMult
 object EstCC extends App {
 
   //initialize PRNG
-  val rEngine = new MersenneTwister
+  var rEngine = new MersenneTwister
 
   val dataFile = args(0)
   val paramFile = if (args.length == 2) Some(args(1)) else None
 
   val rawParameters = importParameters(paramFile)
-  val parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
-  val listParameters = parameters._1
-  val numParameters = parameters._2
-  val stringParameters = parameters._3
+
+  // These parameters are set as variables not values (var not val) so that
+  // they can be set during test execution
+  var parameters = updateParameters(rawParameters, InfConfig.defaultParameters)
+  var listParameters = parameters._1
+  var numParameters = parameters._2
+  var stringParameters = parameters._3
 
   //load data given pair of columns
   val colPair =

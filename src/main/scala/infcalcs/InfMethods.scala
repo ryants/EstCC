@@ -241,7 +241,7 @@ object EstimateMI {
 
   /** Resample a fraction of data by modifying the contingency table.
     *
-    * An alternative to the [[EstimateMI.jackknife]] function.  Resamples the
+    * An alternative to the [[jackknife]] function.  Resamples the
     * data by decrementing (nonzero) counts in the contingency table at
     * randomly chosen indices. After shrinking the number of observations, the
     * rows are re-weighted to be uniform using [[EstimateMI.makeUniform]].
@@ -316,8 +316,7 @@ object EstimateMI {
     * bin size) and randomly shuffled contingency tables (for selection of the
     * appropriate bin size).
     *
-    * Resampling of the dataset is performed using the [[EstimateMI.jackknife]]
-    * method.
+    * Resampling of the dataset is performed using the [[jackknife]] method.
     *
     * The return value is a tuple containing:
     * - a list of the inverse sample sizes for each resampling fraction. This
@@ -399,7 +398,8 @@ object EstimateMI {
     (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
   }
 
-  /** Same purpose as buildDataMult, but uses alternate resampling method. */
+  /** Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
+    */
   def bDMAlt(bt: Pair[Int])(
       pl: DRData, wts: Option[Weight] = None): RegDataMult = {
     val numReps = EstCC.numParameters("repsPerFraction")
@@ -463,7 +463,8 @@ object EstimateMI {
         regLineRand.label + ".dat")
       // printCTData(r)
       None
-    } else Some(regLineRand)
+    }
+    else Some(regLineRand)
   }
 
   /** Calculates regression model for both original and randomized data.
@@ -473,9 +474,10 @@ object EstimateMI {
     * results as a tuple: the first entry in the tuple contains the regression
     * line (as an instance of [[SLR]]) for the original dataset; the second
     * entry in the tuple contains a list of regression lines ([[SLR]] objects),
-    * one for each of numRandTables rounds of randomization. Because linear
-    * regression may fail on the randomized data, some entries in the list may
-    * be None.
+    * one for each of numRandTables rounds of randomization. The regression
+    * lines for the randomized datasets are obtained by calling [[calcRandRegs]].
+    * Because linear regression may fail on the randomized data, some entries in
+    * the list may be None.
     *
     * @param r RegDataMult structure, eg as returned by [[buildDataMult]].
     * @return (regression on original data, list of regressions on random data)
@@ -542,11 +544,11 @@ object EstimateMI {
     binTupList map
       (bt => (bt, multIntercepts(calcMultRegs(buildDataMult(bt)(pl, wts)))))
 
-  /** Returns MI estimate that is maximized for real but not randomized data.
+  /** Returns the MI estimate that is maximized for real but not randomized data.
     *
     * Takes a list of MI estimates for a range of bin sizes, extracted by
     * linear regression for both real and randomized data (eg, as provided by
-    * [[genEstimatesMult]] and finds the bin size/MI combination that maximizes
+    * [[genEstimatesMult]]) and finds the bin size/MI combination that maximizes
     * the mutual information while still maintaining the estimated MI of the
     * randomized data below the cutoff specified by the "cutoffValue"
     * parameter.
@@ -594,10 +596,10 @@ object EstimateMI {
 object EstimateCC {
   import LowProb.testWeights
 
-  //is the signal distributed logarithmically
+  /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
-  // given a function, finds the difference in its evaluation of two numbers
+  /** Given a function, finds the difference in its evaluation of two numbers. */
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
     func(hb) - func(lb)
 

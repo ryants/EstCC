@@ -7,8 +7,6 @@
   * For information on building, testing, and using the code, see the README
   * file.
   *
-  * Configuration parameters can be specified in a 
-  *
   * The steps in the channel capacity calculation are outlined below. For more
   * details on the theory underlying the approach taken, see the supplementary
   * information for Suderman, Bachman et al. (2014).

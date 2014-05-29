@@ -327,10 +327,10 @@ object EstimateMI {
   /** Returns resampled and randomized contingency tables for estimation of MI.
     *
     * The data structure returned by this function contains all of the
-    * information required to calculate the MI, including contingency tables
-    * for randomly subsampled datasets (for unbiased estimation of MI at each
-    * bin size) and randomly shuffled contingency tables (for selection of the
-    * appropriate bin size).
+    * information required to calculate the MI for a single pair of bin sizes,
+    * including contingency tables for randomly subsampled datasets (for
+    * unbiased estimation of MI at each bin size) and randomly shuffled
+    * contingency tables (for selection of the appropriate bin size).
     *
     * Resampling of the dataset is performed using the [[jackknife]] method.
     *
@@ -737,9 +737,9 @@ object EstimateCC {
   /** Calculates channel capacity (maximum MI) given list of MI estimates.
     *
     * Takes a list of MI estimates for varying weights, eg., as returned by
-    * [[calcWithWeightsMult]]. For every entry in the list, calls [[optMIMult]]
-    * to find the unbiased MI, and then returns the maximum unbiased MI found
-    * in the list.
+    * [[calcWithWeightsMult]]. For every entry in the list, calls
+    * [[EstimateMI.optMIMult]] to find the unbiased MI, and then returns the
+    * maximum unbiased MI found in the list.
     *
     * @param est List containing tuples as from [[EstimateMI.genEstimatesMult]].
     * @param filePrefix Filename prefix for output files.

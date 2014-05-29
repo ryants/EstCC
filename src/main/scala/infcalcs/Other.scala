@@ -15,7 +15,7 @@ object LowProb {
     println("Weight probability is below threshold.")
   }
 
-  /** Determines whether the weights cover at least 95% of the probability space.
+  /** Determines whether the weights cover a sufficient range of the input space.
     *
     * If the sum of the weights is above the threshold, the weights are
     * returned; otherwise a [[LowProbException]] is thrown containing the given

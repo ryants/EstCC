@@ -94,11 +94,11 @@ object IOFile {
     *
     * Can be useful for debugging. The tuple d given as an argument contains
     * three entries:
-    * - the list of inverse sample sizes
-    * - the list of mutual information values calculated for the non-randomized
-    *   data
-    * - the list of mutual information values calculated for one round of
-    *   randomization on the data.
+    *  - the list of inverse sample sizes
+    *  - the list of mutual information values calculated for the non-randomized
+    *    data
+    *  - the list of mutual information values calculated for one round of
+    *    randomization on the data.
     *
     * @param d (inverse sample sizes, MI list, randomized MI list)
     * @param f Name of the file to write.
@@ -119,9 +119,9 @@ object IOFile {
     *
     * It takes the mutual information data as a list of tuples; each tuple
     * contains:
-    * - a pair of integers specifying a pair of row, column bin sizes;
-    * - A list of tuples, each containing an MI estimate (intercept from the
-    *   linear regression) and its 95% confidence interval.
+    *  - a pair of integers specifying a pair of row, column bin sizes;
+    *  - A list of tuples, each containing an MI estimate (intercept from the
+    *    linear regression) and its 95% confidence interval.
     *
     * @param d List of (bin sizes, list of (MI estimate, confidence interval))
     * @param f Name of the file to write.

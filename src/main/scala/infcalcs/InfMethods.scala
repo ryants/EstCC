@@ -335,19 +335,20 @@ object EstimateMI {
     * Resampling of the dataset is performed using the [[jackknife]] method.
     *
     * The return value is a tuple containing:
-    * - a list of the inverse sample sizes for each resampling fraction. This
-    *   list has length (repsPerFraction * number of fractions) + 1. The extra
-    *   entry in the list (the + 1 in the expression) is due to the inclusion
-    *   of the full dataset (with fraction 1.0) in the list of sampling
-    *   fractions.
-    * - a list of contingency tables for subsamples of the data, length as for
-    *   the inverse sample size list.
-    * - a list of lists of randomized contingency tables. Because there are
-    *   numRandTables randomized tables used for every estimate, the outer list
-    *   contains numRandTables entries; each entry consists of (repsPerFraction *
-    *   number of fractions) + 1 randomized contingency tables.
-    * - a list of string labels for output and logging purposes, length as for
-    *   the inverse sample size list.
+    *  - a list of the inverse sample sizes for each resampling fraction. This
+    *    list has length (repsPerFraction * number of fractions) + 1. The extra
+    *    entry in the list (the + 1 in the expression) is due to the inclusion
+    *    of the full dataset (with fraction 1.0) in the list of sampling
+    *    fractions.
+    *  - a list of contingency tables for subsamples of the data, length as for
+    *    the inverse sample size list.
+    *  - a list of lists of randomized contingency tables. Because there are
+    *    numRandTables randomized tables used for every estimate, the outer list
+    *    contains numRandTables entries; each entry consists of
+    *    (repsPerFraction * number of fractions) + 1 randomized contingency
+    *    tables.
+    *  - a list of string labels for output and logging purposes, length as for
+    *    the inverse sample size list.
     *
     * @param bt Pair containing the numbers of row and column bins.
     * @param pl The input/output dataset.
@@ -541,12 +542,12 @@ object EstimateMI {
   /** Gets mutual information estimates for range of bin sizes by regression.
     *
     * For each set of bin sizes given, this function:
-    * - builds the randomized and resampled contingency tables by calling
-    *   [[buildDataMult]]
-    * - estimates the unbiased mutual information for the resampled and/or
-    *   randomized datasets by linear regression, by calling [[calcMultRegs]]
-    * - extracts the intercepts and confidence intervals from the regression
-    *   results by calling [[multIntercepts]].
+    *  - builds the randomized and resampled contingency tables by calling
+    *    [[buildDataMult]]
+    *  - estimates the unbiased mutual information for the resampled and/or
+    *    randomized datasets by linear regression, by calling [[calcMultRegs]]
+    *  - extracts the intercepts and confidence intervals from the regression
+    *    results by calling [[multIntercepts]].
     *
     * @param pl The input/output dataset
     * @param binTupList Various (nRowBins, nColBins) bin size combinations

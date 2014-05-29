@@ -8,9 +8,17 @@ import IOFile.{ loadPairList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
 
+/** Top-level main function for channel capacity calculation.
+  *
+  *  - Collects command-line arguments;
+  *  - Loads the data;
+  *  - Sets configuration parameters;
+  *  - Generates unimodal and bimodal weights;
+  *  - Calculates channel capacity for each weighting scheme.
+  */
 object EstCC extends App {
 
-  //initialize PRNG
+  // Initialize pseudorandom number generator
   var rEngine = new MersenneTwister
 
   val dataFile = args(0)
@@ -25,29 +33,29 @@ object EstCC extends App {
   var numParameters = parameters._2
   var stringParameters = parameters._3
 
-  //load data given pair of columns
+  // Load data given pair of columns
   val colPair =
     (listParameters("columnPair").get(0).toInt,
      listParameters("columnPair").get(1).toInt)
   val p = loadPairList(dataFile, colPair)
 
-  //determine number of response bins
+  // Determine number of response bins
   val responseBins: List[Int] = listParameters("responseValues") match {
     case None => listParameters("responseBins").get map (_.toInt)
     case Some(x) => List(x.length)
   }
 
-  //determine number of signal bins
+  // Determine number of signal bins
   val signalBins: List[Int] = listParameters("signalValues") match {
     case None => listParameters("signalBins").get map (_.toInt)
     case Some(x) => List(x.length)
   }
 
-  //list of bin pairs
+  // List of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)
 
-  // build list of weight pairs (unimodal and bimodal) given a list of bin
-  // sizes specified in 'InfConfig.scala'
+  // Build list of weight pairs (unimodal and bimodal) given a list of bin
+  // sizes specified by the configuration parameters
   val w: List[Pair[List[Weight]]] = {
     val sBoundList: List[Tree] = listParameters("signalValues") match {
       case None => signalBins map (x => getBinDelims(p._1, x))
@@ -56,15 +64,15 @@ object EstCC extends App {
     sBoundList map (x => (uniWeight(x)(p), biWeight(x)(p)))
   }
 
-  // split unimodal and bimodal weight lists
+  // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)
   val bw: List[List[Weight]] = w map (_._2)
 
-  // function to add string to an original string 
+  // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))
 
-  // calculate and output estimated mutual information values given calculated
+  // Calculate and output estimated mutual information values given calculated
   // weights
   val outF = Some(stringParameters("filePrefix"))
 
@@ -77,11 +85,11 @@ object EstCC extends App {
   val uRes: List[Double] = weightIndices map (n => getResultsMult(
     calcWithWeightsMult(uw(n), p),
     addLabel(outF, "_u_s" + binIndices(n))))
-  val nRes: Double = 
+  val nRes: Double =
     getResultsMult(List(genEstimatesMult(p,bins)), addLabel(outF, "_n"))
-  
+
   val ccMult: Double = (List(bRes, uRes, List(nRes)) map (_.max)).max
 
-  // print estimated channel capacity to stdout
+  // Print estimated channel capacity to stdout
   println(ccMult)
 }

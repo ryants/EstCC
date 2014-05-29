@@ -5,6 +5,7 @@ import cern.jet.random.engine.MersenneTwister
 
 import CTBuild._
 import EstimateMI._
+import EstimateCC._
 
 class CTBuildTest extends FlatSpec with Matchers {
   val dList1 = List(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
@@ -255,4 +256,35 @@ class EstimateMITest extends FlatSpec with Matchers {
     firstResult._2.length shouldBe intercepts.length
   }
 
+}
+
+class EstimateCCTest extends FlatSpec with Matchers {
+
+  // Mock up the global parameters in EstCC
+  val parameters = InfConfig.defaultParameters
+  EstCC.parameters = parameters
+  EstCC.listParameters = parameters._1
+  EstCC.numParameters = parameters._2
+  EstCC.stringParameters = parameters._3
+  EstCC.rEngine = new MersenneTwister
+  // Reset the default signal/response values to None so that we use the
+  // number of bins to get the bin limits instead
+  EstCC.listParameters = EstCC.listParameters updated ("signalValues", None)
+  EstCC.listParameters = EstCC.listParameters updated ("responseValues", None)
+
+  val doses1 = List(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0)
+  val doses2 = List(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0)
+  val responses = List(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
+  val pl = Pair(responses, responses)
+  val numBins = Pair(4, 4)
+  val rd = getBinDelims(responses, numBins._1)
+  val cd = getBinDelims(responses, numBins._2)
+  val ct = buildTable(false)(pl, numBins, rd, cd)
+
+  "EstimateCC" should "generate unimodal Gaussian weights" in {
+    val uniWts = uniWeight(rd)(pl)
+    uniWts.length shouldBe
+      (EstCC.numParameters("uniMuNumber")-1) *
+        EstCC.numParameters("uniSigmaNumber")
+  }
 }

@@ -173,6 +173,22 @@ object CTBuild {
   }
 }
 
+/** Contains methods for estimating mutual information.
+  *
+  * The principal methods used by top-level calling functions are:
+  *  - [[genEstimatesMult]], which takes a dataset and a set of bin sizes and
+  *    returns mutual information estimates for each bin size, and
+  *  - [[optMIMult]], which takes the mutual information estimates produced by
+  *    [[genEstimatesMult]] and finds the bin size and mutual information that
+  *    maximizes the mutual information for the real but not the randomized
+  *    datasets.
+  *
+  * Other important methods include:
+  *  - [[buildDataMult]], which builds resampled and randomized contingency
+  *    tables
+  *  - [[calcMultRegs]], which estimates the mutual information by linear
+  *    regression.
+  */
 object EstimateMI {
   import CTBuild.{ buildTable, getBinDelims, weightSignalData }
 
@@ -593,6 +609,7 @@ object EstimateMI {
   }
 }
 
+/** Contains functions for estimating the channel capacity. */
 object EstimateCC {
   import LowProb.testWeights
 
@@ -603,27 +620,35 @@ object EstimateCC {
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
     func(hb) - func(lb)
 
-  /*
-   * this function is applied to raw weights in order to account for the
-   * uniform weight applied in the CTBuild object when building a 
-   * contingency table (a sort of 'unweighting' of the uniformly 
-   * weighted data prior to its uni/bi-modal weighting)
-   */
+  /** This function is applied to raw weights in order to account for the
+    * uniform weight applied in the CTBuild object when building a contingency
+    * table (a sort of 'unweighting' of the uniformly weighted data prior to
+    * its uni/bi-modal weighting)
+    */
   def normWeight(bounds: Tree)(p: Double): Double =
     p / (1.0 / bounds.toList.length.toDouble)
 
-  //generates list of unimodal (Gaussian) weights
+  /** Generates list of unimodal (Gaussian) weights.
+    *
+    * @param bounds Binary tree specifying bin bounds.
+    * @param pl The input/output dataset.
+    * @return List of weights drawn from a unimodal Gaussian.
+    */
   def uniWeight(bounds: Tree)(pl: DRData): List[Weight] = {
     val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
     val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
 
+    // Create a list of evenly-distributed means that span the input range
+    // ***Note that the enumeration terminates before 1.0, so there are only
+    // uniMuNumber - 1 entries in muList.***
     val minVal = if (logSpace) log(pl._1.min) else pl._1.min
     val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
     val muList =
       (uMuFracMin until 1.0 by uMuFracMin).toList map
         (x => minVal + (maxVal - minVal) * x)
 
-    //attach number of sigma values to mu values
+    // Attaches various sigma values to mu values, resulting in a list of
+    // (mu, sigma) combinations as a list of Pair[Double]
     val wtParams = {
       for {
         mu <- muList
@@ -631,7 +656,8 @@ object EstimateCC {
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
     }
 
-    // calculates and tests weights
+    // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
+    // that the proposed weights cover a sufficient range of the inputs
     def genWeights(p: Pair[Double]): List[Double] = {
       val mu = p._1; val sigma = p._2
       val boundList = bounds.toList
@@ -643,11 +669,17 @@ object EstimateCC {
       rawWeights map normWeight(bounds)
     }
 
+    // Apply genWeights to the (mu, sigma) tuples and return
     for (x <- (0 until wtParams.length).toList) yield
       (genWeights(wtParams(x)), "u_" + x)
   }
 
-  // generates list of bimodal weights
+  /** Generates list of bimodal weights.
+    *
+    * @param bounds Binary tree specifying bin bounds.
+    * @param pl The input/output dataset.
+    * @return List of weights drawn from bimodal Gaussians.
+    */
   def biWeight(bounds: Tree)(pl: DRData): List[Weight] = {
 
     val minVal = if (logSpace) log(pl._1.min) else pl._1.min
@@ -655,19 +687,19 @@ object EstimateCC {
     val minMuDiff =
       (maxVal - minVal) / EstCC.numParameters("biMuNumber").toDouble
 
-    // finds maximum SD given certain conditions to parameterize one of the two
+    // Finds maximum SD given certain conditions to parameterize one of the two
     // Gaussians in the bimodal distribution
     def maxSD(mPair: Pair[Double], b: Double): Double =
       List((mPair._2 - mPair._1) / 4.0,
            (mPair._1 - b).abs / 3.0, (b - mPair._2).abs / 3.0).min
 
-    // generate mu pairs
+    // Generates mu pairs for the two modes
     val mp = for {
       m1 <- (minMuDiff + minVal until maxVal by minMuDiff).toList
       m2 <- (minMuDiff + m1 until maxVal by minMuDiff).toList
     } yield (m1, m2)
 
-    // add sigma values and relative contributions from the two Gaussians for
+    // Adds sigma values and relative contributions from the two Gaussians for
     // each mu pair
     val bSigListMin = 1.0 / EstCC.numParameters("biSigmaNumber").toDouble
     val bRelCont =
@@ -677,10 +709,12 @@ object EstimateCC {
       s <- (bSigListMin until 1.0 by bSigListMin).toList map
         (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
       if (s._1 > 0.0001 && s._2 > 0.0001)
-      w <- bRelCont // ***TODO should this be indented?
+        w <- bRelCont
     } yield (p, s, w)
 
-    // calculates and tests weights
+    // Calculates and tests weights. Takes a tuple containing parameters for a
+    // bimodal Gaussian and makes sure that the proposed weights cover a
+    // sufficient range of the inputs
     def genWeights(
         t: (Pair[Double], Pair[Double], Pair[Double])): List[Double] = {
       val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
@@ -693,12 +727,23 @@ object EstimateCC {
       }.toList)
       rawWeights map normWeight(bounds)
     }
-
+    // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
+    // return
     for (x <- (0 until wtParams.length).toList) yield
       (genWeights(wtParams(x)), "b_" + x)
   }
 
-  // calculates maximum MI given List of estimates
+  /** Calculates channel capacity (maximum MI) given list of MI estimates.
+    *
+    * Takes a list of MI estimates for varying weights, eg., as returned by
+    * [[calcWithWeightsMult]]. For every entry in the list, calls [[optMIMult]]
+    * to find the unbiased MI, and then returns the maximum unbiased MI found
+    * in the list.
+    *
+    * @param est List containing tuples as from [[EstimateMI.genEstimatesMult]].
+    * @param filePrefix Filename prefix for output files.
+    * @return The maximum MI estimate.
+    */
   def getResultsMult(
       est: List[List[(Pair[Int], List[Pair[Double]])]],
       filePrefix: Option[String]): Double = {
@@ -712,11 +757,20 @@ object EstimateCC {
     ((est map EstimateMI.optMIMult) map (x => x._2.head._1)).max
   }
 
-  // generates MI estimates for some weighting
-  def calcWithWeightsMult(weights: List[Weight], pl: DRData) =
+  /** Generates MI estimates using various input weights.
+    *
+    * For each input weight in the set, calculates the MI using
+    * [[EstimateMI.genEstimatesMult]].
+    *
+    * @param weights List of weights.
+    * @param pl The input/output dataset.
+    * @return List of MI estimates as from [[EstimateMI.genEstimatesMult]].
+    */
+  def calcWithWeightsMult(weights: List[Weight], pl: DRData) = {
     for {
       w <- weights
-      // filter to make sure weights are applied to correct set of signal bins
+      // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
       EstCC.bins filter (x => x._1 == w._1.length), Some(w))
+  }
 }

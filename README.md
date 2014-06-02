@@ -45,8 +45,8 @@ in one of 5 possible (parameter-dependent) formats is in the second column:
    'maximum' is included and 'increment' is optional, defaulting to 1 
    (i.e. 0,10,2 produces the list: List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0), 
    and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))
-- a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces the 
-   same list as in option 1.
+- a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces 
+  List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0)).
 - "None" to indicate the absence of a list (only applicable for 
    response/signal value or bin parameters
 

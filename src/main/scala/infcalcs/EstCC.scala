@@ -30,8 +30,10 @@ object EstCC extends App with CLOpts {
     new Config()
   }
 
-  // Initialize pseudorandom number generator
-  var rEngine = new MersenneTwister(new java.util.Date())
+  // Initialize pseudorandom number generator 
+  var rEngine = 
+    if (config.seed >= 0) new MersenneTwister(config.seed)
+    else new MersenneTwister(new java.util.Date())
 
   val dataFile = config.dataFile
   val paramFile = if (config.paramFile == "") None else Some(config.paramFile)

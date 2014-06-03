@@ -1,6 +1,10 @@
 package infcalcs
 
-case class Config(verbose: Boolean = false, dataFile: String = "", paramFile: String = "")
+case class Config(
+    verbose: Boolean = false, 
+    dataFile: String = "", 
+    paramFile: String = "",
+    seed: Int = -1)
 
 trait CLOpts {
   val parser = new scopt.OptionParser[Config]("EstCC.jar") {
@@ -16,6 +20,9 @@ trait CLOpts {
       (x, c) => c.copy(paramFile = x)
     } text ("modify default parameters" +
       " with optional file")
+    opt[Int]('s', "seed") action {
+      (x, c) => c.copy(seed = x)
+    }
     help("help") text ("prints this usage text")
   }
 }

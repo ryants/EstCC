@@ -2,34 +2,41 @@ package infcalcs
 
 import OtherFuncs.updateParameters
 import cern.jet.random.engine.MersenneTwister
-import EstimateCC.{ uniWeight, biWeight, getResultsMult, calcWithWeightsMult }
+import EstimateCC.{
+  uniWeight,
+  biWeight,
+  getResultsMult,
+  calcWithWeightsMult,
+  verboseResults
+}
 import CTBuild.getBinDelims
 import IOFile.{ loadPairList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
 
-
-/** Top-level main function for channel capacity calculation.
-  *
-  *  - Collects command-line arguments;
-  *  - Loads the data;
-  *  - Sets configuration parameters;
-  *  - Generates unimodal and bimodal weights;
-  *  - Calculates channel capacity for each weighting scheme.
-  */
+/**
+ * Top-level main function for channel capacity calculation.
+ *
+ *  - Collects command-line arguments;
+ *  - Loads the data;
+ *  - Sets configuration parameters;
+ *  - Generates unimodal and bimodal weights;
+ *  - Calculates channel capacity for each weighting scheme.
+ */
 object EstCC extends App with CLOpts {
 
   val config = parser.parse(args, Config()) getOrElse {
-    throw new Exception("bad arguments")
+    System.exit(0)
+    new Config()
   }
 
   // Initialize pseudorandom number generator
-  var rEngine = new MersenneTwister
+  var rEngine = new MersenneTwister(new java.util.Date())
 
   val dataFile = config.dataFile
   val paramFile = if (config.paramFile == "") None else Some(config.paramFile)
   if (config.verbose) {
-    println("test")
+    println("Verbose mode")
   }
 
   val rawParameters = importParameters(paramFile)
@@ -44,7 +51,7 @@ object EstCC extends App with CLOpts {
   // Load data given pair of columns
   val colPair =
     (listParameters("columnPair").get(0).toInt,
-     listParameters("columnPair").get(1).toInt)
+      listParameters("columnPair").get(1).toInt)
   val p = loadPairList(dataFile, colPair)
 
   // Determine number of response bins
@@ -80,24 +87,34 @@ object EstCC extends App with CLOpts {
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))
 
+  val outF = Some(stringParameters("filePrefix"))
+  
   // Calculate and output estimated mutual information values given calculated
   // weights
-  val outF = Some(stringParameters("filePrefix"))
+  if (config.verbose) {
+    val weightList: List[List[Weight]] = w map (x => x._1 ++ x._2)
+    var estList: Array[Double] = Array()
+    weightList foreach { wt =>
+      val res = verboseResults(wt, p, outF)
+      estList = estList :+ res
+    }
+    println(estList.max)
+  } else {
+    val weightIndices = (0 until w.length).toList
+    val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
-  val weightIndices = (0 until w.length).toList
-  val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
+    val bRes: List[Double] = weightIndices map (n => getResultsMult(
+      calcWithWeightsMult(bw(n), p),
+      addLabel(outF, "_b_s" + binIndices(n))))
+    val uRes: List[Double] = weightIndices map (n => getResultsMult(
+      calcWithWeightsMult(uw(n), p),
+      addLabel(outF, "_u_s" + binIndices(n))))
+    val nRes: Double =
+      getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))
 
-  val bRes: List[Double] = weightIndices map (n => getResultsMult(
-    calcWithWeightsMult(bw(n), p),
-    addLabel(outF, "_u_s" + binIndices(n))))
-  val uRes: List[Double] = weightIndices map (n => getResultsMult(
-    calcWithWeightsMult(uw(n), p),
-    addLabel(outF, "_u_s" + binIndices(n))))
-  val nRes: Double =
-    getResultsMult(List(genEstimatesMult(p,bins)), addLabel(outF, "_n"))
+    val ccMult: Double = (List(bRes, uRes, List(nRes)) map (_.max)).max
+    // Print estimated channel capacity to stdout
+    println(ccMult)
+  }
 
-  val ccMult: Double = (List(bRes, uRes, List(nRes)) map (_.max)).max
-
-  // Print estimated channel capacity to stdout
-  println(ccMult)
 }

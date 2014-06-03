@@ -828,7 +828,7 @@ object EstimateCC {
           Some(wts(w)))
         fp match {
           case Some(f) =>
-            IOFile.estimatesToFileMult(est, s"${fp}_${w}_s${binNum}.dat")
+            IOFile.estimatesToFileMult(est, s"${f}_${w}_s${binNum}.dat")
           case None => {}
         }
         val opt = EstimateMI.optMIMult(est)
@@ -841,7 +841,7 @@ object EstimateCC {
       x._1 == binNum))
     fp match {
       case Some(f) =>
-        IOFile.estimatesToFileMult(est, s"${fp}_unif_s${binNum}.dat")
+        IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")
       case None => {}
     }
     val opt = EstimateMI.optMIMult(est)

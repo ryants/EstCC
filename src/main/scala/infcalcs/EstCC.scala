@@ -32,7 +32,7 @@ object EstCC extends App with CLOpts {
 
   // Initialize pseudorandom number generator 
   var rEngine = 
-    if (config.seed >= 0) new MersenneTwister(config.seed)
+    if (config.seed != -1) new MersenneTwister(config.seed)
     else new MersenneTwister(new java.util.Date())
 
   val dataFile = config.dataFile
@@ -93,6 +93,8 @@ object EstCC extends App with CLOpts {
   
   // Calculate and output estimated mutual information values given calculated
   // weights
+  
+  // Verbose mode (includes mutable data structures)
   if (config.verbose) {
     val weightList: List[List[Weight]] = w map (x => x._1 ++ x._2)
     var estList: Array[Double] = Array()
@@ -101,7 +103,9 @@ object EstCC extends App with CLOpts {
       estList = estList :+ res
     }
     println(estList.max)
-  } else {
+  } 
+  // Silent mode (all immutable data structures)
+  else {
     val weightIndices = (0 until w.length).toList
     val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 

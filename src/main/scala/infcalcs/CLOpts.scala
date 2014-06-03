@@ -1,11 +1,20 @@
 package infcalcs
 
+/**
+ * Case class whose fields comprise the required and optional
+ * command line options for channel capacity calculation.  
+ * 
+ * For more details see the usage text with the flag "--help"
+ */
 case class Config(
     verbose: Boolean = false, 
     dataFile: String = "", 
     paramFile: String = "",
     seed: Int = -1)
 
+/**
+ * Parser for command line options, inherited by [[EstCC]]
+ */
 trait CLOpts {
   val parser = new scopt.OptionParser[Config]("EstCC.jar") {
     head("EstCC", "1.0")

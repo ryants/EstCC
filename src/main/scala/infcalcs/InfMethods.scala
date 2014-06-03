@@ -675,7 +675,7 @@ object EstimateCC {
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
     }
 
-    def genWeightString(p: Pair[Double]): String = s"G(${p._1}, ${p._2})"
+    def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (p._1, p._2)
 
     // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
     // that the proposed weights cover a sufficient range of the inputs
@@ -736,9 +736,9 @@ object EstimateCC {
 
     // Constructs a string label for each weight
     def genWeightLabel(t: (Pair[Double], Pair[Double], Pair[Double])) = {
-      s"${t._3._1} * G1(${t._1._1}, ${t._2._1}), ${t._3._2} * G2(${
-        t._1._2
-      }, ${t._2._2})"
+      val gauss1 = "G1(%1.2f, %1.2f)" format (t._1._1, t._2._1)
+      val gauss2 = "G2(%1.2f, %1.2f)" format (t._1._2, t._2._2)
+      s"${t._3._1} * ${gauss1}, ${t._3._2} * ${gauss2}"
     }
 
     // Calculates and tests weights. Takes a tuple containing parameters for a

@@ -85,7 +85,7 @@ object EstCC extends App with CLOpts {
   val uw: List[List[Weight]] = w map (_._1)
   val bw: List[List[Weight]] = w map (_._2)
   val aw: List[List[Weight]] = (0 until w.length).toList map (n => uw(n) ++ bw(n))
-  
+
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))

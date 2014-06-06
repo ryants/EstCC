@@ -84,7 +84,8 @@ object EstCC extends App with CLOpts {
   // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)
   val bw: List[List[Weight]] = w map (_._2)
-
+  val aw: List[List[Weight]] = (0 until w.length).toList map (n => uw(n) ++ bw(n))
+  
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))
@@ -108,17 +109,14 @@ object EstCC extends App with CLOpts {
   else {
     val weightIndices = (0 until w.length).toList
     val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
-
-    val bRes: List[Double] = weightIndices map (n => getResultsMult(
-      calcWithWeightsMult(bw(n), p),
-      addLabel(outF, "_b_s" + binIndices(n))))
-    val uRes: List[Double] = weightIndices map (n => getResultsMult(
-      calcWithWeightsMult(uw(n), p),
-      addLabel(outF, "_u_s" + binIndices(n))))
+    
+    val ubRes: List[Double] = weightIndices map (n => getResultsMult(
+      calcWithWeightsMult(aw(n),p),
+      addLabel(outF, "_s" + binIndices(n))))
     val nRes: Double =
-      getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_n"))
+      getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_unif"))
 
-    val ccMult: Double = (List(bRes, uRes, List(nRes)) map (_.max)).max
+    val ccMult: Double = (List(ubRes, List(nRes)) map (_.max)).max
     // Print estimated channel capacity to stdout
     println(ccMult)
   }

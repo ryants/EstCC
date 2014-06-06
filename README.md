@@ -59,6 +59,14 @@ in one of 5 possible (parameter-dependent) formats is in the second column:
 
 ##### String parameters:  
 - a string with no whitespace characters
+ 
+**Note that for assigning bin numbers, "Values" take precedence over "Bins."** This
+means that if `signalBins` is specified and `signalValues` is *not* set to `None` in 
+the parameter file, the calculation will use a single number of bins for the signal
+variable (since `signalValues` has a default value) instead of the various numbers of 
+bins defined with `signalBins`. Similarly, if both `responseValues` and `responseBins`
+are defined in the parameter file, `responseBins` will be disregarded in favor of 
+`responseValues`.
 
 ### OUTPUT
 

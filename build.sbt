@@ -10,6 +10,8 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.1.5" % "test"
 
 libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0"
 
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.3"
+
 resolvers += Resolver.sonatypeRepo("public")
 
 exportJars := true

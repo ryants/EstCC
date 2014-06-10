@@ -13,7 +13,8 @@ import CTBuild.getBinDelims
 import IOFile.{ loadPairList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
-
+import akka.actor.{ ActorSystem, Props }
+import Actors._
 /**
  * Top-level main function for channel capacity calculation.
  *
@@ -31,7 +32,7 @@ object EstCC extends App with CLOpts {
   }
 
   // Initialize pseudorandom number generator 
-  var rEngine = 
+  var rEngine =
     if (config.seed != -1) new MersenneTwister(config.seed)
     else new MersenneTwister(new java.util.Date())
 
@@ -91,12 +92,22 @@ object EstCC extends App with CLOpts {
     s flatMap (x => Some(x ++ l))
 
   val outF = Some(stringParameters("filePrefix"))
-  
+
   // Calculate and output estimated mutual information values given calculated
   // weights
-  
-  // Verbose mode (includes mutable data structures)
-  if (config.verbose) {
+
+  // Parallel mode (includes mutable data structures)
+  if (config.cores > 1) {
+    val system = ActorSystem(s"EstCC")
+    val dist = system.actorOf(Props(new Distributor(aw)), "dist")
+	val calcList = (0 until config.cores - 1).toList map (x => 
+	  system.actorOf(Props(new Calculator), s"calc_${x}"))
+	  
+	dist ! calcList
+    system.awaitTermination()
+  } 
+  // Verbose sequential mode (also has mutable data structures)
+  else if (config.verbose) {
     val weightList: List[List[Weight]] = w map (x => x._1 ++ x._2)
     var estList: Array[Double] = Array()
     weightList foreach { wt =>
@@ -105,13 +116,13 @@ object EstCC extends App with CLOpts {
     }
     println(estList.max)
   } 
-  // Silent mode (all immutable data structures)
+  // Silent sequential mode (all immutable data structures)
   else {
     val weightIndices = (0 until w.length).toList
     val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
-    
+
     val ubRes: List[Double] = weightIndices map (n => getResultsMult(
-      calcWithWeightsMult(aw(n),p),
+      calcWithWeightsMult(aw(n), p),
       addLabel(outF, "_s" + binIndices(n))))
     val nRes: Double =
       getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_unif"))

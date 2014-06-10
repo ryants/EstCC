@@ -10,7 +10,8 @@ case class Config(
     verbose: Boolean = false, 
     dataFile: String = "", 
     paramFile: String = "",
-    seed: Int = -1)
+    seed: Int = -1,
+    cores: Int = 1)
 
 /**
  * Parser for command line options, inherited by [[EstCC]]
@@ -27,11 +28,13 @@ trait CLOpts {
     } text ("input data for calculation")
     opt[String]('p', "parameters") valueName ("<file>") action {
       (x, c) => c.copy(paramFile = x)
-    } text ("modify default parameters" +
-      " with optional file")
+    } text ("modify default parameters with optional file")
     opt[Int]('s', "seed") action {
       (x, c) => c.copy(seed = x)
-    }
+    } text ("seed for random number generator")
+    opt[Int]('c', "cores") action {
+      (x, c) => c.copy(cores = x)
+    } text ("specify positive integer for available number of CPU cores")
     help("help") text ("prints this usage text")
   }
 }

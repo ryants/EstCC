@@ -85,7 +85,8 @@ object EstCC extends App with CLOpts {
   // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)
   val bw: List[List[Weight]] = w map (_._2)
-  val aw: List[List[Weight]] = (0 until w.length).toList map (n => uw(n) ++ bw(n))
+  val aw: List[List[Weight]] = (0 until w.length).toList map (n =>
+    uw(n) ++ bw(n))
 
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
@@ -100,13 +101,13 @@ object EstCC extends App with CLOpts {
   if (config.cores > 1) {
     val system = ActorSystem(s"EstCC")
     val dist = system.actorOf(Props(new Distributor(aw)), "dist")
-	val calcList = (0 until config.cores - 1).toList map (x => 
-	  system.actorOf(Props(new Calculator), s"calc_${x}"))
-	  
-	dist ! calcList
+    val calcList = (0 until config.cores - 1).toList map (x =>
+      system.actorOf(Props(new Calculator), s"calc_${x}"))
+
+    dist ! Init(calcList)
+        
     system.awaitTermination()
-  } 
-  // Verbose sequential mode (also has mutable data structures)
+  } // Verbose sequential mode (also has mutable data structures)
   else if (config.verbose) {
     val weightList: List[List[Weight]] = w map (x => x._1 ++ x._2)
     var estList: Array[Double] = Array()
@@ -115,8 +116,7 @@ object EstCC extends App with CLOpts {
       estList = estList :+ res
     }
     println(estList.max)
-  } 
-  // Silent sequential mode (all immutable data structures)
+  } // Silent sequential mode (all immutable data structures)
   else {
     val weightIndices = (0 until w.length).toList
     val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
@@ -125,7 +125,8 @@ object EstCC extends App with CLOpts {
       calcWithWeightsMult(aw(n), p),
       addLabel(outF, "_s" + binIndices(n))))
     val nRes: Double =
-      getResultsMult(List(genEstimatesMult(p, bins)), addLabel(outF, "_unif"))
+      getResultsMult(List(genEstimatesMult(p, bins, (EstCC.rEngine.raw() *
+        1000000).toInt)), addLabel(outF, "_unif"))
 
     val ccMult: Double = (List(ubRes, List(nRes)) map (_.max)).max
     // Print estimated channel capacity to stdout

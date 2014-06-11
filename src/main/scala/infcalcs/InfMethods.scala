@@ -6,6 +6,7 @@ import TreeDef._
 
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
+  import cern.jet.random.engine.MersenneTwister
 
   /**
    * Divides list into sublists with approximately equal numbers of elements.
@@ -121,7 +122,7 @@ object CTBuild {
    *
    * @return The contingency table.
    */
-  def buildTable(randomize: Boolean)(
+  def buildTable(eng: Option[MersenneTwister])(
     pl: DRData,
     nb: Pair[Int],
     rd: Tree,
@@ -158,14 +159,14 @@ object CTBuild {
     }
 
     // Build the table from the data
-    val ct =
+    val ct = eng match {
       // If randomized, shuffle the row values (while keeping the column values
       // in place) before building the table
-      if (randomize)
-        addValues(table, OtherFuncs.myShuffle(pl._1, EstCC.rEngine) zip pl._2)
+      case Some(e) => addValues(table, OtherFuncs.myShuffle(pl._1, e) zip pl._2)
+
       // Otherwise, don't randomize
-      else
-        addValues(table, pl._1 zip pl._2)
+      case None => addValues(table, pl._1 zip pl._2)
+    }
 
     // Apply weights if present and produces instance of contingency table
     // data structure
@@ -195,6 +196,7 @@ object CTBuild {
  */
 object EstimateMI {
   import CTBuild.{ buildTable, getBinDelims, weightSignalData }
+  import cern.jet.random.engine.MersenneTwister
 
   /** Number of data randomizations to determine bin-based calculation bias. */
   val numRandTables = EstCC.numParameters("numRandom")
@@ -227,11 +229,11 @@ object EstimateMI {
    * @param pl The dose/response data.
    * @return Randomly selected fraction of the dataset.
    */
-  def jackknife(frac: Double, pl: DRData): DRData =
+  def jackknife(frac: Double, pl: DRData, e: MersenneTwister): DRData =
     if (frac == 1.0) pl
     else {
       val numToTake = (frac * pl._1.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, EstCC.rEngine)
+      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, e)
       (shuffledPairs take numToTake).sortBy(_._1).unzip
     }
 
@@ -369,8 +371,10 @@ object EstimateMI {
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
   def buildDataMult(bt: Pair[Int])(
-    pl: DRData, wts: Option[Weight] = None): RegDataMult = {
+    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
     // The number of resampling reps to do for each sampling fraction
+    val engine = new MersenneTwister(seed)
+
     val numReps = EstCC.numParameters("repsPerFraction")
 
     // A list with the sampling fractions to use for each iteration; each
@@ -401,14 +405,14 @@ object EstimateMI {
     val invFracs = fracList map invSS
 
     // Subsamples the data with the jackknife method
-    val subSamples = fracList map (x => jackknife(x, pl))
+    val subSamples = fracList map (x => jackknife(x, pl, engine))
     // For each subsampled dataset, build the contingency table
     val tables = subSamples map
-      (x => buildTable(false)(x, bt, rowDelims, colDelims, wts))
+      (x => buildTable(None)(x, bt, rowDelims, colDelims, wts))
     // For each subsampled dataset, build numRandTables randomized contingency
     // tables
     val randTables = for (n <- 0 until numRandTables) yield subSamples map (x =>
-      buildTable(true)(x, bt, rowDelims, colDelims, wts))
+      buildTable(Some(engine))(x, bt, rowDelims, colDelims, wts))
 
     // Extracts the string tag associated with the weight vector
     val l = wts match {
@@ -431,7 +435,7 @@ object EstimateMI {
    * Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
    */
   def bDMAlt(bt: Pair[Int])(
-    pl: DRData, wts: Option[Weight] = None): RegDataMult = {
+    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
     val numReps = EstCC.numParameters("repsPerFraction")
     val fracList = ({
       for {
@@ -451,13 +455,14 @@ object EstimateMI {
       case None => getBinDelims(pl._2, bt._2)
       case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
     }
+    
+    val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
-    val table = buildTable(false)(pl, bt, rowDelims, colDelims, wts)
-    val randTable = buildTable(true)(pl, bt, rowDelims, colDelims, wts)
+    val table = buildTable(None)(pl, bt, rowDelims, colDelims, wts)
+    val randTable = buildTable(Some(engine))(pl, bt, rowDelims, colDelims, wts)
     val subSamples = fracList map (x => subSample(x, table))
-    val randSubSamples = for (n <- 0 until numRandTables) yield 
-      fracList map (x => subSample(x, randTable))
+    val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
 
     def roundFrac(d: Double) = "%.2f" format d
     val invFracs = fracList map invSS
@@ -575,9 +580,11 @@ object EstimateMI {
   def genEstimatesMult(
     pl: DRData,
     binTupList: List[Pair[Int]],
+    seed: Int,
     wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] =
     binTupList map
-      (bt => (bt, multIntercepts(calcMultRegs(buildDataMult(bt)(pl, wts)))))
+      (bt => (bt, multIntercepts(calcMultRegs(
+        buildDataMult(bt)(pl, seed, wts)))))
 
   /**
    * Returns the MI estimate that is maximized for real but not randomized data.
@@ -608,8 +615,7 @@ object EstimateMI {
     val base = ((0, 0), (0 until d.length).toList map (x => (0.0, 0.0)))
 
     // Determines if estimates are biased using randomization data sets
-    def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]): 
-        List[(Pair[Int], List[Pair[Double]])] = {
+    def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]): List[(Pair[Int], List[Pair[Double]])] = {
 
       // Determines if estimate is biased given mutual information of
       // randomized data and the specified cutoff value
@@ -685,8 +691,7 @@ object EstimateCC {
       def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
       val rawWeights = testWeights("uni " + p.toString, firstTerm +: {
-        for (x <- 0 until (boundList.length - 1)) yield 
-          calcWeight(wtFunc, boundList(x), boundList(x + 1))
+        for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1))
       }.toList)
       (rawWeights map normWeight(bounds), genWeightString(p))
     }
@@ -751,8 +756,7 @@ object EstimateCC {
       def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
       val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
-        for (x <- 0 until (boundList.length - 1)) yield 
-          calcWeight(wtFunc, boundList(x), boundList(x + 1))
+        for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1))
       }.toList)
       (rawWeights map normWeight(bounds), genWeightLabel(t))
     }
@@ -800,7 +804,8 @@ object EstimateCC {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
-      EstCC.bins filter (x => x._1 == w._1.length), Some(w))
+      EstCC.bins filter (x => 
+        x._1 == w._1.length), (EstCC.rEngine.raw() * 1000000).toInt, Some(w))
   }
 
   /**
@@ -825,6 +830,7 @@ object EstimateCC {
         val est = EstimateMI.genEstimatesMult(
           pl,
           EstCC.bins filter (x => x._1 == binNum),
+          (EstCC.rEngine.raw() * 1000000).toInt,
           Some(wts(w)))
         fp match {
           case Some(f) =>
@@ -838,7 +844,7 @@ object EstimateCC {
       }
     }
     val est = EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x =>
-      x._1 == binNum))
+      x._1 == binNum), (EstCC.rEngine.raw() * 1000000).toInt)
     fp match {
       case Some(f) =>
         IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")

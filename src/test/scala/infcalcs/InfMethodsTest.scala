@@ -88,7 +88,7 @@ class CTBuildTest extends FlatSpec with Matchers {
     val rd = getBinDelims(doses, numBins._1)
     val cd = getBinDelims(responses, numBins._2)
     // Call with no weighting and no randomization
-    val ct = buildTable(false)(pl, numBins, rd, cd)
+    val ct = buildTable(None)(pl, numBins, rd, cd)
     ct.rows shouldBe 2
     ct.cols shouldBe 4
     ct.numSamples shouldBe 8
@@ -99,7 +99,7 @@ class CTBuildTest extends FlatSpec with Matchers {
 
     // Now try building a table with weights
     val wts =Option((List(1.0, 2.0), "testWeight"))
-    val ct2 = buildTable(false)(pl, numBins, rd, cd, wts)
+    val ct2 = buildTable(None)(pl, numBins, rd, cd, wts)
     ct2.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 8, 0))
   }
 }
@@ -113,7 +113,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   val numBins = Pair(2, 4)
   val rd = getBinDelims(doses1, numBins._1)
   val cd = getBinDelims(responses, numBins._2)
-  val ct = buildTable(false)(pl, numBins, rd, cd)
+  val ct = buildTable(None)(pl, numBins, rd, cd)
 
   // Mock up the global parameters in EstCC
   val parameters = InfConfig.defaultParameters
@@ -138,7 +138,7 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "jackknife" should "subsample data" in {
     val data = Pair(responses, responses)
-    val jkData = jackknife(0.5, data)
+    val jkData = jackknife(0.5, data, EstCC.rEngine)
     jkData._1.length shouldBe 4
     jkData._2.length shouldBe 4
     // Show that the doses and responses are shuffled together, not independently
@@ -173,7 +173,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     val numBins2 = Pair(3, 4)
     val rd2 = getBinDelims(doses1, numBins2._1)
     val cd2 = getBinDelims(responses, numBins2._2)
-    val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
+    val ct2 = buildTable(None)(pl, numBins2, rd2, cd2)
     isUniform(ct2.table) shouldBe false
   }
 
@@ -188,7 +188,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     val numBins2 = Pair(3, 4)
     val rd2 = getBinDelims(doses1, numBins2._1)
     val cd2 = getBinDelims(responses, numBins2._2)
-    val ct2 = buildTable(false)(pl, numBins2, rd2, cd2)
+    val ct2 = buildTable(None)(pl, numBins2, rd2, cd2)
     val uni2 = makeUniform(ct2.table)
     // These two rows should have the same sum after weighting
     uni2(0).sum shouldBe uni2(1).sum
@@ -206,7 +206,8 @@ class EstimateMITest extends FlatSpec with Matchers {
   "buildDataMult" should "return an appropriate RegDataMult data structure" in {
     // Get the RegDataMult result
     val numReps = EstCC.numParameters("repsPerFraction")
-    val rdm = buildDataMult(numBins)(pl)
+    // Seeded with some integer
+    val rdm = buildDataMult(numBins)(pl, 1234567)
     // Check the inverse sample sizes
     val fracs = EstCC.listParameters("sampleFractions").get
     val invss = rdm._1
@@ -232,18 +233,18 @@ class EstimateMITest extends FlatSpec with Matchers {
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {
-    val rdm = buildDataMult(numBins)(pl)
+    val rdm = buildDataMult(numBins)(pl, 1234567)
     val regs = calcMultRegs(rdm)
     regs._2.length shouldBe numRandTables
   }
 
   "genEstimatesMult" should
     "get a list of MI results for a small sample dataset" in {
-    val rdm = buildDataMult(numBins)(pl)
+    val rdm = buildDataMult(numBins)(pl, 1234567)
     val regs = calcMultRegs(rdm)
     val intercepts = multIntercepts(regs)
     val binSizes = List((2, 4))
-    val genResult = genEstimatesMult(pl, binSizes)
+    val genResult = genEstimatesMult(pl, binSizes, 1234567)
     // We should get one result back because we only gave one bin size
     genResult.length shouldBe 1
     // The first tuple in the list
@@ -279,7 +280,7 @@ class EstimateCCTest extends FlatSpec with Matchers {
   val numBins = Pair(4, 4)
   val rd = getBinDelims(responses, numBins._1)
   val cd = getBinDelims(responses, numBins._2)
-  val ct = buildTable(false)(pl, numBins, rd, cd)
+  val ct = buildTable(None)(pl, numBins, rd, cd)
 
   "EstimateCC" should "generate unimodal Gaussian weights" in {
     val uniWts = uniWeight(rd)(pl)

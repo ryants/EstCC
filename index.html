@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>EstCC by ryants</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="without-description">
+        <h1>EstCC</h1>
+        <p></p>
+        <p class="view"><a href="https://github.com/ryants/EstCC">View the Project on GitHub <small>ryants/EstCC</small></a></p>
+        <ul>
+          <li><a href="https://github.com/ryants/EstCC/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/ryants/EstCC/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/ryants/EstCC">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>DESCRIPTION</h3>
+
+<p>Code to estimate the channel capacity between a set of (signal, response)
+ordered pairs</p>
+
+<h3>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>DEPENDENCIES</h3>
+
+<p>Built using scala v2.11.0, sbt v0.13.5, and java v1.7.0_51. In order to build
+an executable JAR file, run <code>sbt one-jar</code> in the project's root directory
+to generate the JAR file.  Additional information on this plugin can be found 
+at <a href="https://github.com/sbt/sbt-onejar">https://github.com/sbt/sbt-onejar</a></p>
+
+<p>This code also contains a number of methods from the <a href="http://acs.lbl.gov/software/colt/">Colt Project</a>.  This 
+dependency is included in the build.sbt file.</p>
+
+<h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>USAGE</h3>
+
+<p>Upon successful compilation, the one-jar executable is located in 
+target/scala-2.1x/ and can be copied/renamed to any other directory for use:</p>
+
+<p>i.e. <code>cp target/scala-2.1x/estcc_2.1x-0.1-SNAPSHOT-one-jar.jar /my/working/dir/MyEstCC.jar</code></p>
+
+<p>Given a plaintext file with data organized into whitespace-delimited columns,
+the channel capacity can be estimated using the following command:</p>
+
+<p><code>java -jar MyEstCC.jar -d datafile (-p paramfile)</code></p>
+
+<p>where the optional 'paramfile' contains calculation parameters modified from 
+their default values and 'datafile' contains the whitespace-delimited columns
+of data</p>
+
+<p>A full description of the options can be seen in the usage text:</p>
+
+<p><code>java -jar MyEstCC.jar --help</code></p>
+
+<h3>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>CONFIGURATION</h3>
+
+<p>Default channel capacity calculation parameters are present in both the 
+<code>src/main/scala/infcalcs/InfConfig.scala</code> file and the example <code>params.txt</code> 
+file, which contains all possible parameters and their associated default 
+values formatted for input to the executable JAR file. As mentioned 
+previously, these values can be changed upon introduction of a parameter 
+file.  The parameter file is formatted with two tab-delimited columns,
+so that the parameter string is in the first column and the parameter value
+in one of 5 possible (parameter-dependent) formats is in the second column:</p>
+
+<h5>
+<a name="list-parameters" class="anchor" href="#list-parameters"><span class="octicon octicon-link"></span></a>List parameters:</h5>
+
+<ul>
+<li>2 or 3 comma-delimited numbers: 'minimum','maximum','increment' where 
+'maximum' is included and 'increment' is optional, defaulting to 1 
+(i.e. 0,10,2 produces the list: List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0), 
+and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))</li>
+<li>a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces 
+List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0)).</li>
+<li>"None" to indicate the absence of a list (only applicable for 
+response/signal value or bin parameters</li>
+</ul><h5>
+<a name="numeric-parameters" class="anchor" href="#numeric-parameters"><span class="octicon octicon-link"></span></a>Numeric parameters:</h5>
+
+<ul>
+<li>a single number</li>
+</ul><h5>
+<a name="string-parameters" class="anchor" href="#string-parameters"><span class="octicon octicon-link"></span></a>String parameters:</h5>
+
+<ul>
+<li>a string with no whitespace characters</li>
+</ul><p><strong>Note that for assigning bin numbers, "Values" take precedence over "Bins."</strong> This
+means that if <code>signalBins</code> is specified and <code>signalValues</code> is <em>not</em> set to <code>None</code> in 
+the parameter file, the calculation will use a single number of bins for the signal
+variable (since <code>signalValues</code> has a default value) instead of the various numbers of 
+bins defined with <code>signalBins</code>. Similarly, if both <code>responseValues</code> and <code>responseBins</code>
+are defined in the parameter file, <code>responseBins</code> will be disregarded in favor of 
+<code>responseValues</code>.</p>
+
+<h3>
+<a name="output" class="anchor" href="#output"><span class="octicon octicon-link"></span></a>OUTPUT</h3>
+
+<p>The output is recorded in a series of files containing the estimated mutual
+information for a particular signal distribution. Each file is identified by 
+an index and the number of signal bins (e.g. <code>out_47_s19.dat</code>) with the 
+exception of the uniform signal distribution (<code>out_unif_s19.dat</code>). Contained
+in each space-delimited file is the number of signal bins, the number of 
+response bins, the estimated mutual information, its 95% confidence interval 
+and the estimated mutual information and confidence interval for a series of 
+randomizations of the data set.</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/ryants">ryants</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>

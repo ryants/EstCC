@@ -1,5 +1,5 @@
 package infcalcs
-import akka.actor.{ ActorRef, Actor, ActorLogging }
+import akka.actor.{ ActorRef, Actor }
 
 object Actors {
 
@@ -9,7 +9,7 @@ object Actors {
 
   case class Uniform(ns: Int, seed: Int)
 
-  class Distributor(wts: List[List[Weight]]) extends Actor with ActorLogging {
+  class Distributor(wts: List[List[Weight]]) extends Actor {
     val numLists = wts.length
     var rLists = wts.length
 
@@ -21,8 +21,10 @@ object Actors {
     def receive = {
       case d: Double => {
         totRem -= 1
-        log.info(s"$totRem remaining calculations")
-        ccList :+ d
+        if (EstCC.config.verbose) {
+          println(s"$totRem remaining calculations")
+        }
+        ccList = ccList :+ d
         if (rWeights > 0) {
           val curList = numLists - rLists
           val index = wts(curList).length - rWeights
@@ -42,7 +44,10 @@ object Actors {
           sender ! Estimate(wts(curList)(index), index, seed)
           rWeights = wts(numLists - rLists).length - 1
         } else if (totRem == 0) {
-          log.info("calculation finished")
+          if (EstCC.config.verbose){
+            println("calculation finished, estimated channel capacity:")
+          }
+          println(s"${ccList.max}")
           context.system.shutdown()
         }
       }
@@ -77,7 +82,7 @@ object Actors {
     }
   }
 
-  class Calculator extends Actor with ActorLogging {
+  class Calculator extends Actor {
 
     def receive = {
       case Estimate(w, i, s) => {
@@ -90,7 +95,9 @@ object Actors {
             s"${s}_s${numSignals}_${i}.dat")
         }
         val opt = EstimateMI.optMIMult(estMI)._2.head._1
-        log.info(s"I = $opt")
+        if (EstCC.config.verbose){
+          println(s"${w._2}\tI = $opt")
+        }
         sender ! opt
       }
 
@@ -103,7 +110,9 @@ object Actors {
             s"${s}_s${n}_unif.dat")
         }
         val opt = EstimateMI.optMIMult(estMI)._2.head._1
-        log.info(s"I = $opt")
+        if (EstCC.config.verbose){
+          println(s"Uniform\tI = $opt")
+        }
         sender ! opt
       }
     }

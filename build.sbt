@@ -1,6 +1,6 @@
 name := "EstCC"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.3"
 
 scalacOptions += "-feature"
 

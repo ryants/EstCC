@@ -1,0 +1,475 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>infcalcs - infcalcs</title>
+          <meta name="description" content="infcalcs - infcalcs" />
+          <meta name="keywords" content="infcalcs infcalcs" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../index.html';
+            var hash = 'infcalcs.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../lib/package_big.png" />
+        
+        <h1>infcalcs</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">infcalcs</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Information theory calculations.</p><p>This package implements calculation of information-theoretic quantities, in
+particular estimates of mutual information and channel capacity for
+continuous variables.</p><p>For information on building, testing, and using the code, see the README
+file.</p><p>The steps in the channel capacity calculation are outlined below. For more
+details on the theory underlying the approach taken, see the supplementary
+information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level main function, <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a>, command-line arguments are
+   parsed and the data and configuration parameters are loaded.</li><li>Because the channel capacity depends on the input distribution, various
+   input weights are generated to determine which input weightings yield the
+   highest mutual information between input and output. Input weights are
+   generated using the functions <a href="EstimateCC$.html#uniWeight(bounds:infcalcs.TreeDef.Tree)(pl:infcalcs.DRData):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and
+   <a href="EstimateCC$.html#biWeight(bounds:infcalcs.TreeDef.Tree)(pl:infcalcs.DRData):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a>, which allow weighting of the input distribution
+   according to unimodal and bimodal Gaussian distributions, respectively.</li><li>Mutual information is calculated for each proposed input weighting
+   by the function <a href="EstimateCC$.html#calcWithWeightsMult(weights:List[infcalcs.Weight],pl:infcalcs.DRData):List[List[(infcalcs.Pair[Int],List[infcalcs.Pair[Double]])]]" class="extmbr" name="infcalcs.EstimateCC#calcWithWeightsMult">EstimateCC.calcWithWeightsMult</a>.</li><li>For each weighting, the algorithm tries a wide variety of bin
+   numbers/sizes to arrive at an estimate that is not biased by the bin size.
+   The ranges of input and output bins are specified by configuration
+   parameters.</li><li>For each unique combination of input/output bin sizes, the algorithm
+   builds the contingency tables for the raw data as well as for randomly
+   selected subsamples of the data. These contingency tables are generated
+   by <a href="EstimateMI$.html#buildDataMult(bt:infcalcs.Pair[Int])(pl:infcalcs.DRData,wts:Option[infcalcs.Weight]):infcalcs.RegDataMult" class="extmbr" name="infcalcs.EstimateMI#buildDataMult">EstimateMI.buildDataMult</a>.</li><li>After calculating the mutual information for each contingency table
+   (implemented in <a href="ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.ContTable#mutualInformation">ContTable.mutualInformation</a>) the unbiased mutual
+   information is estimated by performing a linear regression of the mutual
+   information of each subsampled dataset against the inverse sample size;
+   the intercept of the linear regression is the unbiased mutual
+   information estimate. The regression calculation is performed by
+   <a href="EstimateMI$.html#calcMultRegs(r:infcalcs.RegDataMult):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>.</li><li>Because increasing the number of bins can artifactually inflate estimates
+   of MI, identical MI calculations are performed on shuffled datasets of
+   varying sizes. The function <a href="EstimateMI$.html#optMIMult(d:List[(infcalcs.Pair[Int],List[infcalcs.Pair[Double]])]):(infcalcs.Pair[Int],List[infcalcs.Pair[Double]])" class="extmbr" name="infcalcs.EstimateMI#optMIMult">EstimateMI.optMIMult</a> then selects the MI
+   estimate that maximizes the MI estimate for real data while keeping the
+   the MI estimate for randomized data below the cutoff specified in the
+   configuration.</li><li><a href="EstimateCC$.html#getResultsMult(est:List[List[(infcalcs.Pair[Int],List[infcalcs.Pair[Double]])]],filePrefix:Option[String]):Double" class="extmbr" name="infcalcs.EstimateCC#getResultsMult">EstimateCC.getResultsMult</a> then reports the channel capacity estimate
+   as the maximum mutual information estimate obtained for all of the input
+   weightings tested.
+</li></ul></div><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="infcalcs"><span>infcalcs</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="infcalcs.CLOpts" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CLOptsextendsAnyRef"></a>
+      <a id="CLOpts:CLOpts"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="CLOpts.html"><span class="name">CLOpts</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Parser for command line options, inherited by <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a>
+</p>
+    </li><li name="infcalcs.Config" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConfigextendsProductwithSerializable"></a>
+      <a id="Config:Config"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Config.html"><span class="name">Config</span></a><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Case class whose fields comprise the required and optional
+command line options for channel capacity calculation.</p>
+    </li><li name="infcalcs.ConstructedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConstructedTableextendsContTable"></a>
+      <a id="ConstructedTable:ConstructedTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConstructedTable.html"><span class="name">ConstructedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.ContTable">ContTable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Class for building a contingency table from scratch.</p>
+    </li><li name="infcalcs.ContTable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ContTableextendsAnyRef"></a>
+      <a id="ContTable:ContTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ContTable.html"><span class="name">ContTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">A mixin for implementing contingency tables.</p>
+    </li><li name="infcalcs.DRData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DRData=infcalcs.package.Pair[List[Double]]"></a>
+      <a id="DRData:DRData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DRData</span><span class="result"> = (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>])</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Input-output (dose-response) data.</p><div class="fullcomment"><div class="comment cmt"><p>Input-output (dose-response) data. The first list contains the inputs,
+the second list contains the outputs.
+</p></div></div>
+    </li><li name="infcalcs.ImportedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ImportedTableextendsContTable"></a>
+      <a id="ImportedTable:ImportedTable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ImportedTable.html"><span class="name">ImportedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.ContTable">ContTable</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Class for reading contingency tables from a file.</p>
+    </li><li name="infcalcs.Pair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Pair[T]=(T,T)"></a>
+      <a id="Pair[T]:Pair[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Pair</span><span class="tparams">[<span name="T">T</span>]</span><span class="result"> = (<span class="extype" name="infcalcs.Pair.T">T</span>, <span class="extype" name="infcalcs.Pair.T">T</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">A two-tuple.</p>
+    </li><li name="infcalcs.Parameters" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Parameters=(Map[String,Option[List[Double]]],Map[String,Int],Map[String,String])"></a>
+      <a id="Parameters:Parameters"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Parameters</span><span class="result"> = (<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]], <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Int">Int</span>], <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>])</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Tuple containing configuration parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Tuple containing configuration parameters.</p><p>The first entry contains parameters that have list values; the second
+entry, parameters that have numerical values; the third entry, parameters
+that have string values.
+</p></div></div>
+    </li><li name="infcalcs.Prt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Prt=List[List[Double]]"></a>
+      <a id="Prt:Prt"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Prt</span><span class="result"> = <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>
+      </span>
+      </h4>
+      
+    </li><li name="infcalcs.RegData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RegData=(List[Double],List[infcalcs.ConstructedTable],List[infcalcs.ConstructedTable],List[String])"></a>
+      <a id="RegData:RegData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RegData</span><span class="result"> = (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.List">List</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.List">List</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>])</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Data to be used for linear regression for a single randomization.</p><div class="fullcomment"><div class="comment cmt"><p>Data to be used for linear regression for a single randomization.</p><p>Entries in the tuple:</p><ul><li>inverse sample sizes</li><li>list of subsampled contingency tables</li><li>list of randomized contingency tables (a single randomization for each
+   subsample size)</li><li>a list of string labels for output and logging purposes, one for each
+   subsample size.
+</li></ul></div></div>
+    </li><li name="infcalcs.RegDataMult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="RegDataMult=(List[Double],List[infcalcs.ConstructedTable],List[List[infcalcs.ConstructedTable]],List[String])"></a>
+      <a id="RegDataMult:RegDataMult"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RegDataMult</span><span class="result"> = (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.List">List</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>]], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>])</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Data to be used for linear regressions over all randomizations.</p><div class="fullcomment"><div class="comment cmt"><p>Data to be used for linear regressions over all randomizations.</p><p>Tuple containing entries as for <a href="#RegData=(List[Double],List[infcalcs.ConstructedTable],List[infcalcs.ConstructedTable],List[String])" class="extmbr" name="infcalcs.RegData">RegData</a>, but the third entry contains
+a list over all of the randomizations.
+</p></div></div>
+    </li><li name="infcalcs.SLR" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SLRextendsAnyRef"></a>
+      <a id="SLR:SLR"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SLR.html"><span class="name">SLR</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Implementation of simple least-squares (linear) regression.</p>
+    </li><li name="infcalcs.Weight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Weight=(List[Double],String)"></a>
+      <a id="Weight:Weight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Weight</span><span class="result"> = (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.Predef.String">String</span>)</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Weight vector.</p><div class="fullcomment"><div class="comment cmt"><p>Weight vector. The first entry is a list of weights across all of the
+input bins. The second entry is a string that describes the type of
+weighting.
+</p></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="infcalcs.CTBuild" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CTBuild"></a>
+      <a id="CTBuild:CTBuild"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CTBuild$.html"><span class="name">CTBuild</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Contains methods for building contingency tables from data.</p>
+    </li><li name="infcalcs.EstCC" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EstCC"></a>
+      <a id="EstCC:EstCC"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EstCC$.html"><span class="name">EstCC</span></a><span class="result"> extends <span class="extype" name="scala.App">App</span> with <a href="CLOpts.html" class="extype" name="infcalcs.CLOpts">CLOpts</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Top-level main function for channel capacity calculation.</p>
+    </li><li name="infcalcs.EstimateCC" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EstimateCC"></a>
+      <a id="EstimateCC:EstimateCC"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EstimateCC$.html"><span class="name">EstimateCC</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Contains functions for estimating the channel capacity.</p>
+    </li><li name="infcalcs.EstimateMI" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EstimateMI"></a>
+      <a id="EstimateMI:EstimateMI"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EstimateMI$.html"><span class="name">EstimateMI</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Contains methods for estimating mutual information.</p>
+    </li><li name="infcalcs.IOFile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="IOFile"></a>
+      <a id="IOFile:IOFile"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="IOFile$.html"><span class="name">IOFile</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">This object contains methods for writing and reading various types of
+data to and from files.</p>
+    </li><li name="infcalcs.InfConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InfConfig"></a>
+      <a id="InfConfig:InfConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="InfConfig$.html"><span class="name">InfConfig</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Defines default values for the channel capacity calculation parameters.</p>
+    </li><li name="infcalcs.LowProb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LowProb"></a>
+      <a id="LowProb:LowProb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LowProb$.html"><span class="name">LowProb</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Deals with instances where weights fail to adequately cover the relevant
+signal space.</p>
+    </li><li name="infcalcs.MathFuncs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MathFuncs"></a>
+      <a id="MathFuncs:MathFuncs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MathFuncs$.html"><span class="name">MathFuncs</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Contains a handful of useful mathematical functions.</p>
+    </li><li name="infcalcs.OtherFuncs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OtherFuncs"></a>
+      <a id="OtherFuncs:OtherFuncs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OtherFuncs$.html"><span class="name">OtherFuncs</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Contains a handful of utility functions.</p>
+    </li><li name="infcalcs.TreeDef" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TreeDef"></a>
+      <a id="TreeDef:TreeDef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="TreeDef$.html"><span class="name">TreeDef</span></a>
+      </span>
+      </h4>
+      <p class="comment cmt">Implementation of binary trees containing Double values at each node.</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

@@ -1,0 +1,7 @@
+.cache
+.worksheet/*
+project/*
+src/*
+target/*
+!target/scala-2.11/api/*
+

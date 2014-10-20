@@ -35,12 +35,20 @@ object CTBuild {
     }
     val sv = v.sorted
 
-    def buildPartList(es: List[Int], ls: List[Double]): List[List[Double]] = {
-      if (es.isEmpty) Nil
-      else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
-    }
-
     buildPartList(elemPerBin, sv)
+  }
+
+  /**
+   * Utility function which partitions a list into specific sublists
+   * as assigned by a list of integers
+   * 
+   * @param es list denoting number of elements per bin
+   * @param ls list of all elements
+   * @return partitioning of ls into sublists denoting bins
+   */
+  def buildPartList(es: List[Int], ls: List[Double]): List[List[Double]] = {
+    if (es.isEmpty) Nil
+    else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
   }
 
   /**
@@ -113,7 +121,7 @@ object CTBuild {
    * Randomized contingency tables are used as a control to determine the
    * number of bins to use for calculating the mutual information.
    *
-   * @param randomize Whether to randomize the data in the table.
+   * @param eng optional engine for table randomization
    * @param pl The dose-response data.
    * @param nb The numbers of bins to use for the rows and columns of the table.
    * @param rd Binary tree giving bounds of the row bins.
@@ -455,7 +463,7 @@ object EstimateMI {
       case None => getBinDelims(pl._2, bt._2)
       case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
     }
-    
+
     val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
@@ -804,7 +812,7 @@ object EstimateCC {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
-      EstCC.bins filter (x => 
+      EstCC.bins filter (x =>
         x._1 == w._1.length), (EstCC.rEngine.raw() * 1000000).toInt, Some(w))
   }
 

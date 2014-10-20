@@ -63,6 +63,12 @@ package object infcalcs {
     */
   type DRData = Pair[List[Double]]
 
+  /**
+   * Like [[DRData]] but with ordered pairs instead of single values for inputs
+   * and outputs
+   */
+  type DRDataPair = Pair[List[Pair[Double]]]
+  
   /** Weight vector. The first entry is a list of weights across all of the
     * input bins. The second entry is a string that describes the type of
     * weighting.

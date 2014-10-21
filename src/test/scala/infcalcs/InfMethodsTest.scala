@@ -283,7 +283,7 @@ class EstimateCCTest extends FlatSpec with Matchers {
   val ct = buildTable(None)(pl, numBins, rd, cd)
 
   "EstimateCC" should "generate unimodal Gaussian weights" in {
-    val uniWts = uniWeight(rd)(pl)
+    val uniWts = uniWeight(rd)(pl._1)
     uniWts.length shouldBe
       (EstCC.numParameters("uniMuNumber")-1) *
         EstCC.numParameters("uniSigmaNumber")

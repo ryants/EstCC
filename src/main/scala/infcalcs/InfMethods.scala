@@ -455,7 +455,7 @@ object EstimateMI {
       case None => getBinDelims(pl._2, bt._2)
       case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
     }
-    
+
     val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
@@ -636,6 +636,9 @@ object EstimateMI {
 object EstimateCC {
   import LowProb.testWeights
 
+  val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
+  val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+
   /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
@@ -653,33 +656,54 @@ object EstimateCC {
     p / (1.0 / bounds.toList.length.toDouble)
 
   /**
+   * Utility function that generates a range of values to use as the mean of
+   * the unimodal Gaussian weighting function
+   *
+   * @param min minimum value in weight range
+   * @param max maximum value in weight range
+   * @return list of values for use as mean in gaussian weighting function
+   */
+  def genMuList(minV: Double, maxV: Double): List[Double] =
+    (uMuFracMin until 1.0 by uMuFracMin).toList map
+      (x => minV + (maxV - minV) * x)
+
+  /**
+   * Generates a list of (mu, sigma) pairs for parameterizing unimodal gaussian
+   * weighting functions.
+   *
+   *  @param muList list of mean values (from [[genMuList]])
+   *  @param min minimum value in weight range
+   *  @param max maximum value in weight range
+   *  @return list of parameters for weighting function
+   */
+  def genMuSigList(
+    muList: List[Double],
+    minV: Double,
+    maxV: Double): List[Pair[Double]] =
+    for {
+      mu <- muList
+      i <- (uSigFracMin to 1.0 by uSigFracMin).toList
+    } yield (mu, (i * (mu - minV) / 3.0) min (i * (maxV - mu) / 3.0))
+
+  /**
    * Generates list of unimodal (Gaussian) weights.
    *
    * @param bounds Binary tree specifying bin bounds.
-   * @param pl The input/output dataset.
+   * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(bounds: Tree)(pl: DRData): List[Weight] = {
-    val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
-    val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+  def uniWeight(bounds: Tree)(in: List[Double]): List[Weight] = {
 
     // Create a list of evenly-distributed means that span the input range
     // ***Note that the enumeration terminates before 1.0, so there are only
     // uniMuNumber - 1 entries in muList.***
-    val minVal = if (logSpace) log(pl._1.min) else pl._1.min
-    val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
-    val muList =
-      (uMuFracMin until 1.0 by uMuFracMin).toList map
-        (x => minVal + (maxVal - minVal) * x)
+    val minVal = if (logSpace) log(in.min) else in.min
+    val maxVal = if (logSpace) log(in.max) else in.max
+    val muList = genMuList(minVal, maxVal)
 
     // Attaches various sigma values to mu values, resulting in a list of
     // (mu, sigma) combinations as a list of Pair[Double]
-    val wtParams = {
-      for {
-        mu <- muList
-        i <- (uSigFracMin to 1.0 by uSigFracMin).toList
-      } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
-    }
+    val wtParams = genMuSigList(muList, minVal, maxVal)
 
     def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (p._1, p._2)
 
@@ -704,13 +728,13 @@ object EstimateCC {
    * Generates list of bimodal weights.
    *
    * @param bounds Binary tree specifying bin bounds.
-   * @param pl The input/output dataset.
+   * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(bounds: Tree)(pl: DRData): List[Weight] = {
+  def biWeight(bounds: Tree)(in: List[Double]): List[Weight] = {
 
-    val minVal = if (logSpace) log(pl._1.min) else pl._1.min
-    val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
+    val minVal = if (logSpace) log(in.min) else in.min
+    val maxVal = if (logSpace) log(in.max) else in.max
     val minMuDiff =
       (maxVal - minVal) / EstCC.numParameters("biMuNumber").toDouble
 
@@ -804,7 +828,7 @@ object EstimateCC {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
-      EstCC.bins filter (x => 
+      EstCC.bins filter (x =>
         x._1 == w._1.length), (EstCC.rEngine.raw() * 1000000).toInt, Some(w))
   }
 

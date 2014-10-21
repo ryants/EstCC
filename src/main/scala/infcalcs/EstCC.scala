@@ -79,7 +79,7 @@ object EstCC extends App with CLOpts {
       case None => signalBins map (x => getBinDelims(p._1, x))
       case Some(x) => List(TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))
     }
-    sBoundList map (x => (uniWeight(x)(p), biWeight(x)(p)))
+    sBoundList map (x => (uniWeight(x)(p._1), biWeight(x)(p._1)))
   }
 
   // Split unimodal and bimodal weight lists

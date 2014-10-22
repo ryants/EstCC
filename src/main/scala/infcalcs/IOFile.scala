@@ -61,6 +61,24 @@ object IOFile {
       (u._1.toList, u._2.toList)
     }
   }
+  
+  /** 
+   *  Loads arbitrary numbers of columns into 2D vector
+   *  
+   *  Currently, the remainder of the program can only handle
+   *  4 columns or fewer correctly
+   *  
+   *  @param f Name of file to load.
+    * @param cols List of integers indicating which columns of the file to load.
+    * @return 2D vector of data from file
+   */
+  def loadList(f: String, cols: Vector[Int]): Vector[Vector[Double]] = {
+    val d = importData(f)
+    if (d.isEmpty) Vector()
+    else {
+      d map (x => cols map (y => x(y)))
+    }
+  }
 
   /** Loads multiple list pairs. */
   def loadSeries(

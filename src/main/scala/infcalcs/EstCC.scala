@@ -69,6 +69,13 @@ object EstCC extends App with CLOpts {
     case Some(x) => List(x.length)
   }
 
+  val fracList = ({
+    for {
+      f <- listParameters("sampleFractions").get
+      n <- 0 until numParameters("repsPerFraction")
+    } yield f
+  } :+ 1.0).toList
+
   // List of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)
 
@@ -105,7 +112,7 @@ object EstCC extends App with CLOpts {
       system.actorOf(Props(new Calculator), s"calc_${x}"))
 
     dist ! Init(calcList)
-        
+
     system.awaitTermination()
   } // Verbose sequential mode (also has mutable data structures)
   else if (config.verbose) {

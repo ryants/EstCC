@@ -336,6 +336,14 @@ object EstimateMI {
       case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
     }
   }
+      
+  /**
+   *  Calculates the inverse sample size for subsampling data
+   *  
+   *  @param f fraction of data to sample
+   *  @param ds data set to sample from
+   */ 
+  def invSS[T](f: Double, ds: List[T]) = 1 / (f * ds.length)
 
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
@@ -375,22 +383,6 @@ object EstimateMI {
     // The number of resampling reps to do for each sampling fraction
     val engine = new MersenneTwister(seed)
 
-    val numReps = EstCC.numParameters("repsPerFraction")
-
-    // A list with the sampling fractions to use for each iteration; each
-    // sampling fraction is repeated numReps times in the list. The value 1.0
-    // is appended so that the full dataset is also used after subsampling is
-    // completed.
-    val fracList = ({
-      for {
-        f <- EstCC.listParameters("sampleFractions").get
-        n <- 0 until numReps
-      } yield f
-    } :+ 1.0).toList
-
-    // Calculates the inverse sample size of the subsampled data
-    def invSS(f: Double) = 1 / (f * pl._1.length)
-
     // Determines row/column bin delimiters
     val rowDelims: Tree = EstCC.listParameters("signalValues") match {
       case None => getBinDelims(pl._1, bt._1)
@@ -402,10 +394,10 @@ object EstimateMI {
     }
 
     // List of inverse sample sizes for all of the resampling reps
-    val invFracs = fracList map invSS
+    val invFracs = EstCC.fracList map (x => invSS(x,pl._1))
 
     // Subsamples the data with the jackknife method
-    val subSamples = fracList map (x => jackknife(x, pl, engine))
+    val subSamples = EstCC.fracList map (x => jackknife(x, pl, engine))
     // For each subsampled dataset, build the contingency table
     val tables = subSamples map
       (x => buildTable(None)(x, bt, rowDelims, colDelims, wts))
@@ -423,9 +415,10 @@ object EstimateMI {
     def roundFrac(d: Double) = "%.2f" format d
     // List of labels describing features of each resampling result
     val tags = for {
-      f <- (0 until fracList.length).toList
-      if (fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
+      f <- (0 until EstCC.fracList.length).toList
+      if (EstCC.fracList(f) < 1.0)
+    } yield s"${l}_r${bt._1}_c${bt._2}_${
+      roundFrac(EstCC.fracList(f))}_${f % EstCC.numParameters("repsPerFraction")}"
 
     // Return the assembled outputs
     (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
@@ -436,15 +429,7 @@ object EstimateMI {
    */
   def bDMAlt(bt: Pair[Int])(
     pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
-    val numReps = EstCC.numParameters("repsPerFraction")
-    val fracList = ({
-      for {
-        f <- EstCC.listParameters("sampleFractions").get
-        n <- 0 until numReps
-      } yield f
-    } :+ 1.0).toList
 
-    def invSS(f: Double) = 1 / (f * pl._1.length)
 
     //determines row/column bin delimiters
     val rowDelims: Tree = EstCC.listParameters("signalValues") match {
@@ -461,11 +446,14 @@ object EstimateMI {
     // generates data with subSample method
     val table = buildTable(None)(pl, bt, rowDelims, colDelims, wts)
     val randTable = buildTable(Some(engine))(pl, bt, rowDelims, colDelims, wts)
-    val subSamples = fracList map (x => subSample(x, table))
-    val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
+    val subSamples = EstCC.fracList map (x => subSample(x, table))
+    val randSubSamples =
+      for (
+        n <- 0 until numRandTables
+      ) yield EstCC.fracList map (x => subSample(x, randTable))
 
     def roundFrac(d: Double) = "%.2f" format d
-    val invFracs = fracList map invSS
+    val invFracs = EstCC.fracList map (x => invSS(x,pl._1))
 
     val l = wts match {
       case None => "n"
@@ -473,9 +461,11 @@ object EstimateMI {
     }
 
     val tags = for {
-      f <- (0 until fracList.length).toList
-      if (fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
+      f <- (0 until EstCC.fracList.length).toList
+      if (EstCC.fracList(f) < 1.0)
+    } yield s"${l}_r${bt._1}_c${bt._2}_${
+      roundFrac(EstCC.fracList(f))}_${
+        f % EstCC.numParameters("repsPerFraction")}"
 
     (invFracs, subSamples, randSubSamples.toList, tags :+
       s"${l}_r${bt._1}_c${bt._2}")

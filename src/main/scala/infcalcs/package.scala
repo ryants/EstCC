@@ -58,17 +58,6 @@ package object infcalcs {
   /** A two-tuple. */
   type Pair[T] = (T, T)
 
-  /** Input-output (dose-response) data. The first list contains the inputs,
-    * the second list contains the outputs.
-    */
-  type DRData = Pair[List[Double]]
-
-  /**
-   * Like [[DRData]] but with ordered pairs instead of single values for inputs
-   * and outputs
-   */
-  type DRDataPair = Pair[List[Pair[Double]]]
-  
   /** Weight vector. The first entry is a list of weights across all of the
     * input bins. The second entry is a string that describes the type of
     * weighting.

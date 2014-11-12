@@ -58,6 +58,9 @@ package object infcalcs {
   /** A two-tuple. */
   type Pair[T] = (T, T)
 
+  /** An n-tuple (for clarity)  */
+  type NTuple[T] = Vector[T]
+  
   /** Weight vector. The first entry is a list of weights across all of the
     * input bins. The second entry is a string that describes the type of
     * weighting.

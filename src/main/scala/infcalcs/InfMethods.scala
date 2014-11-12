@@ -107,73 +107,99 @@ object CTBuild {
         (x * wts(v)).round.toInt))).toVector
     }
 
+  @tailrec
+  def genIndTuples(
+    binDim: Int,
+    valDim: Int,
+    acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+    if (valDim == 0) acc
+    else {
+      val newAcc: Vector[NTuple[Int]] = for {
+        a <- Range(0, binDim).toVector
+        b <- acc
+      } yield b updated (valDim - 1, a)
+      genIndTuples(binDim, valDim - 1, newAcc)
+    }
+  }
+  
   /**
-   * Builds a (possibly randomized) contingency table from data.
+   * Returns index for insertion of data point into contingency table
    *
-   * Randomized contingency tables are used as a control to determine the
-   * number of bins to use for calculating the mutual information.
+   * Makes use of [[calcBinKey]] to map index pair to single index
    *
-   * @param randomize Whether to randomize the data in the table.
-   * @param pl The dose-response data.
-   * @param nb The numbers of bins to use for the rows and columns of the table.
-   * @param rd Binary tree giving bounds of the row bins.
-   * @param cd Binary tree giving bounds of the column bins.
-   * @param weights List specifying the input weights, or None for no weighting.
+   * @param pair ordered pair data point to be inserted into contingency table
+   * @param binDelims pair of delimiting trees used to determine respective
+   * bin indices
+   * @param v vector of bin indices, whose index is used for insertion into
+   * the contingency table
    *
-   * @return The contingency table.
+   * @return index of 2D bin
+   */
+  def findVectIndex(
+    tuple: NTuple[Double],
+    binDelims: Vector[Tree],
+    v: Vector[NTuple[Int]]): Int = {
+
+    val indices = Range(0, tuple.length).toVector map (x =>
+      findIndex(tuple(x), binDelims(x)))
+    v.indexOf(indices)
+
+  }
+  
+  /**
+   * Method for constructing contingency table from a set of n-dim data points
+   *
+   * @param data container for dose-response data
+   * @param nb one-dimensional bin numbers for row and column values resp.
+   * @param rd vector of trees for determining row insertion index
+   * @param cd vector of trees for determining column insertion index
+   * @param weights pair of weights for varying signal distribution
+   *
+   * @return contingency table for ordered pair data points
    */
   def buildTable(eng: Option[MersenneTwister])(
-    pl: DRData,
+    data: DRData,
     nb: Pair[Int],
-    rd: Tree,
-    cd: Tree,
-    weights: Option[Weight] = None): ConstructedTable = {
-    // Initialize the contingency table to have dimensions (num_rows, num_cols)
-    // and fill with zeros
+    rd: Vector[Tree],
+    cd: Vector[Tree],
+    weights: Option[Weight]): ConstructedTable = {
+
+    val tDimS = pow(rd(0).entries.toDouble, nb._1)
+    val tDimR = pow(cd(0).entries.toDouble, nb._2)
+
     val table = {
-      for (r <- Range(0, rd.entries)) yield Range(0, cd.entries).map(x => 0).toVector
+      for (r <- Range(0, tDimS.toInt))
+        yield Range(0, tDimR.toInt).map(x => 0).toVector
     }.toVector
 
-    // Accumulator for populating the contingency table
     def addValues(
       acc: Vector[Vector[Int]],
-      p: List[Pair[Double]]): Vector[Vector[Int]] = {
-      // Base case: we've reached the end of the data, return the table
-      // unchanged
+      p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
       if (p.isEmpty) acc
-      // Recursive case: update the table
       else {
-        // Figure which bin the row/dose value should go into
-        val rIndex = findIndex(p.head._1, rd)
-        // Figure which bin the col/response value should go into
-        val cIndex = findIndex(p.head._2, cd)
-        // Sanity check
+        val rIndex = findVectIndex(p.head._1, rd, data sigKey nb._1)
+        val cIndex = findVectIndex(p.head._2, cd, data respKey nb._2)
         if (rIndex < 0 || cIndex < 0) {
           throw new Exception(
             "negative indices" + println(rIndex, cIndex) + println(p.head))
         }
-        // Increment the count at (rIndex, cIndex) by 1
         addValues(acc updated (rIndex, acc(rIndex) updated
           (cIndex, acc(rIndex)(cIndex) + 1)), p.tail)
       }
     }
 
-    // Build the table from the data
     val ct = eng match {
-      // If randomized, shuffle the row values (while keeping the column values
-      // in place) before building the table
-      case Some(e) => addValues(table, OtherFuncs.myShuffle(pl._1, e) zip pl._2)
-
-      // Otherwise, don't randomize
-      case None => addValues(table, pl._1 zip pl._2)
+      case Some(e) => addValues(table,
+        (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
+      case None => addValues(table, (data.sig zip data.resp).toList)
     }
 
-    // Apply weights if present and produces instance of contingency table
-    // data structure
     weights match {
       case None => new ConstructedTable(ct)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
+
+    new ConstructedTable(ct)
   }
 }
 
@@ -232,9 +258,12 @@ object EstimateMI {
   def jackknife(frac: Double, pl: DRData, e: MersenneTwister): DRData =
     if (frac == 1.0) pl
     else {
-      val numToTake = (frac * pl._1.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, e)
-      (shuffledPairs take numToTake).sortBy(_._1).unzip
+      val numToTake = (frac * pl.sig.length).toInt
+      val shuffledPairs = OtherFuncs.myShuffle(pl.sig zip pl.resp, e)
+      //Don't think the sorting is necessary
+      //(shuffledPairs take numToTake).sortBy(_._1).unzip
+      val newDR = (shuffledPairs take numToTake).unzip
+      new DRData(newDR._1, newDR._2)
     }
 
   /**
@@ -336,14 +365,14 @@ object EstimateMI {
       case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
     }
   }
-      
+
   /**
    *  Calculates the inverse sample size for subsampling data
-   *  
+   *
    *  @param f fraction of data to sample
    *  @param ds data set to sample from
-   */ 
-  def invSS[T](f: Double, ds: List[T]) = 1 / (f * ds.length)
+   */
+  def invSS[T](f: Double, ds: Vector[T]) = 1 / (f * ds.length)
 
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
@@ -378,33 +407,40 @@ object EstimateMI {
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
-  def buildDataMult(bt: Pair[Int])(
-    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
-    // The number of resampling reps to do for each sampling fraction
+def buildDataMult(
+    binPair: Pair[Int],
+    data: DRData,
+    seed: Int,
+    wts: Option[Weight] = None): RegDataMult = {
+
+    // engine for randomization processes
     val engine = new MersenneTwister(seed)
 
+    // number of randomizations per bin pair
+    val numRandTables = EstCC.numParameters("numRandom")
+
     // Determines row/column bin delimiters
-    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
-      case None => getBinDelims(pl._1, bt._1)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    val rowDelims: Vector[Tree] = EstCC.listParameters("signalValues") match {
+      case None => data sigDelims binPair._1
+      case Some(l) => ???
     }
-    val colDelims: Tree = EstCC.listParameters("responseValues") match {
-      case None => getBinDelims(pl._2, bt._2)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    val colDelims: Vector[Tree] = EstCC.listParameters("responseValues") match {
+      case None => data respDelims binPair._2
+      case Some(l) => ???
     }
 
     // List of inverse sample sizes for all of the resampling reps
-    val invFracs = EstCC.fracList map (x => invSS(x,pl._1))
+    val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
 
     // Subsamples the data with the jackknife method
-    val subSamples = EstCC.fracList map (x => jackknife(x, pl, engine))
+    val subSamples = EstCC.fracList map (x => jackknife(x, data, engine))
     // For each subsampled dataset, build the contingency table
     val tables = subSamples map
-      (x => buildTable(None)(x, bt, rowDelims, colDelims, wts))
+      (x => buildTable(None)(x, binPair, rowDelims, colDelims, wts))
     // For each subsampled dataset, build numRandTables randomized contingency
     // tables
     val randTables = for (n <- 0 until numRandTables) yield subSamples map (x =>
-      buildTable(Some(engine))(x, bt, rowDelims, colDelims, wts))
+      buildTable(Some(engine))(x, binPair, rowDelims, colDelims, wts))
 
     // Extracts the string tag associated with the weight vector
     val l = wts match {
@@ -417,35 +453,40 @@ object EstimateMI {
     val tags = for {
       f <- (0 until EstCC.fracList.length).toList
       if (EstCC.fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${
-      roundFrac(EstCC.fracList(f))}_${f % EstCC.numParameters("repsPerFraction")}"
+    } yield s"${l}_r${binPair._1}_c${binPair}_${
+      roundFrac(EstCC.fracList(f))
+    }_${f % EstCC.numParameters("repsPerFraction")}"
 
     // Return the assembled outputs
-    (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
+    (invFracs, tables, randTables.toList,
+      tags :+ s"${l}_r${binPair._1}_c${binPair._2}")
+
   }
 
   /**
    * Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
    */
-  def bDMAlt(bt: Pair[Int])(
-    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
+  def bDMAlt(
+    binPair: Pair[Int],
+    data: DRData,
+    seed: Int,
+    wts: Option[Weight] = None): RegDataMult = {
 
-
-    //determines row/column bin delimiters
-    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
-      case None => getBinDelims(pl._1, bt._1)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    // Determines row/column bin delimiters
+    val rowDelims: Vector[Tree] = EstCC.listParameters("signalValues") match {
+      case None => data sigDelims binPair._1
+      case Some(l) => ???
     }
-    val colDelims: Tree = EstCC.listParameters("responseValues") match {
-      case None => getBinDelims(pl._2, bt._2)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
+    val colDelims: Vector[Tree] = EstCC.listParameters("responseValues") match {
+      case None => data respDelims binPair._2
+      case Some(l) => ???
     }
 
     val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
-    val table = buildTable(None)(pl, bt, rowDelims, colDelims, wts)
-    val randTable = buildTable(Some(engine))(pl, bt, rowDelims, colDelims, wts)
+    val table = buildTable(None)(data, binPair, rowDelims, colDelims, wts)
+    val randTable = buildTable(Some(engine))(data, binPair, rowDelims, colDelims, wts)
     val subSamples = EstCC.fracList map (x => subSample(x, table))
     val randSubSamples =
       for (
@@ -453,7 +494,7 @@ object EstimateMI {
       ) yield EstCC.fracList map (x => subSample(x, randTable))
 
     def roundFrac(d: Double) = "%.2f" format d
-    val invFracs = EstCC.fracList map (x => invSS(x,pl._1))
+    val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
 
     val l = wts match {
       case None => "n"
@@ -463,12 +504,14 @@ object EstimateMI {
     val tags = for {
       f <- (0 until EstCC.fracList.length).toList
       if (EstCC.fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${
-      roundFrac(EstCC.fracList(f))}_${
-        f % EstCC.numParameters("repsPerFraction")}"
+    } yield s"${l}_r${binPair._1}_c${binPair._2}_${
+      roundFrac(EstCC.fracList(f))
+    }_${
+      f % EstCC.numParameters("repsPerFraction")
+    }"
 
     (invFracs, subSamples, randSubSamples.toList, tags :+
-      s"${l}_r${bt._1}_c${bt._2}")
+      s"${l}_r${binPair._1}_c${binPair._2}")
   }
 
   /**
@@ -574,7 +617,7 @@ object EstimateMI {
     wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] =
     binTupList map
       (bt => (bt, multIntercepts(calcMultRegs(
-        buildDataMult(bt)(pl, seed, wts)))))
+        buildDataMult(bt, pl, seed, wts)))))
 
   /**
    * Returns the MI estimate that is maximized for real but not randomized data.
@@ -625,6 +668,7 @@ object EstimateMI {
 /** Contains functions for estimating the channel capacity. */
 object EstimateCC {
   import LowProb.testWeights
+  import CTBuild.genIndTuples
 
   val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
   val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
@@ -632,6 +676,29 @@ object EstimateCC {
   /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
+  /**
+   * Generates signal weights for n-dim signal data
+   *
+   * Given n marginal signal distributions and assuming independence
+   * between the distributions, a joint signal distribution is
+   * calculated and a [[Weight]] is generated.
+   *
+   * @param wv vector of weights for signal distributions
+   * @return weight for joint distribution
+   */
+  def makeJoint(wv: Vector[Weight]): Weight = {
+    val valDim = wv.length
+    val binDim = wv(0)._1.length
+    val i = genIndTuples(binDim, valDim, Vector(Range(0, valDim).toVector))
+
+    val wND: List[Double] = i.toList map (x => (Range(0, x.length) map (y =>
+      wv(y)._1(x(y)))).product)
+
+    val jointString = (wv map (x => x._2)).mkString(";")
+
+    (wND, jointString)
+  }
+  
   /** Given a function, finds the difference in its evaluation of two numbers. */
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
     func(hb) - func(lb)
@@ -682,7 +749,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(bounds: Tree)(in: List[Double]): List[Weight] = {
+  def uniWeight(bounds: Tree, in: List[Double]): List[Weight] = {
 
     // Create a list of evenly-distributed means that span the input range
     // ***Note that the enumeration terminates before 1.0, so there are only
@@ -721,7 +788,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(bounds: Tree)(in: List[Double]): List[Weight] = {
+  def biWeight(bounds: Tree, in: List[Double]): List[Weight] = {
 
     val minVal = if (logSpace) log(in.min) else in.min
     val maxVal = if (logSpace) log(in.max) else in.max
@@ -777,6 +844,33 @@ object EstimateCC {
     // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
     // return
     for (x <- (0 until wtParams.length).toList) yield genWeights(wtParams(x))
+  }
+  
+  /**
+   * Generates a list of weights for n-dim input data
+   *
+   * Weights are generated for a n-dim input distribution by calculating
+   * the marginal distributions for the n independent random variables
+   * representing the signal.  These are used to produce a joint
+   * distribution (see [[makeJoint]]) in order to construct a list of
+   * weights corresponding to the structure of the contingency table as 
+   * seen in [[CTBuild]].
+   *
+   * @param pBounds vector of trees delimiting n-dim signal value bins
+   * @param sig list of ordered tuples (signal values)
+   * @param weightFunc function determining calculation of weight distribution
+   * @return list of weights for a signal set of ordered tuples
+   */
+  def weightND(
+    pBounds: Vector[Tree],
+    sig: Vector[NTuple[Double]],
+    weightFunc: (Tree, List[Double]) => List[Weight]): List[Weight] = {
+
+    val sigT = sig.transpose
+    val weights = sigT.indices map (x => weightFunc(pBounds(x), sigT(x).toList))
+
+    weights.transpose.toList map (x => makeJoint(x.toVector))
+
   }
 
   /**

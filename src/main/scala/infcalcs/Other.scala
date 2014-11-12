@@ -115,8 +115,8 @@ object OtherFuncs {
     * @return The shuffled list.
     */
   def myShuffle[A: scala.reflect.ClassTag](
-      l: List[A],
-      e: MersenneTwister): List[A] = {
+      l: Vector[A],
+      e: MersenneTwister): Vector[A] = {
     val a: Array[A] = l.toArray
     for (i <- (1 until l.length).reverse) {
       val j = (e.raw() * (i + 1)).toInt
@@ -124,7 +124,7 @@ object OtherFuncs {
       a(i) = a(j)
       a(j) = t
     }
-    a.toList
+    a.toVector
   }
 
   /** Parses strings specifying list or range parameters.

@@ -14,7 +14,7 @@ import annotation.tailrec
  *  @param sig 2D vector of signal values
  *  @param resp 2D vector of response values
  */
-class DRData(val sig: Vector[Vector[Double]], val resp: Vector[Vector[Double]]) {
+class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) {
   Predef.assert(sig.length == resp.length)
   Predef.assert(checkSize(sig) == 1 && checkSize(resp) == 1)
 
@@ -24,11 +24,27 @@ class DRData(val sig: Vector[Vector[Double]], val resp: Vector[Vector[Double]]) 
   lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
 
-  private def checkSize(d: Vector[Vector[Double]]): Int =
+  private def checkSize(d: Vector[NTuple[Double]]): Int =
     (d map (_.length)).toSet.size
 
-  private def dim(d: Vector[Vector[Double]]): Int = d.head.length
+  private def dim(d: Vector[NTuple[Double]]): Int = d.head.length
 
+  /**
+   * Returns binary tree giving the values delimiting the bounds of each bin.
+   *
+   * The tree returned by this function has numBins nodes; the value
+   * associated with each node represents the maximum data value contained in
+   * that bin, ie, the upper inclusive bin bound.
+   *
+   * @param v The list of doubles to be partitioned.
+   * @param numBins The number of bins to divide the list into.
+   * @return Binary tree containing the maximum value in each bin.
+   */
+  private def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
+    val delimList = CTBuild.partitionList(v, numBins) map (_.max)
+    buildTree(buildOrderedNodeList(delimList))
+  }
+  
   /**
    * Calculates bin delimiters for arbitrary dimensioned data points
    *
@@ -39,11 +55,11 @@ class DRData(val sig: Vector[Vector[Double]], val resp: Vector[Vector[Double]]) 
    */
   private def getDelims(
     dim: Int,
-    data: Vector[Vector[Double]],
+    data: Vector[NTuple[Double]],
     numBins: Int): Vector[Tree] = {
 
     ((0 until dim) map (x => data map (y => y(x))) map
-      (z => CTBuild.getBinDelims(z.toList, numBins))).toVector
+      (z => getBinDelims(z, numBins))).toVector
 
   }
   
@@ -59,7 +75,7 @@ class DRData(val sig: Vector[Vector[Double]], val resp: Vector[Vector[Double]]) 
   private def calcBinKey(trees: Vector[Tree]): Vector[NTuple[Int]] = {
     val treeBins = trees(0).entries
     val depth = trees.length
-    CTBuildND.genIndTuples(treeBins, depth, Vector(Range(0, depth).toVector))
+    CTBuild.genIndTuples(treeBins, depth, Vector(Range(0, depth).toVector))
   }
 
   def sigDelims(numBins: Int): Vector[Tree] = getDelims(sigDim, sig, numBins)

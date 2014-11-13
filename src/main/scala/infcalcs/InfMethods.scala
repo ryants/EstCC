@@ -23,7 +23,7 @@ object CTBuild {
    * @param numBins The number of bins to divide the list into.
    * @return A list of length numBins containing each of the sublists.
    */
-  def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
+  def partitionList(v: Vector[Double], numBins: Int): List[List[Double]] = {
     val avgPerBin = v.length / numBins
     val rem = v.length % numBins
     val elemPerBin: List[Int] = {
@@ -33,7 +33,7 @@ object CTBuild {
         ((0 until (numBins - rem)).toList map (x => avgPerBin)) ++
           ((0 until rem).toList map (x => avgPerBin + 1))
     }
-    val sv = v.sorted
+    val sv = v.sorted.toList
 
     def buildPartList(es: List[Int], ls: List[Double]): List[List[Double]] = {
       if (es.isEmpty) Nil
@@ -41,22 +41,6 @@ object CTBuild {
     }
 
     buildPartList(elemPerBin, sv)
-  }
-
-  /**
-   * Returns binary tree giving the values delimiting the bounds of each bin.
-   *
-   * The tree returned by this function has numBins nodes; the value
-   * associated with each node represents the maximum data value contained in
-   * that bin, ie, the upper inclusive bin bound.
-   *
-   * @param v The list of doubles to be partitioned.
-   * @param numBins The number of bins to divide the list into.
-   * @return Binary tree containing the maximum value in each bin.
-   */
-  def getBinDelims(v: List[Double], numBins: Int): Tree = {
-    val delimList = partitionList(v, numBins) map (_.max)
-    buildTree(buildOrderedNodeList(delimList))
   }
 
   /**
@@ -221,7 +205,7 @@ object CTBuild {
  *    regression.
  */
 object EstimateMI {
-  import CTBuild.{ buildTable, getBinDelims, weightSignalData }
+  import CTBuild.{ buildTable, weightSignalData }
   import cern.jet.random.engine.MersenneTwister
 
   /** Number of data randomizations to determine bin-based calculation bias. */
@@ -766,7 +750,7 @@ object EstimateCC {
 
     // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
     // that the proposed weights cover a sufficient range of the inputs
-    def genWeights(p: Pair[Double]): Weight = {
+    def weights(p: Pair[Double]): Weight = {
       val mu = p._1; val sigma = p._2
       val boundList = bounds.toList
       def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
@@ -778,7 +762,7 @@ object EstimateCC {
     }
 
     // Apply genWeights to the (mu, sigma) tuples and return
-    for (x <- (0 until wtParams.length).toList) yield genWeights(wtParams(x))
+    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
   }
 
   /**
@@ -830,7 +814,7 @@ object EstimateCC {
     // Calculates and tests weights. Takes a tuple containing parameters for a
     // bimodal Gaussian and makes sure that the proposed weights cover a
     // sufficient range of the inputs
-    def genWeights(
+    def weights(
       t: (Pair[Double], Pair[Double], Pair[Double])): Weight = {
       val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
       val boundList = bounds.toList
@@ -843,7 +827,7 @@ object EstimateCC {
     }
     // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
     // return
-    for (x <- (0 until wtParams.length).toList) yield genWeights(wtParams(x))
+    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
   }
   
   /**
@@ -861,7 +845,7 @@ object EstimateCC {
    * @param weightFunc function determining calculation of weight distribution
    * @return list of weights for a signal set of ordered tuples
    */
-  def weightND(
+  def genWeights(
     pBounds: Vector[Tree],
     sig: Vector[NTuple[Double]],
     weightFunc: (Tree, List[Double]) => List[Weight]): List[Weight] = {

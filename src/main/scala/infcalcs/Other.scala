@@ -158,6 +158,34 @@ object OtherFuncs {
     else
       Some(s.split("\\s").toList map (_.toDouble))
   }
+  
+  /** Parses strings for generation of n-dim value vectors
+   *  
+   *  Uses the same parsing function as [[stringToSList]] but compiles
+   *  the results into a two dimensional Vector in which each element is an 
+   *  n-tuple denoting a particular signal or response in n-dimensional 
+   *  space
+   *  
+   *  @param s The string to parse
+   *  @param cur The current state of the parameter in questions
+   *  @return 2D vector generated from various configuration commands
+   *  
+   */
+  def stringToValList(
+      s: String, 
+      cur: Option[Vector[NTuple[Double]]]): Option[Vector[NTuple[Double]]] = {
+    stringToSList(s) match {
+      case None => None
+      case Some(x) => 
+        cur match {
+          case None => Some(x.toVector map (y => Vector(y)))
+          case Some(y) => Some(for {
+            o <- y
+            n <- x.toVector
+          } yield o :+ n) 
+        }
+    }
+  }
 
   /** Updates a set of configuration parameters with a list of key/value pairs.
     *
@@ -174,18 +202,31 @@ object OtherFuncs {
   def updateParameters(l: List[Pair[String]], p: Parameters): Parameters = {
     if (l.isEmpty) p
     else {
-      // Check if listParameters contains the current key
+      // Check if listParams contains the current key
       if (p._1 contains l.head._1)
         updateParameters(l.tail,
-          (p._1 updated (l.head._1, stringToSList(l.head._2)), p._2, p._3))
-      // Check if numParameters contains the current key
+          (p._1 updated (l.head._1, stringToSList(l.head._2)), p._2, p._3, p._4))
+      // Check if numParams contains the current key
       else if (p._2 contains l.head._1)
         updateParameters(l.tail,
-          (p._1, p._2 updated (l.head._1, l.head._2.toInt), p._3))
-      // Check if stringParameters contains the current key
+          (p._1, p._2 updated (l.head._1, l.head._2.toInt), p._3, p._4))
+      // Check if stringParams contains the current key
       else if (p._3 contains l.head._1)
         updateParameters(l.tail,
-          (p._1, p._2, p._3 updated (l.head._1, l.head._2)))
+          (p._1, p._2, p._3 updated (l.head._1, l.head._2), p._4))
+      // Check if valueParams is to be updated
+      else if (l.head._1 matches "*Vals[0-9]+")
+        if (l.head._1 matches "resp.*")
+          updateParameters(l.tail, 
+              (p._1, p._2, p._3, 
+                  p._4 updated ("responseValues", 
+                      stringToValList(l.head._2, p._4("responseValues")))))
+        else if (l.head._1 matches "sig.*")
+          updateParameters(l.tail, 
+              (p._1, p._2, p._3, 
+                  p._4 updated ("signalValues", 
+                      stringToValList(l.head._2, p._4("signalValues")))))
+        else throw new Exception(s"illegal parameter: ${l.head._1}")
       // The key was not found! Throw an exception
       else throw new Exception(s"illegal parameter: ${l.head._1}")
     }

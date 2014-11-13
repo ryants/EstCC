@@ -10,10 +10,8 @@ object InfConfig {
   val listParams: Map[String, Option[List[Double]]] =
     Map("signalColumns" -> Some(List(0.0)),
     "responseColumns" -> Some(List(1.0)),
-    "responseValues" -> None,
     "responseBins" -> Some((4.0 to 80.0 by 4.0).toList),
-    "signalValues" -> Some((0.0 to 18.0 by 1.0).toList),
-    "signalBins" -> None,
+    "signalBins" -> Some((4.0 to 80.0 by 4.0).toList),
     "sampleFractions" -> Some((0.8 to 0.975 by 0.025).toList),
     "biPeakWeights" -> Some(List(0.4, 0.5, 0.6)))
 
@@ -34,7 +32,13 @@ object InfConfig {
     "filePrefix" -> "out",
     "logSpace" -> "false")
 
+ /** (Optional) Parameters that define possible signal/response values */
+  val valueParams: Map[String, Option[Vector[NTuple[Double]]]] = 
+    Map("responseValues" -> None,
+        "signalValues" -> None)
+    
   /** Instance of [[Parameters]] containing default parameter values. */
-  val defaultParameters: Parameters = (listParams, numParams, stringParams)
+  val defaultParameters: Parameters = 
+    (listParams, numParams, stringParams, valueParams)
 
 }

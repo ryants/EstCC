@@ -3,18 +3,19 @@ package infcalcs
 import OtherFuncs.updateParameters
 import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{
+  genWeights,
   uniWeight,
   biWeight,
   getResultsMult,
   calcWithWeightsMult,
   verboseResults
 }
-import CTBuild.getBinDelims
-import IOFile.{ loadPairList, importParameters }
+import IOFile.{ loadList, importParameters }
 import TreeDef.Tree
 import EstimateMI.genEstimatesMult
 import akka.actor.{ ActorSystem, Props }
 import Actors._
+
 /**
  * Top-level main function for channel capacity calculation.
  *
@@ -50,21 +51,21 @@ object EstCC extends App with CLOpts {
   var listParameters = parameters._1
   var numParameters = parameters._2
   var stringParameters = parameters._3
+  var valueParameters = parameters._4
 
   // Load data given pair of columns
-  val colPair =
-    (listParameters("columnPair").get(0).toInt,
-      listParameters("columnPair").get(1).toInt)
-  val p = loadPairList(dataFile, colPair)
+  val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)
+  val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
+  val p = loadList(dataFile, sigCols, respCols)
 
   // Determine number of response bins
-  val responseBins: List[Int] = listParameters("responseValues") match {
+  val responseBins: List[Int] = valueParameters("responseValues") match {
     case None => listParameters("responseBins").get map (_.toInt)
     case Some(x) => List(x.length)
   }
 
   // Determine number of signal bins
-  val signalBins: List[Int] = listParameters("signalValues") match {
+  val signalBins: List[Int] = valueParameters("signalValues") match {
     case None => listParameters("signalBins").get map (_.toInt)
     case Some(x) => List(x.length)
   }
@@ -81,13 +82,10 @@ object EstCC extends App with CLOpts {
 
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
-  val w: List[Pair[List[Weight]]] = {
-    val sBoundList: List[Tree] = listParameters("signalValues") match {
-      case None => signalBins map (x => getBinDelims(p._1, x))
-      case Some(x) => List(TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))
-    }
-    sBoundList map (x => (uniWeight(x)(p._1), biWeight(x)(p._1)))
-  }
+  val w: List[Pair[List[Weight]]] = 
+    signalBins map (x => p sigDelims x) map (y => 
+      (genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight)))
+  
 
   // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)

@@ -70,7 +70,8 @@ object EstCC extends App with CLOpts {
     case Some(x) => List(x.length)
   }
 
-  val fracList = ({
+  //Mutable variable for testing purposes
+  var fracList = ({
     for {
       f <- listParameters("sampleFractions").get
       n <- 0 until numParameters("repsPerFraction")

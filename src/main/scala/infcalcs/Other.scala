@@ -215,13 +215,13 @@ object OtherFuncs {
         updateParameters(l.tail,
           (p._1, p._2, p._3 updated (l.head._1, l.head._2), p._4))
       // Check if valueParams is to be updated
-      else if (l.head._1 matches "*Vals[0-9]+")
-        if (l.head._1 matches "resp.*")
+      else if (l.head._1 matches ".*Vals[0-9]+")
+        if (l.head._1 matches "^resp.*")
           updateParameters(l.tail, 
               (p._1, p._2, p._3, 
                   p._4 updated ("responseValues", 
                       stringToValList(l.head._2, p._4("responseValues")))))
-        else if (l.head._1 matches "sig.*")
+        else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail, 
               (p._1, p._2, p._3, 
                   p._4 updated ("signalValues", 

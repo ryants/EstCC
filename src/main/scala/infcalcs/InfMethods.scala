@@ -105,7 +105,7 @@ object CTBuild {
       genIndTuples(binDim, valDim - 1, newAcc)
     }
   }
-  
+
   /**
    * Returns index for insertion of data point into contingency table
    *
@@ -129,7 +129,7 @@ object CTBuild {
     v.indexOf(indices)
 
   }
-  
+
   /**
    * Method for constructing contingency table from a set of n-dim data points
    *
@@ -148,14 +148,16 @@ object CTBuild {
     cd: Vector[Tree],
     weights: Option[Weight] = None): ConstructedTable = {
 
-    val tDimS = pow(rd(0).entries.toDouble, nb._1)
-    val tDimR = pow(cd(0).entries.toDouble, nb._2)
-
+    val tDimR = pow(nb._1.toDouble, rd.length.toDouble)
+    val tDimC = pow(nb._2.toDouble, cd.length.toDouble)
+    
     val table = {
-      for (r <- Range(0, tDimS.toInt))
-        yield Range(0, tDimR.toInt).map(x => 0).toVector
+      for {
+        r <- Range(0, tDimR.toInt)
+      } yield Range(0, tDimC.toInt).map(x => 0).toVector
     }.toVector
 
+    @tailrec
     def addValues(
       acc: Vector[Vector[Int]],
       p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
@@ -183,7 +185,6 @@ object CTBuild {
       case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 
-    new ConstructedTable(ct)
   }
 }
 
@@ -391,7 +392,7 @@ object EstimateMI {
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
-def buildDataMult(
+  def buildDataMult(
     binPair: Pair[Int],
     data: DRData,
     seed: Int,
@@ -404,15 +405,9 @@ def buildDataMult(
     val numRandTables = EstCC.numParameters("numRandom")
 
     // Determines row/column bin delimiters
-    val rowDelims: Vector[Tree] = EstCC.listParameters("signalValues") match {
-      case None => data sigDelims binPair._1
-      case Some(l) => ???
-    }
-    val colDelims: Vector[Tree] = EstCC.listParameters("responseValues") match {
-      case None => data respDelims binPair._2
-      case Some(l) => ???
-    }
-
+    val rowDelims: Vector[Tree] = data sigDelims binPair._1
+    val colDelims: Vector[Tree] = data respDelims binPair._2
+  
     // List of inverse sample sizes for all of the resampling reps
     val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
 
@@ -457,11 +452,11 @@ def buildDataMult(
     wts: Option[Weight] = None): RegDataMult = {
 
     // Determines row/column bin delimiters
-    val rowDelims: Vector[Tree] = EstCC.listParameters("signalValues") match {
+    val rowDelims: Vector[Tree] = EstCC.valueParameters("signalValues") match {
       case None => data sigDelims binPair._1
       case Some(l) => ???
     }
-    val colDelims: Vector[Tree] = EstCC.listParameters("responseValues") match {
+    val colDelims: Vector[Tree] = EstCC.valueParameters("responseValues") match {
       case None => data respDelims binPair._2
       case Some(l) => ???
     }
@@ -682,7 +677,7 @@ object EstimateCC {
 
     (wND, jointString)
   }
-  
+
   /** Given a function, finds the difference in its evaluation of two numbers. */
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
     func(hb) - func(lb)
@@ -829,7 +824,7 @@ object EstimateCC {
     // return
     for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
   }
-  
+
   /**
    * Generates a list of weights for n-dim input data
    *
@@ -837,7 +832,7 @@ object EstimateCC {
    * the marginal distributions for the n independent random variables
    * representing the signal.  These are used to produce a joint
    * distribution (see [[makeJoint]]) in order to construct a list of
-   * weights corresponding to the structure of the contingency table as 
+   * weights corresponding to the structure of the contingency table as
    * seen in [[CTBuild]].
    *
    * @param pBounds vector of trees delimiting n-dim signal value bins

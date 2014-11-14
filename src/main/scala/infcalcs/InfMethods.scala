@@ -146,7 +146,7 @@ object CTBuild {
     nb: Pair[Int],
     rd: Vector[Tree],
     cd: Vector[Tree],
-    weights: Option[Weight]): ConstructedTable = {
+    weights: Option[Weight] = None): ConstructedTable = {
 
     val tDimS = pow(rd(0).entries.toDouble, nb._1)
     val tDimR = pow(cd(0).entries.toDouble, nb._2)

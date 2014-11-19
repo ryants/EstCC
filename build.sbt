@@ -18,3 +18,4 @@ exportJars := true
 
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 
+parallelExecution in Test := false

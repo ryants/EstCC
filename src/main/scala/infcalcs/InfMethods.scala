@@ -91,25 +91,35 @@ object CTBuild {
         (x * wts(v)).round.toInt))).toVector
     }
 
-  @tailrec
-  def genIndTuples(
-    binDim: Int,
-    valDim: Int,
-    acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
-    if (valDim == 0) acc
-    else {
-      val newAcc: Vector[NTuple[Int]] = for {
-        a <- Range(0, binDim).toVector
-        b <- acc
-      } yield b updated (valDim - 1, a)
-      genIndTuples(binDim, valDim - 1, newAcc)
+  /**
+   * Generates a key for multidimensional bin indexing
+   *
+   * @param binDim number of bins per dimension
+   * @param valDim number of dimensions per (signal or response) value
+   * @return key
+   */
+  def genIndTuples(binDim: Int, valDim: Int): Vector[NTuple[Int]] = {
+    @tailrec
+    def helper(
+      bd: Int,
+      vd: Int,
+      acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+      if (vd == 0) acc
+      else {
+        val newAcc: Vector[NTuple[Int]] = for {
+          a <- Range(0, bd).toVector
+          b <- acc
+        } yield b updated (vd - 1, a)
+        helper(bd, vd - 1, newAcc)
+      }
     }
+    val initKey = Vector(Range(0, valDim).toVector)
+    helper(binDim, valDim, initKey)
   }
-
   /**
    * Returns index for insertion of data point into contingency table
    *
-   * Makes use of [[calcBinKey]] to map index pair to single index
+   * Makes use of [[DRData.calcBinKey]] to map index pair to single index
    *
    * @param pair ordered pair data point to be inserted into contingency table
    * @param binDelims pair of delimiting trees used to determine respective
@@ -126,8 +136,39 @@ object CTBuild {
 
     val indices = Range(0, tuple.length).toVector map (x =>
       findIndex(tuple(x), binDelims(x)))
-    v.indexOf(indices)
+    v indexOf indices
 
+  }
+  
+  /**
+   * Method for constructing a bin indexing key from explicitly defined
+   * signal/response values
+   * 
+   * In order to allow signal variables with different numbers of defined
+   * values, we have an alternate bin indexing function to circumvent
+   * the implemented strategy in which each variable has the same number 
+   * of bins
+   * 
+   * @param v n-dimensional variable vector
+   * 
+   * @return bin indexing key
+   */
+  def valuesToKey(v: Vector[NTuple[Double]]): Vector[NTuple[Int]] = {
+    val sigPerType = v.transpose map (_.toSet.size)
+    @tailrec
+    def helper(
+        data: Vector[NTuple[Double]], 
+        acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+      if (data.isEmpty) acc
+      else {
+        val newAcc = for {
+          x <- Range(0, data.head.length).toVector
+          y <- acc
+        } yield y :+ x
+        helper(data.tail, newAcc)
+      }
+    }
+    helper(v, Vector(Vector()))
   }
 
   /**
@@ -150,7 +191,7 @@ object CTBuild {
 
     val tDimR = pow(nb._1.toDouble, rd.length.toDouble)
     val tDimC = pow(nb._2.toDouble, cd.length.toDouble)
-    
+
     val table = {
       for {
         r <- Range(0, tDimR.toInt)
@@ -163,8 +204,17 @@ object CTBuild {
       p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
       if (p.isEmpty) acc
       else {
-        val rIndex = findVectIndex(p.head._1, rd, data sigKey nb._1)
-        val cIndex = findVectIndex(p.head._2, cd, data respKey nb._2)
+        val sigKey = EstCC.valueParameters("signalValues") match {
+          case None => data sigKey nb._1
+          case Some(x) => valuesToKey(data.sig)
+        }
+        val respKey = EstCC.valueParameters("responseValues") match {
+          case None => data sigKey nb._1
+          case Some(x) => valuesToKey(data.resp)
+        } 
+        
+        val rIndex = findVectIndex(p.head._1, rd, sigKey)
+        val cIndex = findVectIndex(p.head._2, cd, respKey)
         if (rIndex < 0 || cIndex < 0) {
           throw new Exception(
             "negative indices" + println(rIndex, cIndex) + println(p.head))
@@ -407,7 +457,7 @@ object EstimateMI {
     // Determines row/column bin delimiters
     val rowDelims: Vector[Tree] = data sigDelims binPair._1
     val colDelims: Vector[Tree] = data respDelims binPair._2
-  
+
     // List of inverse sample sizes for all of the resampling reps
     val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
 
@@ -668,7 +718,7 @@ object EstimateCC {
   def makeJoint(wv: Vector[Weight]): Weight = {
     val valDim = wv.length
     val binDim = wv(0)._1.length
-    val i = genIndTuples(binDim, valDim, Vector(Range(0, valDim).toVector))
+    val i = genIndTuples(binDim, valDim)
 
     val wND: List[Double] = i.toList map (x => (Range(0, x.length) map (y =>
       wv(y)._1(x(y)))).product)

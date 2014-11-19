@@ -75,7 +75,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def calcBinKey(trees: Vector[Tree]): Vector[NTuple[Int]] = {
     val treeBins = trees(0).entries
     val depth = trees.length
-    CTBuild.genIndTuples(treeBins, depth, Vector(Range(0, depth).toVector))
+    CTBuild.genIndTuples(treeBins, depth)
   }
 
   def sigDelims(numBins: Int): Vector[Tree] = getDelims(sigDim, sig, numBins)

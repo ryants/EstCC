@@ -30,22 +30,6 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def dim(d: Vector[NTuple[Double]]): Int = d.head.length
 
   /**
-   * Returns binary tree giving the values delimiting the bounds of each bin.
-   *
-   * The tree returned by this function has numBins nodes; the value
-   * associated with each node represents the maximum data value contained in
-   * that bin, ie, the upper inclusive bin bound.
-   *
-   * @param v The list of doubles to be partitioned.
-   * @param numBins The number of bins to divide the list into.
-   * @return Binary tree containing the maximum value in each bin.
-   */
-  private def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
-    val delimList = CTBuild.partitionList(v, numBins) map (_.max)
-    buildTree(buildOrderedNodeList(delimList))
-  }
-  
-  /**
    * Calculates bin delimiters for arbitrary dimensioned data points
    *
    * @param dim number of independent variables
@@ -59,7 +43,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     numBins: Int): Vector[Tree] = {
 
     ((0 until dim) map (x => data map (y => y(x))) map
-      (z => getBinDelims(z, numBins))).toVector
+      (z => CTBuild.getBinDelims(z, numBins))).toVector
 
   }
   

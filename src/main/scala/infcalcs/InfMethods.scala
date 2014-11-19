@@ -116,6 +116,23 @@ object CTBuild {
     val initKey = Vector(Range(0, valDim).toVector)
     helper(binDim, valDim, initKey)
   }
+
+  /**
+   * Returns binary tree giving the values delimiting the bounds of each bin.
+   *
+   * The tree returned by this function has numBins nodes; the value
+   * associated with each node represents the maximum data value contained in
+   * that bin, ie, the upper inclusive bin bound.
+   *
+   * @param v The list of doubles to be partitioned.
+   * @param numBins The number of bins to divide the list into.
+   * @return Binary tree containing the maximum value in each bin.
+   */
+  def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
+    val delimList = partitionList(v, numBins) map (_.max)
+    buildTree(buildOrderedNodeList(delimList))
+  }
+
   /**
    * Returns index for insertion of data point into contingency table
    *
@@ -139,36 +156,49 @@ object CTBuild {
     v indexOf indices
 
   }
-  
+
   /**
    * Method for constructing a bin indexing key from explicitly defined
    * signal/response values
-   * 
+   *
    * In order to allow signal variables with different numbers of defined
    * values, we have an alternate bin indexing function to circumvent
-   * the implemented strategy in which each variable has the same number 
+   * the implemented strategy in which each variable has the same number
    * of bins
-   * 
+   *
    * @param v n-dimensional variable vector
-   * 
+   *
    * @return bin indexing key
    */
   def valuesToKey(v: Vector[NTuple[Double]]): Vector[NTuple[Int]] = {
     val sigPerType = v.transpose map (_.toSet.size)
     @tailrec
     def helper(
-        data: Vector[NTuple[Double]], 
-        acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+      data: Vector[Int],
+      acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
       if (data.isEmpty) acc
       else {
         val newAcc = for {
-          x <- Range(0, data.head.length).toVector
+          x <- Range(0, data.head).toVector
           y <- acc
         } yield y :+ x
         helper(data.tail, newAcc)
       }
     }
-    helper(v, Vector(Vector()))
+    helper(sigPerType, Vector(Vector()))
+  }
+
+  /**
+   * Method for constructing a Vector of bin-delimiting trees given explicit
+   * signal or response values
+   *
+   * @param v vector of ordered tuples
+   *
+   * @return vector of trees
+   */
+  def valuesToTrees(v: Vector[NTuple[Double]]): Vector[Tree] = {
+    val sigPerType = v.transpose map (_.toSet.toVector)
+    sigPerType map (x => getBinDelims(x, x.length))
   }
 
   /**
@@ -176,8 +206,6 @@ object CTBuild {
    *
    * @param data container for dose-response data
    * @param nb one-dimensional bin numbers for row and column values resp.
-   * @param rd vector of trees for determining row insertion index
-   * @param cd vector of trees for determining column insertion index
    * @param weights pair of weights for varying signal distribution
    *
    * @return contingency table for ordered pair data points
@@ -185,13 +213,26 @@ object CTBuild {
   def buildTable(eng: Option[MersenneTwister])(
     data: DRData,
     nb: Pair[Int],
-    rd: Vector[Tree],
-    cd: Vector[Tree],
     weights: Option[Weight] = None): ConstructedTable = {
 
-    val tDimR = pow(nb._1.toDouble, rd.length.toDouble)
-    val tDimC = pow(nb._2.toDouble, cd.length.toDouble)
+    val rd = EstCC.valueParameters("signalValues") match {
+      case None => data sigDelims nb._1
+      case Some(x) => valuesToTrees(data.sig)
+    }
+    val cd = EstCC.valueParameters("responseValues") match {
+      case None => data respDelims nb._2
+      case Some(x) => valuesToTrees(data.resp)
+    }
 
+    val tDimR = EstCC.valueParameters("signalValues") match {
+      case None => pow(nb._1.toDouble, rd.length.toDouble)
+      case Some(x) => (data.sig.transpose map (_.toSet.toVector.length)).product
+    }
+    val tDimC = EstCC.valueParameters("responseValues") match {
+      case None => pow(nb._2.toDouble, cd.length.toDouble)
+      case Some(x) => (data.resp.transpose map (_.toSet.toVector.length)).product
+    }
+    
     val table = {
       for {
         r <- Range(0, tDimR.toInt)
@@ -209,15 +250,18 @@ object CTBuild {
           case Some(x) => valuesToKey(data.sig)
         }
         val respKey = EstCC.valueParameters("responseValues") match {
-          case None => data sigKey nb._1
+          case None => data respKey nb._2
           case Some(x) => valuesToKey(data.resp)
-        } 
-        
+        }
+
         val rIndex = findVectIndex(p.head._1, rd, sigKey)
         val cIndex = findVectIndex(p.head._2, cd, respKey)
         if (rIndex < 0 || cIndex < 0) {
           throw new Exception(
             "negative indices" + println(rIndex, cIndex) + println(p.head))
+        } else if (rIndex >= tDimR || cIndex >= tDimC) {
+          throw new Exception(
+            "index out of bounds" + println(rIndex, cIndex) + println(p.head))
         }
         addValues(acc updated (rIndex, acc(rIndex) updated
           (cIndex, acc(rIndex)(cIndex) + 1)), p.tail)
@@ -454,10 +498,6 @@ object EstimateMI {
     // number of randomizations per bin pair
     val numRandTables = EstCC.numParameters("numRandom")
 
-    // Determines row/column bin delimiters
-    val rowDelims: Vector[Tree] = data sigDelims binPair._1
-    val colDelims: Vector[Tree] = data respDelims binPair._2
-
     // List of inverse sample sizes for all of the resampling reps
     val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
 
@@ -465,11 +505,11 @@ object EstimateMI {
     val subSamples = EstCC.fracList map (x => jackknife(x, data, engine))
     // For each subsampled dataset, build the contingency table
     val tables = subSamples map
-      (x => buildTable(None)(x, binPair, rowDelims, colDelims, wts))
+      (x => buildTable(None)(x, binPair, wts))
     // For each subsampled dataset, build numRandTables randomized contingency
     // tables
     val randTables = for (n <- 0 until numRandTables) yield subSamples map (x =>
-      buildTable(Some(engine))(x, binPair, rowDelims, colDelims, wts))
+      buildTable(Some(engine))(x, binPair, wts))
 
     // Extracts the string tag associated with the weight vector
     val l = wts match {
@@ -501,21 +541,11 @@ object EstimateMI {
     seed: Int,
     wts: Option[Weight] = None): RegDataMult = {
 
-    // Determines row/column bin delimiters
-    val rowDelims: Vector[Tree] = EstCC.valueParameters("signalValues") match {
-      case None => data sigDelims binPair._1
-      case Some(l) => ???
-    }
-    val colDelims: Vector[Tree] = EstCC.valueParameters("responseValues") match {
-      case None => data respDelims binPair._2
-      case Some(l) => ???
-    }
-
     val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
-    val table = buildTable(None)(data, binPair, rowDelims, colDelims, wts)
-    val randTable = buildTable(Some(engine))(data, binPair, rowDelims, colDelims, wts)
+    val table = buildTable(None)(data, binPair, wts)
+    val randTable = buildTable(Some(engine))(data, binPair, wts)
     val subSamples = EstCC.fracList map (x => subSample(x, table))
     val randSubSamples =
       for (

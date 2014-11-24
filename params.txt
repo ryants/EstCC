@@ -1,4 +1,5 @@
-columnPair	0 1
+signalColumns	0
+responseColumns	1
 responseValues	None
 responseBins	4,80,4
 signalValues	0,18,1

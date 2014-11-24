@@ -1,6 +1,6 @@
 package infcalcs
 
-import OtherFuncs.updateParameters
+import OtherFuncs.{ updateParameters, printParameters }
 import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{
   genWeights,
@@ -52,6 +52,10 @@ object EstCC extends App with CLOpts {
   var numParameters = parameters._2
   var stringParameters = parameters._3
   var valueParameters = parameters._4
+  
+  if (config.verbose){
+    printParameters(parameters)
+  }
 
   // Load data given pair of columns
   val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)

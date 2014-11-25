@@ -704,7 +704,7 @@ object EstimateMI {
         val v = ds.head._2.head._1
         if (i._2.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
       }
-    val base = ((0, 0), (0 until d.length).toList map (x => (0.0, 0.0)))
+    val base = ((0, 0), (0 until d.head._2.length).toList map (x => (0.0, 0.0)))
 
     // Determines if estimates are biased using randomization data sets
     def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]): List[(Pair[Int], List[Pair[Double]])] = {

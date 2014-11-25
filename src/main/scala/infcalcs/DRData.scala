@@ -20,7 +20,15 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
 
   val sigDim = dim(sig)
   val respDim = dim(resp)
-  
+  var exSigDelims: scala.collection.mutable.Map[Int, Vector[Tree]] =
+    scala.collection.mutable.Map()
+  var exRespDelims: scala.collection.mutable.Map[Int, Vector[Tree]] =
+    scala.collection.mutable.Map()
+  var exSigKeys: scala.collection.mutable.Map[Int, Vector[NTuple[Int]]] =
+    scala.collection.mutable.Map()
+  var exRespKeys: scala.collection.mutable.Map[Int, Vector[NTuple[Int]]] =
+    scala.collection.mutable.Map()
+
   lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
 
@@ -40,13 +48,11 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def getDelims(
     dim: Int,
     data: Vector[NTuple[Double]],
-    numBins: Int): Vector[Tree] = {
+    numBins: Int): Vector[Tree] =
 
     ((0 until dim) map (x => data map (y => y(x))) map
       (z => CTBuild.getBinDelims(z, numBins))).toVector
 
-  }
-  
   /**
    *  Produces a list of bin index vectors in order to find the bin number
    *  for some arbitrary data point
@@ -62,11 +68,35 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     CTBuild.genIndTuples(treeBins, depth)
   }
 
-  def sigDelims(numBins: Int): Vector[Tree] = getDelims(sigDim, sig, numBins)
-  def respDelims(numBins: Int): Vector[Tree] = getDelims(respDim, resp, numBins)
-  
-  def sigKey(numBins: Int): Vector[NTuple[Int]] = 
-    calcBinKey(sigDelims(numBins))
-  def respKey(numBins: Int): Vector[NTuple[Int]] = 
-    calcBinKey(respDelims(numBins))
+  def sigDelims(numBins: Int): Vector[Tree] =
+    if (exSigDelims contains numBins) exSigDelims(numBins)
+    else {
+      val sd = getDelims(sigDim, sig, numBins)
+      exSigDelims update (numBins, sd)
+      sd
+    }
+
+  def respDelims(numBins: Int): Vector[Tree] =
+    if (exRespDelims contains numBins) exRespDelims(numBins)
+    else {
+      val rd = getDelims(respDim, resp, numBins)
+      exRespDelims update (numBins, rd)
+      rd
+    }
+
+  def sigKey(numBins: Int): Vector[NTuple[Int]] =
+    if (exSigKeys contains numBins) exSigKeys(numBins)
+    else {
+      val sk = calcBinKey(sigDelims(numBins))
+      exSigKeys update (numBins, sk)
+      sk
+    }
+  def respKey(numBins: Int): Vector[NTuple[Int]] =
+    if (exRespKeys contains numBins) exRespKeys(numBins)
+    else {
+      val rk = calcBinKey(respDelims(numBins))
+      exRespKeys update (numBins, rk)
+      rk
+    }
+
 }

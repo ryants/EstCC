@@ -251,7 +251,7 @@ object OtherFuncs {
     println()
     p._2.keys map (x => println(s"${x}\t${p._2(x)}"))
     println()
-    p._3.keys map (x => println(s"${x}\t${p._2(x)}"))
+    p._3.keys map (x => println(s"${x}\t${p._3(x)}"))
     println()
     p._4.keys map { x =>
       p._4(x) match {

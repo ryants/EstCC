@@ -1,6 +1,7 @@
 package infcalcs
 import TreeDef._
 import annotation.tailrec
+import scala.collection.mutable.HashMap
 
 /**
  * Structure for input-output (dose-response) data.
@@ -20,14 +21,10 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
 
   val sigDim = dim(sig)
   val respDim = dim(resp)
-  var exSigDelims: scala.collection.mutable.Map[Int, Vector[Tree]] =
-    scala.collection.mutable.Map()
-  var exRespDelims: scala.collection.mutable.Map[Int, Vector[Tree]] =
-    scala.collection.mutable.Map()
-  var exSigKeys: scala.collection.mutable.Map[Int, Vector[NTuple[Int]]] =
-    scala.collection.mutable.Map()
-  var exRespKeys: scala.collection.mutable.Map[Int, Vector[NTuple[Int]]] =
-    scala.collection.mutable.Map()
+  var exSigDelims: HashMap[Int, NTuple[Tree]] = HashMap()
+  var exRespDelims: HashMap[Int, NTuple[Tree]] = HashMap()
+  var exSigKeys: HashMap[Int, Vector[NTuple[Int]]] = HashMap()
+  var exRespKeys: HashMap[Int, Vector[NTuple[Int]]] = HashMap()
 
   lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
@@ -48,10 +45,9 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def getDelims(
     dim: Int,
     data: Vector[NTuple[Double]],
-    numBins: Int): Vector[Tree] =
+    numBins: Int): NTuple[Tree] =
 
-    ((0 until dim) map (x => data map (y => y(x))) map
-      (z => CTBuild.getBinDelims(z, numBins))).toVector
+    (data.transpose map (z => CTBuild.getBinDelims(z, numBins))).toVector
 
   /**
    *  Produces a list of bin index vectors in order to find the bin number
@@ -62,41 +58,42 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
    *
    *  @return vector of bin index vectors
    */
-  private def calcBinKey(trees: Vector[Tree]): Vector[NTuple[Int]] = {
+  private def calcBinKey(trees: NTuple[Tree]): Vector[NTuple[Int]] = {
     val treeBins = trees(0).entries
     val depth = trees.length
     CTBuild.genIndTuples(treeBins, depth)
   }
-
-  def sigDelims(numBins: Int): Vector[Tree] =
-    if (exSigDelims contains numBins) exSigDelims(numBins)
+  
+  private def delims(
+      dim: Int, 
+      data: Vector[NTuple[Double]], 
+      h: HashMap[Int, NTuple[Tree]], 
+      nb: Int): NTuple[Tree] = 
+    if (h contains nb) h(nb)
     else {
-      val sd = getDelims(sigDim, sig, numBins)
-      exSigDelims update (numBins, sd)
-      sd
+      val d = getDelims(dim, data, nb)
+      h update (nb, d)
+      d
     }
+  
+  private def keys(
+      h: HashMap[Int, Vector[NTuple[Int]]],
+      nb: Int): Vector[NTuple[Int]] = 
+        if (h contains nb) h(nb)
+        else {
+          val k = calcBinKey(respDelims(nb))
+          h update (nb, k)
+          k
+        }
 
-  def respDelims(numBins: Int): Vector[Tree] =
-    if (exRespDelims contains numBins) exRespDelims(numBins)
-    else {
-      val rd = getDelims(respDim, resp, numBins)
-      exRespDelims update (numBins, rd)
-      rd
-    }
-
+  def sigDelims(numBins: Int): NTuple[Tree] =
+    delims(sigDim, sig, exSigDelims, numBins)
+  def respDelims(numBins: Int): NTuple[Tree] =
+    delims(respDim, resp, exRespDelims, numBins)
+    
   def sigKey(numBins: Int): Vector[NTuple[Int]] =
-    if (exSigKeys contains numBins) exSigKeys(numBins)
-    else {
-      val sk = calcBinKey(sigDelims(numBins))
-      exSigKeys update (numBins, sk)
-      sk
-    }
+    keys(exSigKeys, numBins)
   def respKey(numBins: Int): Vector[NTuple[Int]] =
-    if (exRespKeys contains numBins) exRespKeys(numBins)
-    else {
-      val rk = calcBinKey(respDelims(numBins))
-      exRespKeys update (numBins, rk)
-      rk
-    }
+    keys(exRespKeys, numBins)
 
 }

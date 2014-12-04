@@ -148,7 +148,7 @@ object CTBuild {
    */
   def findVectIndex(
     tuple: NTuple[Double],
-    binDelims: Vector[Tree],
+    binDelims: NTuple[Tree],
     v: Vector[NTuple[Int]]): Int = {
 
     val indices = Range(0, tuple.length).toVector map (x =>
@@ -196,7 +196,7 @@ object CTBuild {
    *
    * @return vector of trees
    */
-  def valuesToTrees(v: Vector[NTuple[Double]]): Vector[Tree] = {
+  def valuesToTrees(v: Vector[NTuple[Double]]): NTuple[Tree] = {
     val sigPerType = v.transpose map (_.toSet.toVector)
     sigPerType map (x => getBinDelims(x, x.length))
   }
@@ -215,28 +215,25 @@ object CTBuild {
     nb: Pair[Int],
     weights: Option[Weight] = None): ConstructedTable = {
 
-    val rd = EstCC.valueParameters("signalValues") match {
-      case None => data sigDelims nb._1
-      case Some(x) => valuesToTrees(data.sig)
+    val (rd, sigKey, tDimR) = EstCC.valueParameters("signalValues") match {
+      case None =>
+        (data sigDelims nb._1, data sigKey nb._1, 
+            pow(nb._1.toDouble, data.sigDim).toInt)
+      case Some(x) =>
+        (valuesToTrees(data.sig), valuesToKey(data.sig), x.length)
     }
-    val cd = EstCC.valueParameters("responseValues") match {
-      case None => data respDelims nb._2
-      case Some(x) => valuesToTrees(data.resp)
+    val (cd, respKey, tDimC) = EstCC.valueParameters("responseValues") match {
+      case None => 
+        (data respDelims nb._2, data respKey nb._2, 
+            pow(nb._2.toDouble, data.respDim).toInt)
+      case Some(x) => 
+        (valuesToTrees(data.resp), valuesToKey(data.resp), x.length)
     }
 
-    val tDimR = EstCC.valueParameters("signalValues") match {
-      case None => pow(nb._1.toDouble, rd.length.toDouble)
-      case Some(x) => (data.sig.transpose map (_.toSet.toVector.length)).product
-    }
-    val tDimC = EstCC.valueParameters("responseValues") match {
-      case None => pow(nb._2.toDouble, cd.length.toDouble)
-      case Some(x) => (data.resp.transpose map (_.toSet.toVector.length)).product
-    }
-    
     val table = {
       for {
-        r <- Range(0, tDimR.toInt)
-      } yield Range(0, tDimC.toInt).map(x => 0).toVector
+        r <- Range(0, tDimR)
+      } yield Range(0, tDimC).map(x => 0).toVector
     }.toVector
 
     @tailrec
@@ -245,15 +242,6 @@ object CTBuild {
       p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
       if (p.isEmpty) acc
       else {
-        val sigKey = EstCC.valueParameters("signalValues") match {
-          case None => data sigKey nb._1
-          case Some(x) => valuesToKey(data.sig)
-        }
-        val respKey = EstCC.valueParameters("responseValues") match {
-          case None => data respKey nb._2
-          case Some(x) => valuesToKey(data.resp)
-        }
-
         val rIndex = findVectIndex(p.head._1, rd, sigKey)
         val cIndex = findVectIndex(p.head._2, cd, respKey)
         if (rIndex < 0 || cIndex < 0) {

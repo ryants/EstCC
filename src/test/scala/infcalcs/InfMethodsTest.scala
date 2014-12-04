@@ -373,6 +373,12 @@ class MultiVarTest extends FlatSpec with Matchers {
     (data4 sigDelims 2).length shouldBe 3
     (data4 respDelims 12).length shouldBe 4
   }
+  
+  it should "recall existing binDelims and binKeys" in {
+    data3.exSigDelims contains 3 shouldBe false
+    val bd = data3 sigDelims 3  
+    data3.exSigDelims contains 3 shouldBe true
+  }
 
   "calcBinKeys" should "correctly place values in the contingency table" in {
     EstCC.valueParameters = InfConfig.defaultParameters._4

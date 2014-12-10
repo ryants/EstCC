@@ -92,32 +92,6 @@ object CTBuild {
     }
 
   /**
-   * Generates a key for multidimensional bin indexing
-   *
-   * @param binDim number of bins per dimension
-   * @param valDim number of dimensions per (signal or response) value
-   * @return key
-   */
-  def genIndTuples(binDim: Int, valDim: Int): Vector[NTuple[Int]] = {
-    @tailrec
-    def helper(
-      bd: Int,
-      vd: Int,
-      acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
-      if (vd == 0) acc
-      else {
-        val newAcc: Vector[NTuple[Int]] = for {
-          a <- Range(0, bd).toVector
-          b <- acc
-        } yield b updated (vd - 1, a)
-        helper(bd, vd - 1, newAcc)
-      }
-    }
-    val initKey = Vector(Range(0, valDim).toVector)
-    helper(binDim, valDim, initKey)
-  }
-
-  /**
    * Returns binary tree giving the values delimiting the bounds of each bin.
    *
    * The tree returned by this function has numBins nodes; the value
@@ -131,6 +105,29 @@ object CTBuild {
   def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
     val delimList = partitionList(v, numBins) map (_.max)
     buildTree(buildOrderedNodeList(delimList))
+  }
+
+  /**
+   *  Produces a vector of bin index vectors in order to find the bin number
+   *  for some arbitrary ndim data point
+   *
+   *  @param dLs vector of dimension lengths (bins or values)
+   *  @param acc accumulator for building key
+   *  
+   *  @return key of bin indices
+   */
+  @tailrec
+  def keyFromDimLengths(
+    dLs: Vector[Int],
+    acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+    if (dLs.isEmpty) acc
+    else {
+      val newAcc = for {
+        x <- acc
+        y <- Range(0, dLs.head).toVector
+      } yield x :+ y
+      keyFromDimLengths(dLs.tail, newAcc)
+    }
   }
 
   /**
@@ -158,50 +155,6 @@ object CTBuild {
   }
 
   /**
-   * Method for constructing a bin indexing key from explicitly defined
-   * signal/response values
-   *
-   * In order to allow signal variables with different numbers of defined
-   * values, we have an alternate bin indexing function to circumvent
-   * the implemented strategy in which each variable has the same number
-   * of bins
-   *
-   * @param v n-dimensional variable vector
-   *
-   * @return bin indexing key
-   */
-  def valuesToKey(v: Vector[NTuple[Double]]): Vector[NTuple[Int]] = {
-    val sigPerType = v.transpose map (_.toSet.size)
-    @tailrec
-    def helper(
-      data: Vector[Int],
-      acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
-      if (data.isEmpty) acc
-      else {
-        val newAcc = for {
-          x <- Range(0, data.head).toVector
-          y <- acc
-        } yield y :+ x
-        helper(data.tail, newAcc)
-      }
-    }
-    helper(sigPerType, Vector(Vector()))
-  }
-
-  /**
-   * Method for constructing a Vector of bin-delimiting trees given explicit
-   * signal or response values
-   *
-   * @param v vector of ordered tuples
-   *
-   * @return vector of trees
-   */
-  def valuesToTrees(v: Vector[NTuple[Double]]): NTuple[Tree] = {
-    val sigPerType = v.transpose map (_.toSet.toVector)
-    sigPerType map (x => getBinDelims(x, x.length))
-  }
-
-  /**
    * Method for constructing contingency table from a set of n-dim data points
    *
    * @param data container for dose-response data
@@ -215,19 +168,16 @@ object CTBuild {
     nb: Pair[Int],
     weights: Option[Weight] = None): ConstructedTable = {
 
-    val (rd, sigKey, tDimR) = EstCC.valueParameters("signalValues") match {
-      case None =>
-        (data sigDelims nb._1, data sigKey nb._1, 
-            pow(nb._1.toDouble, data.sigDim).toInt)
-      case Some(x) =>
-        (valuesToTrees(data.sig), valuesToKey(data.sig), x.length)
+    val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
+    val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
+
+    val tDimR = EstCC.valueParameters("signalValues") match {
+      case None => pow(nb._1.toDouble, data.sigDim).toInt
+      case Some(x) => x.length
     }
-    val (cd, respKey, tDimC) = EstCC.valueParameters("responseValues") match {
-      case None => 
-        (data respDelims nb._2, data respKey nb._2, 
-            pow(nb._2.toDouble, data.respDim).toInt)
-      case Some(x) => 
-        (valuesToTrees(data.resp), valuesToKey(data.resp), x.length)
+    val tDimC = EstCC.valueParameters("responseValues") match {
+      case None => pow(nb._2.toDouble, data.respDim).toInt
+      case Some(x) => x.length
     }
 
     val table = {
@@ -715,7 +665,6 @@ object EstimateMI {
 /** Contains functions for estimating the channel capacity. */
 object EstimateCC {
   import LowProb.testWeights
-  import CTBuild.genIndTuples
 
   val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
   val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
@@ -734,9 +683,8 @@ object EstimateCC {
    * @return weight for joint distribution
    */
   def makeJoint(wv: Vector[Weight]): Weight = {
-    val valDim = wv.length
-    val binDim = wv(0)._1.length
-    val i = genIndTuples(binDim, valDim)
+    val dimLengths = wv map (x => x._1.length)
+    val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
 
     val wND: List[Double] = i.toList map (x => (Range(0, x.length) map (y =>
       wv(y)._1(x(y)))).product)

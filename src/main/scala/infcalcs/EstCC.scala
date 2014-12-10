@@ -62,13 +62,13 @@ object EstCC extends App with CLOpts {
   val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
   val p = loadList(dataFile, sigCols, respCols)
 
-  // Determine number of response bins
+  // Determine number of response bins if values not specified
   val responseBins: List[Int] = valueParameters("responseValues") match {
     case None => listParameters("responseBins").get map (_.toInt)
     case Some(x) => List(x.length)
   }
 
-  // Determine number of signal bins
+  // Determine number of signal bins if values not specified
   val signalBins: List[Int] = valueParameters("signalValues") match {
     case None => listParameters("signalBins").get map (_.toInt)
     case Some(x) => List(x.length)

@@ -110,6 +110,8 @@ object MathFuncs {
 /** Contains a handful of utility functions. */
 object OtherFuncs {
 
+  def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
+  
   /**
    * Returns a shuffled list.
    *
@@ -258,6 +260,7 @@ object OtherFuncs {
         case None => println(s"${x}\tNone")
         case Some(y) => println(s"${x}\t${y}")
       }
-    } 
+    }
+    println()
   }
 }

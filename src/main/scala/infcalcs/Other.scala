@@ -152,11 +152,21 @@ object OtherFuncs {
   def stringToSList(s: String): Option[List[Double]] = {
     val csv = s.split(',')
     // Three elements: "start, stop, interval"
-    if (csv.length == 3)
-      Some((csv(0).toDouble to csv(1).toDouble by csv(2).toDouble).toList)
-    // Two elements: "start, stop" with default interval 1.0
+    // Does not assume elements are integers
+    if (csv.length == 3){
+      
+      def trimTrailingZero(s: String): String = 
+        s.replaceAll("0+$","")
+        
+      val numStr = trimTrailingZero(csv(2).split("\\.").last)
+      val factor = math.pow(10,numStr.length).toInt
+      val intRep = csv map (_.toDouble) map (x => x * factor)
+      Some((intRep(0) to intRep(1) by intRep(2)).toList map (_.toDouble / factor))
+    }
+    // Two elements: "start", "stop" with default interval 1
+    // Assumes "start" and "stop" are integers
     else if (csv.length == 2)
-      Some((csv(0).toDouble to csv(1).toDouble by 1.0).toList)
+      Some((csv(0).toInt to csv(1).toInt by 1).toList map (_.toDouble))
     // Too many arguments, throw an exception.
     else if (csv.length > 3)
       throw new Exception(s"Illegal number of arguments: ${csv.length}")

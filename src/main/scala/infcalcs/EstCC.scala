@@ -1,6 +1,6 @@
 package infcalcs
 
-import OtherFuncs.{ updateParameters, printParameters }
+import OtherFuncs.{ updateParameters, printParameters, genSeed }
 import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{
   genWeights,
@@ -40,7 +40,7 @@ object EstCC extends App with CLOpts {
   val dataFile = config.dataFile
   val paramFile = if (config.paramFile == "") None else Some(config.paramFile)
   if (config.verbose) {
-    println("Verbose mode")
+    println("\nVerbose mode\n")
   }
 
   val rawParameters = importParameters(paramFile)
@@ -52,8 +52,8 @@ object EstCC extends App with CLOpts {
   var numParameters = parameters._2
   var stringParameters = parameters._3
   var valueParameters = parameters._4
-  
-  if (config.verbose){
+
+  if (config.verbose) {
     printParameters(parameters)
   }
 
@@ -87,10 +87,9 @@ object EstCC extends App with CLOpts {
 
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
-  val w: List[Pair[List[Weight]]] = 
-    signalBins map (x => p sigDelims x) map (y => 
+  val w: List[Pair[List[Weight]]] =
+    signalBins map (x => p sigDelims x) map (y =>
       (genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight)))
-  
 
   // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)
@@ -107,40 +106,50 @@ object EstCC extends App with CLOpts {
   // Calculate and output estimated mutual information values given calculated
   // weights
 
-  // Parallel mode (includes mutable data structures)
-  if (config.cores > 1) {
-    val system = ActorSystem(s"EstCC")
-    val dist = system.actorOf(Props(new Distributor(aw)), "dist")
-    val calcList = (0 until config.cores - 1).toList map (x =>
-      system.actorOf(Props(new Calculator), s"calc_${x}"))
-
-    dist ! Init(calcList)
-
-    system.awaitTermination()
-  } // Verbose sequential mode (also has mutable data structures)
-  else if (config.verbose) {
-    val weightList: List[List[Weight]] = w map (x => x._1 ++ x._2)
-    var estList: Array[Double] = Array()
-    weightList foreach { wt =>
-      val res = verboseResults(wt, p, outF)
-      estList = estList :+ res
+  if (numParameters("biMuNumber") == 0 && numParameters("uniMuNumber") == 0) {
+    val unifEst = genEstimatesMult(p, bins, genSeed(rEngine))
+    val unifOpt = EstimateMI.optMIMult(unifEst)
+    val unifRes = getResultsMult(List(unifEst), addLabel(outF, "_unif"))
+    if (config.verbose) {
+      println(s"Weight: None, Est. MI: ${unifOpt._2(0)._1} " +
+        s"${0xB1.toChar} ${unifOpt._2(0)._2}")
     }
-    println(estList.max)
-  } // Silent sequential mode (all immutable data structures)
-  else {
-    val weightIndices = (0 until w.length).toList
-    val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
+    println(unifRes)
+  } else {
+    // Parallel mode (includes mutable data structures)
+    if (config.cores > 1) {
+      val system = ActorSystem(s"EstCC")
+      val dist = system.actorOf(Props(new Distributor(aw)), "dist")
+      val calcList = (0 until config.cores - 1).toList map (x =>
+        system.actorOf(Props(new Calculator), s"calc_${x}"))
 
-    val ubRes: List[Double] = weightIndices map (n => getResultsMult(
-      calcWithWeightsMult(aw(n), p),
-      addLabel(outF, "_s" + binIndices(n))))
-    val nRes: Double =
-      getResultsMult(List(genEstimatesMult(p, bins, (EstCC.rEngine.raw() *
-        1000000).toInt)), addLabel(outF, "_unif"))
+      dist ! Init(calcList)
 
-    val ccMult: Double = (List(ubRes, List(nRes)) map (_.max)).max
-    // Print estimated channel capacity to stdout
-    println(ccMult)
+      system.awaitTermination()
+    } // Verbose sequential mode (also has mutable data structures)
+    else if (config.verbose) {
+      var estList: Array[Double] = Array()
+      aw foreach { wt =>
+        val res = verboseResults(wt, p, outF)
+        estList = estList :+ res
+      }
+      println(estList.max)
+    } // Silent sequential mode (all immutable data structures except parameters)
+    else {
+      val weightIndices = (0 until w.length).toList
+      val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
+
+      val ubRes: List[Double] = weightIndices map (n => getResultsMult(
+        calcWithWeightsMult(aw(n), p),
+        addLabel(outF, "_s" + binIndices(n))))
+      val nRes: Double =
+        getResultsMult(
+          List(genEstimatesMult(p, bins, genSeed(rEngine))),
+          addLabel(outF, "_unif"))
+
+      val ccMult: Double = (List(ubRes, List(nRes)) map (_.max)).max
+      // Print estimated channel capacity to stdout
+      println(ccMult)
+    }
   }
-
 }

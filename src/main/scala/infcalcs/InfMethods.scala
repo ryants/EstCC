@@ -113,7 +113,7 @@ object CTBuild {
    *
    *  @param dLs vector of dimension lengths (bins or values)
    *  @param acc accumulator for building key
-   *  
+   *
    *  @return key of bin indices
    */
   @tailrec
@@ -171,14 +171,8 @@ object CTBuild {
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
 
-    val tDimR = EstCC.valueParameters("signalValues") match {
-      case None => pow(nb._1.toDouble, data.sigDim).toInt
-      case Some(x) => x.length
-    }
-    val tDimC = EstCC.valueParameters("responseValues") match {
-      case None => pow(nb._2.toDouble, data.respDim).toInt
-      case Some(x) => x.length
-    }
+    val tDimR = sigKey.length
+    val tDimC = respKey.length
 
     val table = {
       for {
@@ -605,16 +599,20 @@ object EstimateMI {
    * @param pl The input/output dataset
    * @param binTupList Various (nRowBins, nColBins) bin size combinations
    * @param wts Optional weight vector for inputs
-   * @return List of (bin size combo, list of (intercept, conf. int.))
+   * @return List of ([[ContTable]] dimensions, list of (intercept, conf. int.))
    */
   def genEstimatesMult(
     pl: DRData,
     binTupList: List[Pair[Int]],
     seed: Int,
-    wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] =
+    wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] = {
+
+    val tDims = (x: Pair[Int]) => ((pl sigKey x._1).length, (pl respKey x._2).length)
+
     binTupList map
-      (bt => (bt, multIntercepts(calcMultRegs(
+      (bt => (tDims(bt), multIntercepts(calcMultRegs(
         buildDataMult(bt, pl, seed, wts)))))
+  }
 
   /**
    * Returns the MI estimate that is maximized for real but not randomized data.
@@ -686,8 +684,8 @@ object EstimateCC {
     val dimLengths = wv map (x => x._1.length)
     val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
 
-    val wND: List[Double] = i.toList map (x => (Range(0, x.length) map (y =>
-      wv(y)._1(x(y)))).product)
+    val wND: List[Double] = testWeights("joint dist failure", i.toList map (x => (Range(0, x.length) map (y =>
+      wv(y)._1(x(y)))).product))
 
     val jointString = (wv map (x => x._2)).mkString(";")
 
@@ -908,7 +906,7 @@ object EstimateCC {
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
       EstCC.bins filter (x =>
-        x._1 == w._1.length), (EstCC.rEngine.raw() * 1000000).toInt, Some(w))
+        x._1 == w._1.length), OtherFuncs.genSeed(EstCC.rEngine), Some(w))
   }
 
   /**
@@ -925,7 +923,7 @@ object EstimateCC {
   def verboseResults(wts: List[Weight], pl: DRData, fp: Option[String]) = {
     val binNum = wts(0)._1.length
     var optList: Array[Double] = Array()
-    println(s"# Signal Bins: ${binNum}")
+    println(s"# Signal Bins: ${binNum}\t${wts.length + 1} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
     (0 until wts.length) foreach { w =>
@@ -933,7 +931,7 @@ object EstimateCC {
         val est = EstimateMI.genEstimatesMult(
           pl,
           EstCC.bins filter (x => x._1 == binNum),
-          (EstCC.rEngine.raw() * 1000000).toInt,
+          OtherFuncs.genSeed(EstCC.rEngine),
           Some(wts(w)))
         fp match {
           case Some(f) =>
@@ -942,12 +940,12 @@ object EstimateCC {
         }
         val opt = EstimateMI.optMIMult(est)
         optList = optList :+ opt._2(0)._1
-        println(s"  Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
+        println(s"  ${wts.length + 1 - w}) Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
           s"${0xB1.toChar} ${opt._2(0)._2}")
       }
     }
     val est = EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x =>
-      x._1 == binNum), (EstCC.rEngine.raw() * 1000000).toInt)
+      x._1 == binNum), OtherFuncs.genSeed(EstCC.rEngine))
     fp match {
       case Some(f) =>
         IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")
@@ -955,7 +953,7 @@ object EstimateCC {
     }
     val opt = EstimateMI.optMIMult(est)
     optList = optList :+ opt._2(0)._1
-    println(s"  Weight: None, Est. MI: ${opt._2(0)._1} " +
+    println(s"  1) Weight: None, Est. MI: ${opt._2(0)._1} " +
       s"${0xB1.toChar} ${opt._2(0)._2}")
     optList.max
   }

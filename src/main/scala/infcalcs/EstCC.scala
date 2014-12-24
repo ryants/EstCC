@@ -53,10 +53,6 @@ object EstCC extends App with CLOpts {
   var stringParameters = parameters._3
   var valueParameters = parameters._4
 
-  if (config.verbose) {
-    printParameters(parameters)
-  }
-
   // Load data given pair of columns
   val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)
   val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
@@ -85,18 +81,23 @@ object EstCC extends App with CLOpts {
   // List of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)
 
+  if (config.verbose) {
+    printParameters(parameters)
+    println(bins+"\n")
+  }
+  
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
   val w: List[Pair[List[Weight]]] =
     signalBins map (x => p sigDelims x) map (y =>
       (genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight)))
-
+  
   // Split unimodal and bimodal weight lists
   val uw: List[List[Weight]] = w map (_._1)
   val bw: List[List[Weight]] = w map (_._2)
   val aw: List[List[Weight]] = (0 until w.length).toList map (n =>
     uw(n) ++ bw(n))
-
+  
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
     s flatMap (x => Some(x ++ l))

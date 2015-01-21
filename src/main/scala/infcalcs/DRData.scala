@@ -19,6 +19,8 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   Predef.assert(sig.length == resp.length)
   Predef.assert(checkSize(sig) == 1 && checkSize(resp) == 1)
 
+  lazy val zippedVals = (sig, resp).zipped.toSeq
+  
   lazy val sigVals = EstCC.valueParameters("signalValues") != None
   lazy val respVals = EstCC.valueParameters("responseValues") != None
   
@@ -56,8 +58,8 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     numBins: Int): NTuple[Tree] =
 
     if (valuesPresent)
-      (data.transpose map (_.toSet.toVector)) map (x =>
-        CTBuild.getBinDelims(x, x.length))
+      (data.transpose.view map (_.toSet.toVector) map (x =>
+        CTBuild.getBinDelims(x, x.length))).toVector
     else
       (data.transpose map (z => CTBuild.getBinDelims(z, numBins))).toVector
 

@@ -47,25 +47,40 @@ object MathFuncs {
   /** Returns the base b logarithm of a number. */
   def logb(b: Int): Double => Double = (a: Double) => log(a) / log(b)
 
+  /** Returns double truncated to nearest hundredth */
+  def roundFrac(d: Double) = "%.2f" format d
+  
   /**
    * Converts frequencies to probabilities by normalizing each count by the
    * vector sum.
    */
-  def freqToProb: Vector[Int] => Vector[Double] =
-    l => if (l.sum != 0) l map (_ / l.sum.toDouble) else l map (x => 0.0)
+  def freqToProb: TraversableOnce[Int] => TraversableOnce[Double] = 
+    l => {
+      val s = l.sum.toDouble
+      if (s != 0) l map (x => (x / s).toDouble) else l map (x => 0.0)
+    }
+  
 
   /**
    * Given a list of doubles, returns the mean and 95% confidence interval
-   * around the mean.
+   * around the mean assuming normally distributed data.
    *
    * @param ls List of doubles
    * @return (mean, 95% confidence interval)
    */
-  def meanAndConf(ls: List[Double]): Pair[Double] = {
-    val len = ls.length.toDouble
-    val avg = ls.sum / len
-    val ssd = sqrt((ls map (x => pow((x - avg), 2))).sum / (len - 1))
-    (avg, (ssd * 1.96) / sqrt(len))
+
+  def meanAndConf(ls: Iterable[Double]): Pair[Double] = {
+    val K = ls.head
+    val (sum, len, sumSq) = ls.foldLeft((0.0, 0.0, 0.0)) { (acc, b) =>
+      val (oldSum, oldLen, oldSumSq) = acc
+      val newSum = oldSum + (b - K)
+      val newLen = oldLen + 1.0
+      val newSumSq = oldSumSq + (b - K) * (b - K)
+      (newSum, newLen, newSumSq)
+    }
+    val mean = sum / len
+    val variance = (sumSq - (sum * sum) / len) / (len - 1.0)
+    (sum / len, 1.96 * sqrt(variance) / sqrt(len))
   }
 
   /**
@@ -111,7 +126,7 @@ object MathFuncs {
 object OtherFuncs {
 
   def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
-  
+
   /**
    * Returns a shuffled list.
    *
@@ -123,7 +138,7 @@ object OtherFuncs {
    * @return The shuffled list.
    */
   def myShuffle[A: scala.reflect.ClassTag](
-    l: Vector[A],
+    l: Seq[A],
     e: MersenneTwister): Vector[A] = {
     val a: Array[A] = l.toArray
     for (i <- (1 until l.length).reverse) {
@@ -134,6 +149,8 @@ object OtherFuncs {
     }
     a.toVector
   }
+  
+  
 
   /**
    * Parses strings specifying list or range parameters.
@@ -153,17 +170,16 @@ object OtherFuncs {
     val csv = s.split(',')
     // Three elements: "start, stop, interval"
     // Does not assume elements are integers
-    if (csv.length == 3){
-      
-      def trimTrailingZero(s: String): String = 
-        s.replaceAll("0+$","")
-        
+    if (csv.length == 3) {
+
+      def trimTrailingZero(s: String): String =
+        s.replaceAll("0+$", "")
+
       val numStr = trimTrailingZero(csv(2).split("\\.").last)
-      val factor = math.pow(10,numStr.length).toInt
+      val factor = math.pow(10, numStr.length).toInt
       val intRep = csv map (_.toDouble) map (x => x * factor)
       Some((intRep(0) to intRep(1) by intRep(2)).toList map (_.toDouble / factor))
-    }
-    // Two elements: "start", "stop" with default interval 1
+    } // Two elements: "start", "stop" with default interval 1
     // Assumes "start" and "stop" are integers
     else if (csv.length == 2)
       Some((csv(0).toInt to csv(1).toInt by 1).toList map (_.toDouble))

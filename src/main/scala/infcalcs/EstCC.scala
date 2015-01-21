@@ -76,7 +76,7 @@ object EstCC extends App with CLOpts {
       f <- listParameters("sampleFractions").get
       n <- 0 until numParameters("repsPerFraction")
     } yield f
-  } :+ 1.0).toList
+  } :+ 1.0).toVector
 
   // List of bin pairs
   val bins = EstimateMI.genBins(signalBins, responseBins)

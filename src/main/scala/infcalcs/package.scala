@@ -78,7 +78,7 @@ package object infcalcs {
     *    subsample size.
     */
   type RegData =
-    (List[Double], List[ConstructedTable], List[ConstructedTable], List[String])
+    (Vector[Double], Vector[ConstructedTable], Vector[ConstructedTable], Vector[String])
 
   /** Data to be used for linear regressions over all randomizations.
     *
@@ -86,10 +86,8 @@ package object infcalcs {
     * a list over all of the randomizations.
     */
   type RegDataMult =
-    (List[Double], List[ConstructedTable], List[List[ConstructedTable]],
-      List[String])
-
-  type Prt = List[List[Double]]
+    (Vector[Double], Vector[ConstructedTable], Vector[Vector[ConstructedTable]],
+      Vector[String])
 
   /** Tuple containing configuration parameters.
     *

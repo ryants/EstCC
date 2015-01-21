@@ -109,7 +109,7 @@ object IOFile {
    * @param f Name of the file to write.
    */
   def regDataToFile(
-    d: (List[Double], List[Double], List[Double]),
+    d: (Seq[Double], Seq[Double], Seq[Double]),
     f: String) = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {

@@ -9,11 +9,12 @@ trait ContTable {
   /** The number of columns in the table. */
   val cols: Int
 
-  /** The total number of samples (the sum of all counts in the table).
-    *
-    * Note: depending on the weighting scheme being used, this number may be 0,
-    * leading to NaN in output.
-    */
+  /**
+   * The total number of samples (the sum of all counts in the table).
+   *
+   * Note: depending on the weighting scheme being used, this number may be 0,
+   * leading to NaN in output.
+   */
   lazy val numSamples: Double = (table map (x => x.sum)).sum
 
   /** The table of counts, as a matrix of integers. */
@@ -21,64 +22,77 @@ trait ContTable {
   /** The table of counts, transposed. */
   lazy val ttable: Vector[Vector[Int]] = table.transpose
 
-  /** Converts a vector of counts to a marginal probability.
-    *
-    * Takes the sum of all counts in the vector and divides by the total number
-    * of samples in the table to give the probability of observing any of the
-    * events tabulated in that vector.
-    */
+  /**
+   * Converts a vector of counts to a marginal probability.
+   *
+   * Takes the sum of all counts in the vector and divides by the total number
+   * of samples in the table to give the probability of observing any of the
+   * events tabulated in that vector.
+   */
   def probVect: Vector[Int] => Double = l => l.sum / numSamples
 
-  /** Calculates an entropy term from a probability.
-    *
-    * Note that this function returns the term p*log2(p) for a probability p,
-    * which is always negative. Callers of this function must therefore take
-    * the negative of sums of entropies calculated using this function, as the
-    * definition of entropy is E[-log(P(X)].
-    */
+  /**
+   * Calculates an entropy term from a probability.
+   *
+   * Note that this function returns the term p*log2(p) for a probability p,
+   * which is always negative. Callers of this function must therefore take
+   * the negative of sums of entropies calculated using this function, as the
+   * definition of entropy is E[-log(P(X)].
+   */
   def eTerm(prob: Double): Double =
     if (prob == 0) 0
     else prob * MathFuncs.logb(2)(prob)
 
-  /** Returns the marginal entropy (marginalized across columns) of a 2D table.
-    *
-    * For a contingency table for two random variables X = {x1, x2, x3 ...}
-    * and Y = {y1, y2, y3 ...}, of the form
-    *
-    * {{{
-    * |    y1  y2  y3 ...
-    * | x1  .   .   . ...
-    * | x2  .   .   . ...
-    * | x3  .   .   . ...
-    * | ...
-    * }}}
-    *
-    * this function calculates the marginal entropy of the row variable X, H(X).
-    */
-  def margEntropy(t: Vector[Vector[Int]]): Double =
-    -(t map probVect map eTerm).sum
+  /**
+   * Composition to produce marginal entropy function
+   */
+  def margEntFunc: Vector[Int] => Double = probVect andThen eTerm
+    
+  def mapNegSum[A,B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
+    import n.mkNumericOps
+    s => -(s map f).sum
+  }
+  
+  /**
+   * Returns the marginal entropy (marginalized across columns) of a 2D table.
+   *
+   * For a contingency table for two random variables X = {x1, x2, x3 ...}
+   * and Y = {y1, y2, y3 ...}, of the form
+   *
+   * {{{
+   * |    y1  y2  y3 ...
+   * | x1  .   .   . ...
+   * | x2  .   .   . ...
+   * | x3  .   .   . ...
+   * | ...
+   * }}}
+   *
+   * this function calculates the marginal entropy of the row variable X, H(X).
+   */
+  def margEntropy(t: Vector[Vector[Int]]): Double = mapNegSum(margEntFunc) apply t
 
-  /** Returns the conditional entropy of a 2D table (rows conditioned on cols).
-    *
-    * For a contingency table for two random variables X = {x1, x2, x3 ...}
-    * and Y = {y1, y2, y3 ...}, of the form
-    *
-    * {{{
-    * |    y1  y2  y3 ...
-    * | x1  .   .   . ...
-    * | x2  .   .   . ...
-    * | x3  .   .   . ...
-    * | ...
-    * }}}
-    *
-    * this function calculates the entropy of the row variable X conditional
-    * on the column variable Y, H(X|Y).
-    */
+  /**
+   * Returns the conditional entropy of a 2D table (rows conditioned on cols).
+   *
+   * For a contingency table for two random variables X = {x1, x2, x3 ...}
+   * and Y = {y1, y2, y3 ...}, of the form
+   *
+   * {{{
+   * |    y1  y2  y3 ...
+   * | x1  .   .   . ...
+   * | x2  .   .   . ...
+   * | x3  .   .   . ...
+   * | ...
+   * }}}
+   *
+   * this function calculates the entropy of the row variable X conditional
+   * on the column variable Y, H(X|Y).
+   */
   def condEntropy(t: Vector[Vector[Int]]): Double = {
     val trans = t.transpose
-    val probs: Vector[Double] = trans map probVect
-    val entList: Vector[Double] =
-      trans map MathFuncs.freqToProb map (r => -(r map eTerm).sum)
+    val probs = trans map probVect
+    val entList: Seq[Double] =
+      (trans.view map MathFuncs.freqToProb map mapNegSum(eTerm)).force
     (for (p <- 0 until probs.length) yield probs(p) * entList(p)).sum
   }
 
@@ -92,17 +106,20 @@ trait ContTable {
   /** Conditional entropy of the column variable, H(Col|Row). */
   lazy val condColEntropy: Double = condEntropy(ttable)
 
-  /** Mutual information calculated via entropies.
-    *
-    * Since mutual information is symmetric, it can be calculated either in
-    * terms of the row variable or the column variable (here it is calculated
-    * in terms of the row variable).
-    */
+  /**
+   * Mutual information calculated via entropies.
+   *
+   * Since mutual information is symmetric, it can be calculated either in
+   * terms of the row variable or the column variable (here it is calculated
+   * in terms of the row variable).
+   */
   lazy val mutualInformation: Double = margRowEntropy - condRowEntropy
 
-  /** The transfer efficiency is the amount of information transmitted,
-    * normalized by the maximum possible information transfer, ie, the
-    * marginal entropy of the input distribution. */
+  /**
+   * The transfer efficiency is the amount of information transmitted,
+   * normalized by the maximum possible information transfer, ie, the
+   * marginal entropy of the input distribution.
+   */
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
   /** Checks two contingency tables for equality. */

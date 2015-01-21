@@ -123,7 +123,7 @@ class EstimateMITest extends FlatSpec with Matchers {
       f <- EstCC.listParameters("sampleFractions").get
       n <- 0 until EstCC.numParameters("repsPerFraction")
     } yield f
-  } :+ 1.0).toList
+  }.toVector :+ 1.0)
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
     Vector(x))

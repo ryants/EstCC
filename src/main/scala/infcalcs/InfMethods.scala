@@ -82,14 +82,12 @@ object CTBuild {
    */
   def weightSignalData(
     t: Vector[Vector[Int]],
-    wts: List[Double]): Vector[Vector[Int]] =
-    if (t.length != wts.length) {
-      println(t.length, wts.length);
-      throw new Exception("number of rows must equal number of weights")
-    } else {
-      (for (v <- (0 until t.length).toVector) yield (t(v) map (x =>
-        (x * wts(v)).round.toInt))).toVector
-    }
+    wts: List[Double]): Vector[Vector[Int]] = {
+
+    require(t.length == wts.length, "number of rows must equal number of weights")
+    t.indices.toVector map (v => (t(v) map (x =>
+      (x * wts(v)).round.toInt)).toVector)
+  }
 
   /**
    * Returns binary tree giving the values delimiting the bounds of each bin.
@@ -203,7 +201,7 @@ object CTBuild {
     val ct = eng match {
       case Some(e) => addValues(table,
         (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
-      case None => addValues(table, (data.sig zip data.resp).toList)
+      case None => addValues(table, (data.zippedVals).toList)
     }
 
     weights match {
@@ -270,9 +268,7 @@ object EstimateMI {
     if (frac == 1.0) pl
     else {
       val numToTake = (frac * pl.sig.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl.sig zip pl.resp, e)
-      //Don't think the sorting is necessary
-      //(shuffledPairs take numToTake).sortBy(_._1).unzip
+      val shuffledPairs = OtherFuncs.myShuffle(pl.zippedVals, e)
       val newDR = (shuffledPairs take numToTake).unzip
       new DRData(newDR._1, newDR._2)
     }
@@ -431,35 +427,41 @@ object EstimateMI {
     val numRandTables = EstCC.numParameters("numRandom")
 
     // List of inverse sample sizes for all of the resampling reps
-    val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
-
-    // Subsamples the data with the jackknife method
-    val subSamples = EstCC.fracList map (x => jackknife(x, data, engine))
+    // AND
     // For each subsampled dataset, build the contingency table
-    val tables = subSamples map
-      (x => buildTable(None)(x, binPair, wts))
+    // AND
     // For each subsampled dataset, build numRandTables randomized contingency
     // tables
-    val randTables = for (n <- 0 until numRandTables) yield subSamples map (x =>
-      buildTable(Some(engine))(x, binPair, wts))
+    val tupleInit = (Vector[Double](), Vector[ConstructedTable](),
+      Vector[Vector[ConstructedTable]]())
+    val (invFracs, tables, randTables) =
+      EstCC.fracList.foldLeft(tupleInit) { (acc, x) =>
+        val (inv, tab, randTab) = acc
+        val newInv = inv :+ invSS(x, data.sig)
+        val sub = jackknife(x, data, engine)
+        val newTab = tab :+ buildTable(None)(sub, binPair, wts)
+        val newRandTab = randTab :+ (for (
+          n <- 0 until numRandTables
+        ) yield buildTable(Some(engine))(sub, binPair, wts)).toVector
+        (newInv, newTab, newRandTab)
+      }
 
     // Extracts the string tag associated with the weight vector
     val l = wts match {
       case None => "n"
       case Some((wtList, tag)) => tag
     }
-    // Rounds numbers to two decimal places for string output
-    def roundFrac(d: Double) = "%.2f" format d
+
     // List of labels describing features of each resampling result
     val tags = for {
-      f <- (0 until EstCC.fracList.length).toList
+      f <- (0 until EstCC.fracList.length).toVector
       if (EstCC.fracList(f) < 1.0)
     } yield s"${l}_r${binPair._1}_c${binPair}_${
-      roundFrac(EstCC.fracList(f))
+      MathFuncs.roundFrac(EstCC.fracList(f))
     }_${f % EstCC.numParameters("repsPerFraction")}"
 
     // Return the assembled outputs
-    (invFracs, tables, randTables.toList,
+    (invFracs, tables, randTables.transpose,
       tags :+ s"${l}_r${binPair._1}_c${binPair._2}")
 
   }
@@ -478,14 +480,15 @@ object EstimateMI {
     // generates data with subSample method
     val table = buildTable(None)(data, binPair, wts)
     val randTable = buildTable(Some(engine))(data, binPair, wts)
-    val subSamples = EstCC.fracList map (x => subSample(x, table))
-    val randSubSamples =
-      for (
-        n <- 0 until numRandTables
-      ) yield EstCC.fracList map (x => subSample(x, randTable))
-
-    def roundFrac(d: Double) = "%.2f" format d
-    val invFracs = EstCC.fracList map (x => invSS(x, data.sig))
+    val (invFracs, subSamples, randSubSamples) = {
+      val tuples = EstCC.fracList map { x =>
+        val inv = invSS(x, data.sig)
+        val subTable = subSample(x, table)
+        val randSubs = (for (n <- 0 until numRandTables) yield subSample(x, randTable)).toVector
+        (inv, subTable, randSubs)
+      }
+      tuples.unzip3
+    }
 
     val l = wts match {
       case None => "n"
@@ -493,15 +496,15 @@ object EstimateMI {
     }
 
     val tags = for {
-      f <- (0 until EstCC.fracList.length).toList
+      f <- (0 until EstCC.fracList.length).toVector
       if (EstCC.fracList(f) < 1.0)
     } yield s"${l}_r${binPair._1}_c${binPair._2}_${
-      roundFrac(EstCC.fracList(f))
+      MathFuncs.roundFrac(EstCC.fracList(f))
     }_${
       f % EstCC.numParameters("repsPerFraction")
     }"
 
-    (invFracs, subSamples, randSubSamples.toList, tags :+
+    (invFracs, subSamples, randSubSamples.transpose, tags :+
       s"${l}_r${binPair._1}_c${binPair._2}")
   }
 
@@ -516,7 +519,7 @@ object EstimateMI {
   def calcRandRegs(r: RegData): Option[SLR] = {
     val MIList = r._2 map (_.mutualInformation)
     val MIListRand = r._3 map (_.mutualInformation)
-    val regLineRand = new SLR(r._1, r._3 map (_.mutualInformation), r._4.last +
+    val regLineRand = new SLR(r._1, MIListRand, r._4.last +
       "_rand")
     if (regLineRand.intercept.isNaN) {
       IOFile.regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" +
@@ -684,8 +687,8 @@ object EstimateCC {
     val dimLengths = wv map (x => x._1.length)
     val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
 
-    val wND: List[Double] = testWeights("joint dist failure", i.toList map (x => (Range(0, x.length) map (y =>
-      wv(y)._1(x(y)))).product))
+    val wND: List[Double] = testWeights("joint dist failure", (i.toList.view map (x =>
+      (Range(0, x.length) map (y => wv(y)._1(x(y)))).product)).force.toList)
 
     val jointString = (wv map (x => x._2)).mkString(";")
 
@@ -887,7 +890,7 @@ object EstimateCC {
           filePrefix.get + "_" + e.toString + ".dat")
       case None => {}
     }
-    ((est map EstimateMI.optMIMult) map (x => x._2.head._1)).max
+    (est.view map EstimateMI.optMIMult map (x => x._2.head._1)).max
   }
 
   /**

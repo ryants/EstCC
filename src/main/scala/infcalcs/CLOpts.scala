@@ -21,8 +21,7 @@ trait CLOpts {
     head("EstCC", "1.0")
     opt[Unit]('v', "verbose") action { (_, c) =>
       c.copy(verbose = true)
-    } text ("periodically print calculation status " +
-      "to stdout")
+    } text ("periodically print calculation status to stdout")
     opt[String]('d', "data") required () valueName ("<file>") action {
       (x, c) => c.copy(dataFile = x)
     } text ("input data for calculation")

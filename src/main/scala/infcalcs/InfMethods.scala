@@ -35,6 +35,11 @@ object CTBuild {
     }
     val sv = v.sorted.toList
 
+    def buildPartList(es: List[Int], ls: List[Double]): List[List[Double]] = {
+      if (es.isEmpty) Nil
+      else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
+    }
+    
     buildPartList(elemPerBin, sv)
   }
 

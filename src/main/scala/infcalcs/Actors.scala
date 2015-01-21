@@ -1,5 +1,6 @@
 package infcalcs
 import akka.actor.{ ActorRef, Actor }
+import OtherFuncs.genSeed
 
 object Actors {
 
@@ -28,19 +29,19 @@ object Actors {
         if (rWeights > 0) {
           val curList = numLists - rLists
           val index = wts(curList).length - rWeights
-          val seed = (EstCC.rEngine.raw() * 1000000).toInt
+          val seed = genSeed(EstCC.rEngine)
           sender ! Estimate(wts(curList)(index), index, seed)
           rWeights -= 1
         } else if (rWeights == 0) {
           val curList = numLists - rLists
-          val seed = (EstCC.rEngine.raw() * 1000000).toInt
+          val seed = genSeed(EstCC.rEngine)
           sender ! Uniform(wts(curList).head._1.length, seed)
           rWeights -= 1
         } else if (rLists > 1) {
           rLists -= 1
           val curList = numLists - rLists
           val index = 0
-          val seed = (EstCC.rEngine.raw() * 1000000).toInt
+          val seed = genSeed(EstCC.rEngine)
           sender ! Estimate(wts(curList)(index), index, seed)
           rWeights = wts(numLists - rLists).length - 1
         } else if (totRem == 0) {
@@ -58,19 +59,19 @@ object Actors {
             if (rWeights > 0) {
               val curList = numLists - rLists
               val index = wts(curList).length - rWeights
-              val seed = (EstCC.rEngine.raw() * 1000000).toInt
+              val seed = genSeed(EstCC.rEngine)
               cs(c) ! Estimate(wts(curList)(index), index, seed)
               rWeights -= 1
             } else if (rWeights == 0) {
               val curList = numLists - rLists
-              val seed = (EstCC.rEngine.raw() * 1000000).toInt
+              val seed = genSeed(EstCC.rEngine)
               sender ! Uniform(wts(curList).head._1.length, seed)
               rWeights -= 1
             } else if (rLists > 1) {
               rLists -= 1
               val curList = numLists - rLists
               val index = 0
-              val seed = (EstCC.rEngine.raw() * 1000000).toInt
+              val seed = genSeed(EstCC.rEngine)
               cs(c) ! Estimate(wts(curList)(index), index, seed)
               rWeights = wts(numLists - rLists).length - 1
             } else {

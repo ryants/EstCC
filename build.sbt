@@ -1,8 +1,8 @@
 name := "EstCC"
 
-scalaVersion := "2.11.3"
+scalaVersion := "2.11.4"
 
-scalacOptions += "-feature"
+scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
 libraryDependencies += "colt" % "colt" % "1.2.0"
 
@@ -18,3 +18,4 @@ exportJars := true
 
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 
+parallelExecution in Test := false

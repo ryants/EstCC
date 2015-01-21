@@ -58,11 +58,9 @@ package object infcalcs {
   /** A two-tuple. */
   type Pair[T] = (T, T)
 
-  /** Input-output (dose-response) data. The first list contains the inputs,
-    * the second list contains the outputs.
-    */
-  type DRData = Pair[List[Double]]
-
+  /** An n-tuple (for clarity)  */
+  type NTuple[T] = Vector[T]
+  
   /** Weight vector. The first entry is a list of weights across all of the
     * input bins. The second entry is a string that describes the type of
     * weighting.
@@ -80,7 +78,7 @@ package object infcalcs {
     *    subsample size.
     */
   type RegData =
-    (List[Double], List[ConstructedTable], List[ConstructedTable], List[String])
+    (Vector[Double], Vector[ConstructedTable], Vector[ConstructedTable], Vector[String])
 
   /** Data to be used for linear regressions over all randomizations.
     *
@@ -88,10 +86,8 @@ package object infcalcs {
     * a list over all of the randomizations.
     */
   type RegDataMult =
-    (List[Double], List[ConstructedTable], List[List[ConstructedTable]],
-      List[String])
-
-  type Prt = List[List[Double]]
+    (Vector[Double], Vector[ConstructedTable], Vector[Vector[ConstructedTable]],
+      Vector[String])
 
   /** Tuple containing configuration parameters.
     *
@@ -100,5 +96,6 @@ package object infcalcs {
     * that have string values.
     */
   type Parameters =
-    (Map[String, Option[List[Double]]], Map[String, Int], Map[String, String])
+    (Map[String, Option[List[Double]]], Map[String, Int], Map[String, String],
+        Map[String, Option[Vector[NTuple[Double]]]])
 }

@@ -23,7 +23,7 @@ object CTBuild {
    * @param numBins The number of bins to divide the list into.
    * @return A list of length numBins containing each of the sublists.
    */
-  def partitionList(v: List[Double], numBins: Int): List[List[Double]] = {
+  def partitionList(v: Vector[Double], numBins: Int): List[List[Double]] = {
     val avgPerBin = v.length / numBins
     val rem = v.length % numBins
     val elemPerBin: List[Int] = {
@@ -33,38 +33,9 @@ object CTBuild {
         ((0 until (numBins - rem)).toList map (x => avgPerBin)) ++
           ((0 until rem).toList map (x => avgPerBin + 1))
     }
-    val sv = v.sorted
+    val sv = v.sorted.toList
 
     buildPartList(elemPerBin, sv)
-  }
-
-  /**
-   * Utility function which partitions a list into specific sublists
-   * as assigned by a list of integers
-   * 
-   * @param es list denoting number of elements per bin
-   * @param ls list of all elements
-   * @return partitioning of ls into sublists denoting bins
-   */
-  def buildPartList(es: List[Int], ls: List[Double]): List[List[Double]] = {
-    if (es.isEmpty) Nil
-    else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
-  }
-
-  /**
-   * Returns binary tree giving the values delimiting the bounds of each bin.
-   *
-   * The tree returned by this function has numBins nodes; the value
-   * associated with each node represents the maximum data value contained in
-   * that bin, ie, the upper inclusive bin bound.
-   *
-   * @param v The list of doubles to be partitioned.
-   * @param numBins The number of bins to divide the list into.
-   * @return Binary tree containing the maximum value in each bin.
-   */
-  def getBinDelims(v: List[Double], numBins: Int): Tree = {
-    val delimList = partitionList(v, numBins) map (_.max)
-    buildTree(buildOrderedNodeList(delimList))
   }
 
   /**
@@ -106,82 +77,133 @@ object CTBuild {
    */
   def weightSignalData(
     t: Vector[Vector[Int]],
-    wts: List[Double]): Vector[Vector[Int]] =
-    if (t.length != wts.length) {
-      println(t.length, wts.length);
-      throw new Exception("number of rows must equal number of weights")
-    } else {
-      (for (v <- (0 until t.length).toVector) yield (t(v) map (x =>
-        (x * wts(v)).round.toInt))).toVector
-    }
+    wts: List[Double]): Vector[Vector[Int]] = {
+
+    require(t.length == wts.length, "number of rows must equal number of weights")
+    t.indices.toVector map (v => (t(v) map (x =>
+      (x * wts(v)).round.toInt)).toVector)
+  }
 
   /**
-   * Builds a (possibly randomized) contingency table from data.
+   * Returns binary tree giving the values delimiting the bounds of each bin.
    *
-   * Randomized contingency tables are used as a control to determine the
-   * number of bins to use for calculating the mutual information.
+   * The tree returned by this function has numBins nodes; the value
+   * associated with each node represents the maximum data value contained in
+   * that bin, ie, the upper inclusive bin bound.
    *
-   * @param eng optional engine for table randomization
-   * @param pl The dose-response data.
-   * @param nb The numbers of bins to use for the rows and columns of the table.
-   * @param rd Binary tree giving bounds of the row bins.
-   * @param cd Binary tree giving bounds of the column bins.
-   * @param weights List specifying the input weights, or None for no weighting.
+   * @param v The list of doubles to be partitioned.
+   * @param numBins The number of bins to divide the list into.
+   * @return Binary tree containing the maximum value in each bin.
+   */
+  def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
+    val delimList = partitionList(v, numBins) map (_.max)
+    buildTree(buildOrderedNodeList(delimList))
+  }
+
+  /**
+   *  Produces a vector of bin index vectors in order to find the bin number
+   *  for some arbitrary ndim data point
    *
-   * @return The contingency table.
+   *  @param dLs vector of dimension lengths (bins or values)
+   *  @param acc accumulator for building key
+   *
+   *  @return key of bin indices
+   */
+  @tailrec
+  def keyFromDimLengths(
+    dLs: Vector[Int],
+    acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+    if (dLs.isEmpty) acc
+    else {
+      val newAcc = for {
+        x <- acc
+        y <- Range(0, dLs.head).toVector
+      } yield x :+ y
+      keyFromDimLengths(dLs.tail, newAcc)
+    }
+  }
+
+  /**
+   * Returns index for insertion of data point into contingency table
+   *
+   * Makes use of [[DRData.calcBinKey]] to map index pair to single index
+   *
+   * @param pair ordered pair data point to be inserted into contingency table
+   * @param binDelims pair of delimiting trees used to determine respective
+   * bin indices
+   * @param v vector of bin indices, whose index is used for insertion into
+   * the contingency table
+   *
+   * @return index of 2D bin
+   */
+  def findVectIndex(
+    tuple: NTuple[Double],
+    binDelims: NTuple[Tree],
+    v: Vector[NTuple[Int]]): Int = {
+
+    val indices = Range(0, tuple.length).toVector map (x =>
+      findIndex(tuple(x), binDelims(x)))
+    v indexOf indices
+
+  }
+
+  /**
+   * Method for constructing contingency table from a set of n-dim data points
+   *
+   * @param data container for dose-response data
+   * @param nb one-dimensional bin numbers for row and column values resp.
+   * @param weights pair of weights for varying signal distribution
+   *
+   * @return contingency table for ordered pair data points
    */
   def buildTable(eng: Option[MersenneTwister])(
-    pl: DRData,
+    data: DRData,
     nb: Pair[Int],
-    rd: Tree,
-    cd: Tree,
     weights: Option[Weight] = None): ConstructedTable = {
-    // Initialize the contingency table to have dimensions (num_rows, num_cols)
-    // and fill with zeros
+
+    val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
+    val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
+
+    val tDimR = sigKey.length
+    val tDimC = respKey.length
+
     val table = {
-      for (r <- Range(0, rd.entries)) yield Range(0, cd.entries).map(x => 0).toVector
+      for {
+        r <- Range(0, tDimR)
+      } yield Range(0, tDimC).map(x => 0).toVector
     }.toVector
 
-    // Accumulator for populating the contingency table
+    @tailrec
     def addValues(
       acc: Vector[Vector[Int]],
-      p: List[Pair[Double]]): Vector[Vector[Int]] = {
-      // Base case: we've reached the end of the data, return the table
-      // unchanged
+      p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
       if (p.isEmpty) acc
-      // Recursive case: update the table
       else {
-        // Figure which bin the row/dose value should go into
-        val rIndex = findIndex(p.head._1, rd)
-        // Figure which bin the col/response value should go into
-        val cIndex = findIndex(p.head._2, cd)
-        // Sanity check
+        val rIndex = findVectIndex(p.head._1, rd, sigKey)
+        val cIndex = findVectIndex(p.head._2, cd, respKey)
         if (rIndex < 0 || cIndex < 0) {
           throw new Exception(
             "negative indices" + println(rIndex, cIndex) + println(p.head))
+        } else if (rIndex >= tDimR || cIndex >= tDimC) {
+          throw new Exception(
+            "index out of bounds" + println(rIndex, cIndex) + println(p.head))
         }
-        // Increment the count at (rIndex, cIndex) by 1
         addValues(acc updated (rIndex, acc(rIndex) updated
           (cIndex, acc(rIndex)(cIndex) + 1)), p.tail)
       }
     }
 
-    // Build the table from the data
     val ct = eng match {
-      // If randomized, shuffle the row values (while keeping the column values
-      // in place) before building the table
-      case Some(e) => addValues(table, OtherFuncs.myShuffle(pl._1, e) zip pl._2)
-
-      // Otherwise, don't randomize
-      case None => addValues(table, pl._1 zip pl._2)
+      case Some(e) => addValues(table,
+        (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
+      case None => addValues(table, (data.zippedVals).toList)
     }
 
-    // Apply weights if present and produces instance of contingency table
-    // data structure
     weights match {
       case None => new ConstructedTable(ct)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
+
   }
 }
 
@@ -203,7 +225,7 @@ object CTBuild {
  *    regression.
  */
 object EstimateMI {
-  import CTBuild.{ buildTable, getBinDelims, weightSignalData }
+  import CTBuild.{ buildTable, weightSignalData }
   import cern.jet.random.engine.MersenneTwister
 
   /** Number of data randomizations to determine bin-based calculation bias. */
@@ -240,9 +262,10 @@ object EstimateMI {
   def jackknife(frac: Double, pl: DRData, e: MersenneTwister): DRData =
     if (frac == 1.0) pl
     else {
-      val numToTake = (frac * pl._1.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl._1 zip pl._2, e)
-      (shuffledPairs take numToTake).sortBy(_._1).unzip
+      val numToTake = (frac * pl.sig.length).toInt
+      val shuffledPairs = OtherFuncs.myShuffle(pl.zippedVals, e)
+      val newDR = (shuffledPairs take numToTake).unzip
+      new DRData(newDR._1, newDR._2)
     }
 
   /**
@@ -346,6 +369,14 @@ object EstimateMI {
   }
 
   /**
+   *  Calculates the inverse sample size for subsampling data
+   *
+   *  @param f fraction of data to sample
+   *  @param ds data set to sample from
+   */
+  def invSS[T](f: Double, ds: Vector[T]) = 1 / (f * ds.length)
+
+  /**
    * Returns resampled and randomized contingency tables for estimation of MI.
    *
    * The data structure returned by this function contains all of the
@@ -378,102 +409,81 @@ object EstimateMI {
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
-  def buildDataMult(bt: Pair[Int])(
-    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
-    // The number of resampling reps to do for each sampling fraction
+  def buildDataMult(
+    binPair: Pair[Int],
+    data: DRData,
+    seed: Int,
+    wts: Option[Weight] = None): RegDataMult = {
+
+    // engine for randomization processes
     val engine = new MersenneTwister(seed)
 
-    val numReps = EstCC.numParameters("repsPerFraction")
-
-    // A list with the sampling fractions to use for each iteration; each
-    // sampling fraction is repeated numReps times in the list. The value 1.0
-    // is appended so that the full dataset is also used after subsampling is
-    // completed.
-    val fracList = ({
-      for {
-        f <- EstCC.listParameters("sampleFractions").get
-        n <- 0 until numReps
-      } yield f
-    } :+ 1.0).toList
-
-    // Calculates the inverse sample size of the subsampled data
-    def invSS(f: Double) = 1 / (f * pl._1.length)
-
-    // Determines row/column bin delimiters
-    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
-      case None => getBinDelims(pl._1, bt._1)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
-    }
-    val colDelims: Tree = EstCC.listParameters("responseValues") match {
-      case None => getBinDelims(pl._2, bt._2)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
-    }
+    // number of randomizations per bin pair
+    val numRandTables = EstCC.numParameters("numRandom")
 
     // List of inverse sample sizes for all of the resampling reps
-    val invFracs = fracList map invSS
-
-    // Subsamples the data with the jackknife method
-    val subSamples = fracList map (x => jackknife(x, pl, engine))
+    // AND
     // For each subsampled dataset, build the contingency table
-    val tables = subSamples map
-      (x => buildTable(None)(x, bt, rowDelims, colDelims, wts))
+    // AND
     // For each subsampled dataset, build numRandTables randomized contingency
     // tables
-    val randTables = for (n <- 0 until numRandTables) yield subSamples map (x =>
-      buildTable(Some(engine))(x, bt, rowDelims, colDelims, wts))
+    val tupleInit = (Vector[Double](), Vector[ConstructedTable](),
+      Vector[Vector[ConstructedTable]]())
+    val (invFracs, tables, randTables) =
+      EstCC.fracList.foldLeft(tupleInit) { (acc, x) =>
+        val (inv, tab, randTab) = acc
+        val newInv = inv :+ invSS(x, data.sig)
+        val sub = jackknife(x, data, engine)
+        val newTab = tab :+ buildTable(None)(sub, binPair, wts)
+        val newRandTab = randTab :+ (for (
+          n <- 0 until numRandTables
+        ) yield buildTable(Some(engine))(sub, binPair, wts)).toVector
+        (newInv, newTab, newRandTab)
+      }
 
     // Extracts the string tag associated with the weight vector
     val l = wts match {
       case None => "n"
       case Some((wtList, tag)) => tag
     }
-    // Rounds numbers to two decimal places for string output
-    def roundFrac(d: Double) = "%.2f" format d
+
     // List of labels describing features of each resampling result
     val tags = for {
-      f <- (0 until fracList.length).toList
-      if (fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
+      f <- (0 until EstCC.fracList.length).toVector
+      if (EstCC.fracList(f) < 1.0)
+    } yield s"${l}_r${binPair._1}_c${binPair}_${
+      MathFuncs.roundFrac(EstCC.fracList(f))
+    }_${f % EstCC.numParameters("repsPerFraction")}"
 
     // Return the assembled outputs
-    (invFracs, tables, randTables.toList, tags :+ s"${l}_r${bt._1}_c${bt._2}")
+    (invFracs, tables, randTables.transpose,
+      tags :+ s"${l}_r${binPair._1}_c${binPair._2}")
+
   }
 
   /**
    * Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
    */
-  def bDMAlt(bt: Pair[Int])(
-    pl: DRData, seed: Int, wts: Option[Weight] = None): RegDataMult = {
-    val numReps = EstCC.numParameters("repsPerFraction")
-    val fracList = ({
-      for {
-        f <- EstCC.listParameters("sampleFractions").get
-        n <- 0 until numReps
-      } yield f
-    } :+ 1.0).toList
-
-    def invSS(f: Double) = 1 / (f * pl._1.length)
-
-    //determines row/column bin delimiters
-    val rowDelims: Tree = EstCC.listParameters("signalValues") match {
-      case None => getBinDelims(pl._1, bt._1)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
-    }
-    val colDelims: Tree = EstCC.listParameters("responseValues") match {
-      case None => getBinDelims(pl._2, bt._2)
-      case Some(l) => TreeDef.buildTree(TreeDef.buildOrderedNodeList(l))
-    }
+  def bDMAlt(
+    binPair: Pair[Int],
+    data: DRData,
+    seed: Int,
+    wts: Option[Weight] = None): RegDataMult = {
 
     val engine = new MersenneTwister(seed)
 
     // generates data with subSample method
-    val table = buildTable(None)(pl, bt, rowDelims, colDelims, wts)
-    val randTable = buildTable(Some(engine))(pl, bt, rowDelims, colDelims, wts)
-    val subSamples = fracList map (x => subSample(x, table))
-    val randSubSamples = for (n <- 0 until numRandTables) yield fracList map (x => subSample(x, randTable))
-
-    def roundFrac(d: Double) = "%.2f" format d
-    val invFracs = fracList map invSS
+    val table = buildTable(None)(data, binPair, wts)
+    val randTable = buildTable(Some(engine))(data, binPair, wts)
+    val (invFracs, subSamples, randSubSamples) = {
+      val tuples = EstCC.fracList map { x =>
+        val inv = invSS(x, data.sig)
+        val subTable = subSample(x, table)
+        val randSubs = (for (n <- 0 until numRandTables) yield subSample(x, randTable)).toVector
+        (inv, subTable, randSubs)
+      }
+      tuples.unzip3
+    }
 
     val l = wts match {
       case None => "n"
@@ -481,12 +491,16 @@ object EstimateMI {
     }
 
     val tags = for {
-      f <- (0 until fracList.length).toList
-      if (fracList(f) < 1.0)
-    } yield s"${l}_r${bt._1}_c${bt._2}_${roundFrac(fracList(f))}_${f % numReps}"
+      f <- (0 until EstCC.fracList.length).toVector
+      if (EstCC.fracList(f) < 1.0)
+    } yield s"${l}_r${binPair._1}_c${binPair._2}_${
+      MathFuncs.roundFrac(EstCC.fracList(f))
+    }_${
+      f % EstCC.numParameters("repsPerFraction")
+    }"
 
-    (invFracs, subSamples, randSubSamples.toList, tags :+
-      s"${l}_r${bt._1}_c${bt._2}")
+    (invFracs, subSamples, randSubSamples.transpose, tags :+
+      s"${l}_r${binPair._1}_c${binPair._2}")
   }
 
   /**
@@ -500,7 +514,7 @@ object EstimateMI {
   def calcRandRegs(r: RegData): Option[SLR] = {
     val MIList = r._2 map (_.mutualInformation)
     val MIListRand = r._3 map (_.mutualInformation)
-    val regLineRand = new SLR(r._1, r._3 map (_.mutualInformation), r._4.last +
+    val regLineRand = new SLR(r._1, MIListRand, r._4.last +
       "_rand")
     if (regLineRand.intercept.isNaN) {
       IOFile.regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" +
@@ -583,16 +597,20 @@ object EstimateMI {
    * @param pl The input/output dataset
    * @param binTupList Various (nRowBins, nColBins) bin size combinations
    * @param wts Optional weight vector for inputs
-   * @return List of (bin size combo, list of (intercept, conf. int.))
+   * @return List of ([[ContTable]] dimensions, list of (intercept, conf. int.))
    */
   def genEstimatesMult(
     pl: DRData,
     binTupList: List[Pair[Int]],
     seed: Int,
-    wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] =
+    wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] = {
+
+    val tDims = (x: Pair[Int]) => ((pl sigKey x._1).length, (pl respKey x._2).length)
+
     binTupList map
-      (bt => (bt, multIntercepts(calcMultRegs(
-        buildDataMult(bt)(pl, seed, wts)))))
+      (bt => (tDims(bt), multIntercepts(calcMultRegs(
+        buildDataMult(bt, pl, seed, wts)))))
+  }
 
   /**
    * Returns the MI estimate that is maximized for real but not randomized data.
@@ -620,7 +638,7 @@ object EstimateMI {
         val v = ds.head._2.head._1
         if (i._2.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
       }
-    val base = ((0, 0), (0 until d.length).toList map (x => (0.0, 0.0)))
+    val base = ((0, 0), (0 until d.head._2.length).toList map (x => (0.0, 0.0)))
 
     // Determines if estimates are biased using randomization data sets
     def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]): List[(Pair[Int], List[Pair[Double]])] = {
@@ -644,8 +662,33 @@ object EstimateMI {
 object EstimateCC {
   import LowProb.testWeights
 
+  val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
+  val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+
   /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
+
+  /**
+   * Generates signal weights for n-dim signal data
+   *
+   * Given n marginal signal distributions and assuming independence
+   * between the distributions, a joint signal distribution is
+   * calculated and a [[Weight]] is generated.
+   *
+   * @param wv vector of weights for signal distributions
+   * @return weight for joint distribution
+   */
+  def makeJoint(wv: Vector[Weight]): Weight = {
+    val dimLengths = wv map (x => x._1.length)
+    val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
+
+    val wND: List[Double] = testWeights("joint dist failure", (i.toList.view map (x =>
+      (Range(0, x.length) map (y => wv(y)._1(x(y)))).product)).force.toList)
+
+    val jointString = (wv map (x => x._2)).mkString(";")
+
+    (wND, jointString)
+  }
 
   /** Given a function, finds the difference in its evaluation of two numbers. */
   def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
@@ -661,39 +704,60 @@ object EstimateCC {
     p / (1.0 / bounds.toList.length.toDouble)
 
   /**
+   * Utility function that generates a range of values to use as the mean of
+   * the unimodal Gaussian weighting function
+   *
+   * @param min minimum value in weight range
+   * @param max maximum value in weight range
+   * @return list of values for use as mean in gaussian weighting function
+   */
+  def genMuList(minV: Double, maxV: Double): List[Double] =
+    (uMuFracMin until 1.0 by uMuFracMin).toList map
+      (x => minV + (maxV - minV) * x)
+
+  /**
+   * Generates a list of (mu, sigma) pairs for parameterizing unimodal gaussian
+   * weighting functions.
+   *
+   *  @param muList list of mean values (from [[genMuList]])
+   *  @param min minimum value in weight range
+   *  @param max maximum value in weight range
+   *  @return list of parameters for weighting function
+   */
+  def genMuSigList(
+    muList: List[Double],
+    minV: Double,
+    maxV: Double): List[Pair[Double]] =
+    for {
+      mu <- muList
+      i <- (uSigFracMin to 1.0 by uSigFracMin).toList
+    } yield (mu, (i * (mu - minV) / 3.0) min (i * (maxV - mu) / 3.0))
+
+  /**
    * Generates list of unimodal (Gaussian) weights.
    *
    * @param bounds Binary tree specifying bin bounds.
-   * @param pl The input/output dataset.
+   * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(bounds: Tree)(pl: DRData): List[Weight] = {
-    val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
-    val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+  def uniWeight(bounds: Tree, in: List[Double]): List[Weight] = {
 
     // Create a list of evenly-distributed means that span the input range
     // ***Note that the enumeration terminates before 1.0, so there are only
     // uniMuNumber - 1 entries in muList.***
-    val minVal = if (logSpace) log(pl._1.min) else pl._1.min
-    val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
-    val muList =
-      (uMuFracMin until 1.0 by uMuFracMin).toList map
-        (x => minVal + (maxVal - minVal) * x)
+    val minVal = if (logSpace) log(in.min) else in.min
+    val maxVal = if (logSpace) log(in.max) else in.max
+    val muList = genMuList(minVal, maxVal)
 
     // Attaches various sigma values to mu values, resulting in a list of
     // (mu, sigma) combinations as a list of Pair[Double]
-    val wtParams = {
-      for {
-        mu <- muList
-        i <- (uSigFracMin to 1.0 by uSigFracMin).toList
-      } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
-    }
+    val wtParams = genMuSigList(muList, minVal, maxVal)
 
     def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (p._1, p._2)
 
     // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
     // that the proposed weights cover a sufficient range of the inputs
-    def genWeights(p: Pair[Double]): Weight = {
+    def weights(p: Pair[Double]): Weight = {
       val mu = p._1; val sigma = p._2
       val boundList = bounds.toList
       def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
@@ -705,20 +769,20 @@ object EstimateCC {
     }
 
     // Apply genWeights to the (mu, sigma) tuples and return
-    for (x <- (0 until wtParams.length).toList) yield genWeights(wtParams(x))
+    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
   }
 
   /**
    * Generates list of bimodal weights.
    *
    * @param bounds Binary tree specifying bin bounds.
-   * @param pl The input/output dataset.
+   * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(bounds: Tree)(pl: DRData): List[Weight] = {
+  def biWeight(bounds: Tree, in: List[Double]): List[Weight] = {
 
-    val minVal = if (logSpace) log(pl._1.min) else pl._1.min
-    val maxVal = if (logSpace) log(pl._1.max) else pl._1.max
+    val minVal = if (logSpace) log(in.min) else in.min
+    val maxVal = if (logSpace) log(in.max) else in.max
     val minMuDiff =
       (maxVal - minVal) / EstCC.numParameters("biMuNumber").toDouble
 
@@ -757,7 +821,7 @@ object EstimateCC {
     // Calculates and tests weights. Takes a tuple containing parameters for a
     // bimodal Gaussian and makes sure that the proposed weights cover a
     // sufficient range of the inputs
-    def genWeights(
+    def weights(
       t: (Pair[Double], Pair[Double], Pair[Double])): Weight = {
       val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
       val boundList = bounds.toList
@@ -770,7 +834,34 @@ object EstimateCC {
     }
     // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
     // return
-    for (x <- (0 until wtParams.length).toList) yield genWeights(wtParams(x))
+    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
+  }
+
+  /**
+   * Generates a list of weights for n-dim input data
+   *
+   * Weights are generated for a n-dim input distribution by calculating
+   * the marginal distributions for the n independent random variables
+   * representing the signal.  These are used to produce a joint
+   * distribution (see [[makeJoint]]) in order to construct a list of
+   * weights corresponding to the structure of the contingency table as
+   * seen in [[CTBuild]].
+   *
+   * @param pBounds vector of trees delimiting n-dim signal value bins
+   * @param sig list of ordered tuples (signal values)
+   * @param weightFunc function determining calculation of weight distribution
+   * @return list of weights for a signal set of ordered tuples
+   */
+  def genWeights(
+    pBounds: Vector[Tree],
+    sig: Vector[NTuple[Double]],
+    weightFunc: (Tree, List[Double]) => List[Weight]): List[Weight] = {
+
+    val sigT = sig.transpose
+    val weights = sigT.indices map (x => weightFunc(pBounds(x), sigT(x).toList))
+
+    weights.transpose.toList map (x => makeJoint(x.toVector))
+
   }
 
   /**
@@ -794,7 +885,7 @@ object EstimateCC {
           filePrefix.get + "_" + e.toString + ".dat")
       case None => {}
     }
-    ((est map EstimateMI.optMIMult) map (x => x._2.head._1)).max
+    (est.view map EstimateMI.optMIMult map (x => x._2.head._1)).max
   }
 
   /**
@@ -813,7 +904,7 @@ object EstimateCC {
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
       EstCC.bins filter (x =>
-        x._1 == w._1.length), (EstCC.rEngine.raw() * 1000000).toInt, Some(w))
+        x._1 == w._1.length), OtherFuncs.genSeed(EstCC.rEngine), Some(w))
   }
 
   /**
@@ -830,7 +921,7 @@ object EstimateCC {
   def verboseResults(wts: List[Weight], pl: DRData, fp: Option[String]) = {
     val binNum = wts(0)._1.length
     var optList: Array[Double] = Array()
-    println(s"# Signal Bins: ${binNum}")
+    println(s"# Signal Bins: ${binNum}\t${wts.length + 1} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
     (0 until wts.length) foreach { w =>
@@ -838,7 +929,7 @@ object EstimateCC {
         val est = EstimateMI.genEstimatesMult(
           pl,
           EstCC.bins filter (x => x._1 == binNum),
-          (EstCC.rEngine.raw() * 1000000).toInt,
+          OtherFuncs.genSeed(EstCC.rEngine),
           Some(wts(w)))
         fp match {
           case Some(f) =>
@@ -847,12 +938,12 @@ object EstimateCC {
         }
         val opt = EstimateMI.optMIMult(est)
         optList = optList :+ opt._2(0)._1
-        println(s"  Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
+        println(s"  ${wts.length + 1 - w}) Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
           s"${0xB1.toChar} ${opt._2(0)._2}")
       }
     }
     val est = EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x =>
-      x._1 == binNum), (EstCC.rEngine.raw() * 1000000).toInt)
+      x._1 == binNum), OtherFuncs.genSeed(EstCC.rEngine))
     fp match {
       case Some(f) =>
         IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")
@@ -860,7 +951,7 @@ object EstimateCC {
     }
     val opt = EstimateMI.optMIMult(est)
     optList = optList :+ opt._2(0)._1
-    println(s"  Weight: None, Est. MI: ${opt._2(0)._1} " +
+    println(s"  1) Weight: None, Est. MI: ${opt._2(0)._1} " +
       s"${0xB1.toChar} ${opt._2(0)._2}")
     optList.max
   }

@@ -16,7 +16,7 @@ object IOFile {
    *
    * Each line of the file is expected to contain a whitespace-separated list
    * of numbers that can be cast as Doubles. Used as a helper function for
-   * loading dose-response datasets (by [[loadPairList]]) or loading
+   * loading dose-response datasets (by [[loadList]]) or loading
    * contingency tables from a file (by [[ImportedTable]]).
    *
    * @param f Name of file to load.

@@ -2,7 +2,7 @@ signalColumns	0
 responseColumns	1
 responseValues	None
 responseBins	4,80,4
-signalValues	0,18,1
+signalVals1	0,18,1
 signalBins	None
 sampleFractions	0.8,0.975,0.025
 biPeakWeights	0.4 0.5 0.6

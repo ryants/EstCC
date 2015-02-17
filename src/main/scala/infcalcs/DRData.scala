@@ -58,12 +58,12 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     numBins: Int): NTuple[Tree] =
 
     if (valuesPresent)
-      (data.transpose.view map (_.toSet.toVector) map (x =>
-        CTBuild.getBinDelims(x, x.length))).toVector
+      (data.transpose.view map (_.toSet.toList) map (x =>
+        TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
     else
       (data.transpose map (z => CTBuild.getBinDelims(z, numBins))).toVector
 
-  /* 
+  /** 
    *  Calculates key for vector of bin-delimiting trees
    *  
    *  @param trees vector of partition trees (corresponding to ordered pair data
@@ -111,5 +111,11 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     keys(exSigKeys, sigDelims(numBins), numBins)
   def respKey(numBins: Int): Vector[NTuple[Int]] =
     keys(exRespKeys, respDelims(numBins), numBins)
+    
+  override def toString() = 
+    ((0 until sig.length) map { x=> 
+      s"${sig(x)}\t${resp(x)}\n"
+    }).mkString
+  
 
 }

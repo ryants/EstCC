@@ -57,7 +57,7 @@ object EstCC extends App with CLOpts {
   val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)
   val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
   val p = loadList(dataFile, sigCols, respCols)
-
+  
   // Determine number of response bins if values not specified
   val responseBins: List[Int] = valueParameters("responseValues") match {
     case None => listParameters("responseBins").get map (_.toInt)
@@ -84,6 +84,25 @@ object EstCC extends App with CLOpts {
   if (config.verbose) {
     printParameters(parameters)
     println(bins+"\n")
+  }
+    
+  //Confirm that there are fewer (or an equal number of) bins than data entries
+  //for the lowest fraction of jackknifed data
+  valueParameters("signalValues") match {
+    case None => Predef.require(p.sig.length * 
+        listParameters("sampleFractions").get.min >= 
+          listParameters("signalBins").get.max,
+        "number of signal bins must be less than the smallest jackknifed " +
+        "data sample") 
+    case Some(x) => 
+  }
+  valueParameters("responseValues") match {
+    case None => Predef.require(p.resp.length * 
+        listParameters("sampleFractions").get.min >= 
+          listParameters("responseBins").get.max,
+        "number of response bins must be less than the smallest jackknifed " +
+        "data sample") 
+    case Some(x) =>
   }
   
   // Build list of weight pairs (unimodal and bimodal) given a list of bin

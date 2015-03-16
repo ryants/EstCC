@@ -39,7 +39,7 @@ object CTBuild {
       if (es.isEmpty) Nil
       else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
     }
-    
+
     buildPartList(elemPerBin, sv)
   }
 
@@ -667,9 +667,6 @@ object EstimateMI {
 object EstimateCC {
   import LowProb.testWeights
 
-  val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
-  val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
-
   /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
@@ -709,73 +706,55 @@ object EstimateCC {
     p / (1.0 / bounds.toList.length.toDouble)
 
   /**
-   * Utility function that generates a range of values to use as the mean of
-   * the unimodal Gaussian weighting function
-   *
-   * @param min minimum value in weight range
-   * @param max maximum value in weight range
-   * @return list of values for use as mean in gaussian weighting function
-   */
-  def genMuList(minV: Double, maxV: Double): List[Double] =
-    (uMuFracMin until 1.0 by uMuFracMin).toList map
-      (x => minV + (maxV - minV) * x)
-
-  /**
-   * Generates a list of (mu, sigma) pairs for parameterizing unimodal gaussian
-   * weighting functions.
-   *
-   *  @param muList list of mean values (from [[genMuList]])
-   *  @param min minimum value in weight range
-   *  @param max maximum value in weight range
-   *  @return list of parameters for weighting function
-   */
-  def genMuSigList(
-    muList: List[Double],
-    minV: Double,
-    maxV: Double): List[Pair[Double]] =
-    for {
-      mu <- muList
-      i <- (uSigFracMin to 1.0 by uSigFracMin).toList
-    } yield (mu, (i * (mu - minV) / 3.0) min (i * (maxV - mu) / 3.0))
-
-  /**
    * Generates list of unimodal (Gaussian) weights.
    *
    * @param bounds Binary tree specifying bin bounds.
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(bounds: Tree, in: List[Double]): List[Weight] = {
+  def uniWeight(bounds: Tree, in: List[Double]): List[Weight] =
 
-    // Create a list of evenly-distributed means that span the input range
-    // ***Note that the enumeration terminates before 1.0, so there are only
-    // uniMuNumber - 1 entries in muList.***
-    val minVal = if (logSpace) log(in.min) else in.min
-    val maxVal = if (logSpace) log(in.max) else in.max
-    val muList = genMuList(minVal, maxVal)
+    if (EstCC.numParameters("uniMuNumber") == 0) Nil
+    else {
 
-    // Attaches various sigma values to mu values, resulting in a list of
-    // (mu, sigma) combinations as a list of Pair[Double]
-    val wtParams = genMuSigList(muList, minVal, maxVal)
+      // Create a list of evenly-distributed means that span the input range
+      // ***Note that the enumeration terminates before 1.0, so there are only
+      // uniMuNumber - 1 entries in muList.***
+      val minVal = if (logSpace) log(in.min) else in.min
+      val maxVal = if (logSpace) log(in.max) else in.max
 
-    def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (p._1, p._2)
+      val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
+      val muList = (uMuFracMin until 1.0 by uMuFracMin).toList map
+        (x => minVal + (maxVal - minVal) * x)
 
-    // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
-    // that the proposed weights cover a sufficient range of the inputs
-    def weights(p: Pair[Double]): Weight = {
-      val mu = p._1; val sigma = p._2
-      val boundList = bounds.toList
-      def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
-      val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
-      val rawWeights = testWeights("uni " + p.toString, firstTerm +: {
-        for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1))
-      }.toList)
-      (rawWeights map normWeight(bounds), genWeightString(p))
+      // Attaches various sigma values to mu values, resulting in a list of
+      // (mu, sigma) combinations as a list of Pair[Double]
+      val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+      val wtParams = for {
+        mu <- muList
+        i <- (uSigFracMin to 1.0 by uSigFracMin).toList
+      } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
+
+      def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (
+          p._1, p._2)
+
+      // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
+      // that the proposed weights cover a sufficient range of the inputs
+      def weights(p: Pair[Double]): Weight = {
+        val mu = p._1; val sigma = p._2
+        val boundList = bounds.toList
+        def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
+        val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
+        val rawWeights = testWeights("uni " + p.toString, firstTerm +: {
+          for (x <- 0 until (boundList.length - 1)) yield calcWeight(
+              wtFunc, boundList(x), boundList(x + 1))
+        }.toList)
+        (rawWeights map normWeight(bounds), genWeightString(p))
+      }
+
+      // Apply genWeights to the (mu, sigma) tuples and return
+      for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
     }
-
-    // Apply genWeights to the (mu, sigma) tuples and return
-    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
-  }
 
   /**
    * Generates list of bimodal weights.
@@ -833,7 +812,8 @@ object EstimateCC {
       def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
       val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
       val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
-        for (x <- 0 until (boundList.length - 1)) yield calcWeight(wtFunc, boundList(x), boundList(x + 1))
+        for (x <- 0 until (boundList.length - 1)) yield calcWeight(
+            wtFunc, boundList(x), boundList(x + 1))
       }.toList)
       (rawWeights map normWeight(bounds), genWeightLabel(t))
     }

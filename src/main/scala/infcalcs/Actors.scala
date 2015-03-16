@@ -34,11 +34,6 @@ object Actors {
           val seed = genSeed(EstCC.rEngine)
           sender ! Estimate(wts(curList)(index), index, seed)
           rWeights -= 1
-        } else if (rWeights == 0) {
-          val curList = numLists - rLists
-          val seed = genSeed(EstCC.rEngine)
-          sender ! Uniform(wts(curList).head._1.length, seed)
-          rWeights -= 1
         } else if (rLists > 1) {
           rLists -= 1
           val curList = numLists - rLists
@@ -69,11 +64,6 @@ object Actors {
               val index = wts(curList).length - rWeights
               val seed = genSeed(EstCC.rEngine)
               cs(c) ! Estimate(wts(curList)(index), index, seed)
-              rWeights -= 1
-            } else if (rWeights == 0) {
-              val curList = numLists - rLists
-              val seed = genSeed(EstCC.rEngine)
-              sender ! Uniform(wts(curList).head._1.length, seed)
               rWeights -= 1
             } else if (rLists > 1) {
               rLists -= 1

@@ -6,6 +6,7 @@ import EstimateCC.{
   genWeights,
   uniWeight,
   biWeight,
+  pwWeight,
   getResultsMult,
   calcWithWeightsMult,
   verboseResults
@@ -108,15 +109,10 @@ object EstCC extends App with CLOpts {
   
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
-  val w: List[Pair[List[Weight]]] =
-    signalBins map (x => p sigDelims x) map (y =>
-      (genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight)))
-  
-  // Split unimodal and bimodal weight lists
-  val uw: List[List[Weight]] = w map (_._1)
-  val bw: List[List[Weight]] = w map (_._2)
-  val aw: List[List[Weight]] = (0 until w.length).toList map (n =>
-    uw(n) ++ bw(n))
+  val aw: List[List[Weight]] =
+    signalBins map (x => p sigDelims x) flatMap (y =>
+      Vector(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
+          genWeights(y, p.sig, pwWeight)))
   
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
@@ -158,7 +154,7 @@ object EstCC extends App with CLOpts {
       println(estList.max)
     } // Silent sequential mode (all immutable data structures except parameters)
     else {
-      val weightIndices = (0 until w.length).toList
+      val weightIndices = (0 until aw.length).toList
       val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
       val ubRes: List[EstTuple] = weightIndices map (n => getResultsMult(

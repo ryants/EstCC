@@ -129,7 +129,8 @@ object IOFile {
    *  - A list of tuples, each containing an MI estimate (intercept from the
    *    linear regression) and its 95% confidence interval.
    *
-   * @param d List of (bin sizes, list of (MI estimate, confidence interval))
+   * @param d List of (bin sizes, list of (MI estimate, confidence interval),
+   * optional weight)
    * @param f Name of the file to write.
    */
   def estimatesToFileMult(
@@ -140,6 +141,12 @@ object IOFile {
     val rands = (0 until numRandTables).toList map
       (x => ("\tMIRand " + x + "\tSDRand " + x))
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
+    writer.newLine()
+    val wtString = d.head._3 match {
+      case None => "None"
+      case Some(x) => x._2
+    }
+    writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
     val lines =
       for (x <- d) yield s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " +

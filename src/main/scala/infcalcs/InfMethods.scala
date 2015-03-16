@@ -927,8 +927,8 @@ object EstimateCC {
    * @return The maximum MI estimate.
    */
   def getResultsMult(
-    est: List[List[EstTuple]],
-    filePrefix: Option[String]): EstTuple = {
+      est: List[List[EstTuple]],
+      filePrefix: Option[String]): EstTuple = {
     filePrefix match {
       case Some(f) =>
         for (e <- 0 until est.length) yield IOFile.estimatesToFileMult(est(e),
@@ -952,9 +952,9 @@ object EstimateCC {
     for {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
-    } yield EstimateMI.genEstimatesMult(pl,
+    } yield (EstimateMI.genEstimatesMult(pl,
       EstCC.bins filter (x =>
-        x._1 == w._1.length), genSeed(EstCC.rEngine), Some(w))
+        x._1 == w._1.length), genSeed(EstCC.rEngine), Some(w)))
   }
 
   /**

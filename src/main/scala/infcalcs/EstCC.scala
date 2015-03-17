@@ -109,10 +109,10 @@ object EstCC extends App with CLOpts {
   
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
+  val signalTrees: List[NTuple[Tree]] = signalBins map (x => p sigDelims x)
   val aw: List[List[Weight]] =
-    signalBins map (x => p sigDelims x) flatMap (y =>
-      Vector(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
-          genWeights(y, p.sig, pwWeight)))
+    signalTrees map (y => List(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
+          genWeights(y, p.sig, pwWeight)).flatten)
   
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =

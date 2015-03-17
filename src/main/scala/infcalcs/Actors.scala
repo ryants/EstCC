@@ -13,12 +13,15 @@ object Actors {
   case class Result(res: EstTuple)
 
   class Distributor(wts: List[List[Weight]]) extends Actor {
-    val numLists = wts.length
-    var rLists = wts.length
+    val numLists = wts.length //quantity of considered signal bin numbers
+    var rLists = wts.length //remaining signal bin numbers
 
-    var rWeights = wts(numLists - rLists).length
+    //remaining weights for current signal bin number
+    var rWeights = wts(numLists - rLists).length 
 
+    //list of recorded channel capacity estimations
     var estList: Array[EstTuple] = Array()
+    //total remaining weight calculations
     var totRem = (wts map (_.length)).sum + wts.length
 
     def receive = {

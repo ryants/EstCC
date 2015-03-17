@@ -857,35 +857,37 @@ object EstimateCC {
     }
 
   /**
-   * Generates a set of piece-wise functions to create uniform weighting from 
+   * Generates a set of piece-wise functions to create uniform weighting from
    * bin i to bin j with all outer bins (<i and >j) weighted to 0
-   * 
+   *
    * @param bounds Binary tree specifying bin bounds.
    * @param in The input dataset (placeholder to accommodate [[genWeights]]
    * function; not actually used in function).
    * @return List of piece-wise weights
    */
-  def pwWeight(bounds: Tree, in: List[Double]): List[Weight] = {
-    val lBoundsList = bounds.toList
-    val indices = lBoundsList.indices.toList
-    val maxIndex = bounds.maxValIndex
-    val nodePairs = for {
-      x <- indices
-      y <- indices
-      if (x < y)
-      if !(x == 0 && y == maxIndex)
-    } yield (x,y)
-    
-    def weights(ib: Pair[Int]): Weight = {
-      val wt = 1.0 / (ib._2-ib._1+1.0).toDouble
-      val wtList = indices map (x => 
-        if (ib._1 <= x && x <= ib._2) wt else 0.0
-      )
-      (wtList, "PWU(%d, %d)" format (ib._1,ib._2))
-    } 
-    
-    nodePairs map weights
-  }
+  def pwWeight(bounds: Tree, in: List[Double]): List[Weight] =
+    if (EstCC.numParameters("pwUnifWeights") == 0) {
+      Nil
+    } else {
+      val lBoundsList = bounds.toList
+      val indices = lBoundsList.indices.toList
+      val maxIndex = bounds.maxValIndex
+      val nodePairs = for {
+        x <- indices
+        y <- indices
+        if (x < y)
+        if !(x == 0 && y == maxIndex)
+      } yield (x, y)
+
+      def weights(ib: Pair[Int]): Weight = {
+        val wt = 1.0 / (ib._2 - ib._1 + 1.0).toDouble
+        val wtList = indices map (x =>
+          if (ib._1 <= x && x <= ib._2) wt else 0.0)
+        (wtList, "PWU(%d, %d)" format (ib._1, ib._2))
+      }
+
+      nodePairs map weights
+    }
 
   /**
    * Generates a list of weights for n-dim input data

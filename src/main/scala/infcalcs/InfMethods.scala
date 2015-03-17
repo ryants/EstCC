@@ -457,8 +457,8 @@ object EstimateMI {
       f <- (0 until EstCC.fracList.length).toVector
       if (EstCC.fracList(f) < 1.0)
     } yield s"${l}_r${binPair._1}_c${binPair}_${
-      MathFuncs.roundFrac(EstCC.fracList(f))
-    }_${f % EstCC.numParameters("repsPerFraction")}"
+      MathFuncs.roundFrac(EstCC.fracList(f))}_${f % EstCC.numParameters(
+        "repsPerFraction")}"
 
     // Return the assembled outputs
     (invFracs, tables, randTables.transpose,
@@ -514,16 +514,17 @@ object EstimateMI {
    * Note Option monad present to accommodate failed intercept calculations.
    *
    * @param r (inverse sample sizes, CTs, randomized CTs, labels)
+   * @param i integer ID denoting randomized table 
    * @return Regression line, None if regression failed.
    */
-  def calcRandRegs(r: RegData): Option[SLR] = {
+  def calcRandRegs(r: RegData, i: Int): Option[SLR] = {
     val MIList = r._2 map (_.mutualInformation)
     val MIListRand = r._3 map (_.mutualInformation)
     val regLineRand = new SLR(r._1, MIListRand, r._4.last +
       "_rand")
     if (regLineRand.intercept.isNaN) {
       IOFile.regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" +
-        regLineRand.label + ".dat")
+        regLineRand.label + "_" + i.toString + ".dat")
       // printCTData(r)
       None
     } else Some(regLineRand)
@@ -551,8 +552,8 @@ object EstimateMI {
     //regLine.toFile(s"rd_${regLine.label}.dat")
     // Regression on randomized data
     val regdataRand =
-      (0 until numRandTables).toList map (x => (r._1, r._2, r._3(x), r._4))
-    val regLinesRand = regdataRand map calcRandRegs
+      (0 until numRandTables).toList map (x => ((r._1, r._2, r._3(x), r._4),x))
+    val regLinesRand = regdataRand map (x => calcRandRegs(x._1,x._2))
     (regLine, regLinesRand)
   }
 

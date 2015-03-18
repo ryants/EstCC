@@ -135,7 +135,7 @@ object IOFile {
   def estimatesToFileMult(
     d: List[(Pair[Int], List[Pair[Double]])],
     f: String): Unit = {
-    val numRandTables = EstCC.numParameters("numRandom")
+    val numRandTables = EstCC.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map
       (x => ("\tMIRand " + x + "\tSDRand " + x))

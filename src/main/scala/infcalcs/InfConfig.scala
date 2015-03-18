@@ -18,7 +18,7 @@ object InfConfig {
       "biPeakWeights" -> Some(List(0.4, 0.5, 0.6)))
 
   /** Parameters that have numerical values. */
-  val numParams: Map[String, Int] =
+  val numParams: Map[String, Double] =
     Map("numRandom" -> 10,
       "numForCutoff" -> 1,
       "cutoffValue" -> 0,

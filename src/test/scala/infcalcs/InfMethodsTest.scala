@@ -121,7 +121,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   EstCC.fracList = ({
     for {
       f <- EstCC.listParameters("sampleFractions").get
-      n <- 0 until EstCC.numParameters("repsPerFraction")
+      n <- 0 until EstCC.numParameters("repsPerFraction").toInt
     } yield f
   }.toVector :+ 1.0)
 
@@ -212,7 +212,7 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "buildDataMult" should "return an appropriate RegDataMult data structure" in {
     // Get the RegDataMult result
-    val numReps = EstCC.numParameters("repsPerFraction")
+    val numReps = EstCC.numParameters("repsPerFraction").toInt
     // Seeded with some integer
     val rdm = buildDataMult(numBins, pl, 1234567)
     // Check the inverse sample sizes
@@ -288,8 +288,8 @@ class EstimateCCTest extends FlatSpec with Matchers {
     val rd = pl sigDelims numBins._1
     val uniWts = genWeights(rd, pl.sig, uniWeight)
     uniWts.length shouldBe
-      (EstCC.numParameters("uniMuNumber") - 1) *
-      EstCC.numParameters("uniSigmaNumber")
+      (EstCC.numParameters("uniMuNumber").toInt - 1) *
+      EstCC.numParameters("uniSigmaNumber").toInt
   }
 }
 

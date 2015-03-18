@@ -234,13 +234,13 @@ object EstimateMI {
   import cern.jet.random.engine.MersenneTwister
 
   /** Number of data randomizations to determine bin-based calculation bias. */
-  val numRandTables = EstCC.numParameters("numRandom")
+  val numRandTables = EstCC.numParameters("numRandom").toInt
 
   /**
    * The number of randomized tables that must fall below MIRandCutoff to
    * produce a valid estimate.
    */
-  val numTablesForCutoff = EstCC.numParameters("numForCutoff")
+  val numTablesForCutoff = EstCC.numParameters("numForCutoff").toInt
 
   /**
    * Generates all (row, col) bin number tuples.
@@ -424,7 +424,7 @@ object EstimateMI {
     val engine = new MersenneTwister(seed)
 
     // number of randomizations per bin pair
-    val numRandTables = EstCC.numParameters("numRandom")
+    val numRandTables = EstCC.numParameters("numRandom").toInt
 
     // List of inverse sample sizes for all of the resampling reps
     // AND
@@ -458,7 +458,7 @@ object EstimateMI {
       if (EstCC.fracList(f) < 1.0)
     } yield s"${l}_r${binPair._1}_c${binPair}_${
       MathFuncs.roundFrac(EstCC.fracList(f))}_${f % EstCC.numParameters(
-        "repsPerFraction")}"
+        "repsPerFraction").toInt}"
 
     // Return the assembled outputs
     (invFracs, tables, randTables.transpose,
@@ -501,7 +501,7 @@ object EstimateMI {
     } yield s"${l}_r${binPair._1}_c${binPair._2}_${
       MathFuncs.roundFrac(EstCC.fracList(f))
     }_${
-      f % EstCC.numParameters("repsPerFraction")
+      f % EstCC.numParameters("repsPerFraction").toInt
     }"
 
     (invFracs, subSamples, randSubSamples.transpose, tags :+
@@ -715,22 +715,20 @@ object EstimateCC {
    */
   def uniWeight(bounds: Tree, in: List[Double]): List[Weight] =
 
-    if (EstCC.numParameters("uniMuNumber") == 0) Nil
+    if (EstCC.numParameters("uniMuNumber").toInt == 0) Nil
     else {
 
       // Create a list of evenly-distributed means that span the input range
-      // ***Note that the enumeration terminates before 1.0, so there are only
-      // uniMuNumber - 1 entries in muList.***
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
 
-      val uMuFracMin = 1.0 / EstCC.numParameters("uniMuNumber").toDouble
+      val uMuFracMin = 1.0 / (EstCC.numParameters("uniMuNumber") + 1.0)
       val muList = (uMuFracMin until 1.0 by uMuFracMin).toList map
         (x => minVal + (maxVal - minVal) * x)
 
       // Attaches various sigma values to mu values, resulting in a list of
       // (mu, sigma) combinations as a list of Pair[Double]
-      val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber").toDouble
+      val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber")
       val wtParams = for {
         mu <- muList
         i <- (uSigFracMin to 1.0 by uSigFracMin).toList
@@ -769,7 +767,7 @@ object EstimateCC {
     val minVal = if (logSpace) log(in.min) else in.min
     val maxVal = if (logSpace) log(in.max) else in.max
     val minMuDiff =
-      (maxVal - minVal) / EstCC.numParameters("biMuNumber").toDouble
+      (maxVal - minVal) / EstCC.numParameters("biMuNumber")
 
     // Finds maximum SD given certain conditions to parameterize one of the two
     // Gaussians in the bimodal distribution
@@ -785,7 +783,7 @@ object EstimateCC {
 
     // Adds sigma values and relative contributions from the two Gaussians for
     // each mu pair
-    val bSigListMin = 1.0 / EstCC.numParameters("biSigmaNumber").toDouble
+    val bSigListMin = 1.0 / EstCC.numParameters("biSigmaNumber")
     val bRelCont =
       EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
     val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {

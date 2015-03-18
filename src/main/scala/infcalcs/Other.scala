@@ -246,7 +246,7 @@ object OtherFuncs {
       // Check if numParams contains the current key
       else if (p._2 contains l.head._1)
         updateParameters(l.tail,
-          (p._1, p._2 updated (l.head._1, l.head._2.toInt), p._3, p._4))
+          (p._1, p._2 updated (l.head._1, l.head._2.toDouble), p._3, p._4))
       // Check if stringParams contains the current key
       else if (p._3 contains l.head._1)
         updateParameters(l.tail,

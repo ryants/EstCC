@@ -96,6 +96,6 @@ package object infcalcs {
     * that have string values.
     */
   type Parameters =
-    (Map[String, Option[List[Double]]], Map[String, Int], Map[String, String],
+    (Map[String, Option[List[Double]]], Map[String, Double], Map[String, String],
         Map[String, Option[Vector[NTuple[Double]]]])
 }

@@ -74,7 +74,7 @@ object EstCC extends App with CLOpts {
   var fracList = ({
     for {
       f <- listParameters("sampleFractions").get
-      n <- 0 until numParameters("repsPerFraction")
+      n <- 0 until numParameters("repsPerFraction").toInt
     } yield f
   } :+ 1.0).toVector
 
@@ -126,7 +126,7 @@ object EstCC extends App with CLOpts {
   // Calculate and output estimated mutual information values given calculated
   // weights
 
-  if (numParameters("biMuNumber") == 0 && numParameters("uniMuNumber") == 0) {
+  if (numParameters("biMuNumber").toInt == 0 && numParameters("uniMuNumber").toInt == 0) {
     val unifEst = genEstimatesMult(p, bins, genSeed(rEngine))
     val unifOpt = EstimateMI.optMIMult(unifEst)
     val unifRes = getResultsMult(List(unifEst), addLabel(outF, "_unif"))

@@ -882,7 +882,7 @@ object EstimateCC {
       def weights(ib: Pair[Int]): Weight = {
         val wt = 1.0 / (ib._2 - ib._1 + 1.0).toDouble
         val wtList = indices map (x =>
-          if (ib._1 <= x && x <= ib._2) wt else 0.0)
+          if (ib._1 <= x && x <= ib._2) wt else 0.0) map normWeight(bounds)
         (wtList, "PWU(%d, %d)" format (ib._1, ib._2))
       }
 

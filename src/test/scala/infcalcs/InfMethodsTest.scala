@@ -268,8 +268,10 @@ class EstimateMITest extends FlatSpec with Matchers {
 
 class EstimateCCTest extends FlatSpec with Matchers {
 
+  import OtherFuncs.updateParameters
+  
   // Mock up the global parameters in EstCC
-  val parameters = InfConfig.defaultParameters
+  val parameters = updateParameters(List(("biMuNumber","3")),InfConfig.defaultParameters)
   EstCC.parameters = parameters
   EstCC.listParameters = parameters._1
   EstCC.numParameters = parameters._2
@@ -288,8 +290,14 @@ class EstimateCCTest extends FlatSpec with Matchers {
     val rd = pl sigDelims numBins._1
     val uniWts = genWeights(rd, pl.sig, uniWeight)
     uniWts.length shouldBe
-      (EstCC.numParameters("uniMuNumber").toInt - 1) *
+      (EstCC.numParameters("uniMuNumber").toInt) *
       EstCC.numParameters("uniSigmaNumber").toInt
+  }
+  
+  it should "generate bimodel Gaussian weights" in {
+    val rd = pl sigDelims numBins._1
+    val biWts = genWeights(rd, pl.sig, biWeight)
+    biWts.length > 1
   }
 }
 

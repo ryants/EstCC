@@ -722,16 +722,17 @@ object EstimateCC {
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
 
-      val uMuFracMin = 1.0 / (EstCC.numParameters("uniMuNumber") + 1.0)
-      val muList = (uMuFracMin until 1.0 by uMuFracMin).toList map
-        (x => minVal + (maxVal - minVal) * x)
+      val uMuFracList = ((1 to EstCC.numParameters("uniMuNumber").toInt) map (x => 
+          x * (1.0 / (1.0 + x.toDouble)))).toList
+      val muList = uMuFracList map (x => minVal + (maxVal - minVal) * x)
 
       // Attaches various sigma values to mu values, resulting in a list of
       // (mu, sigma) combinations as a list of Pair[Double]
-      val uSigFracMin = 1.0 / EstCC.numParameters("uniSigmaNumber")
+      val uSigFracList = ((1 to EstCC.numParameters("uniSigmaNumber").toInt) map (x => 
+          x * (1.0 / (1.0 + x.toDouble)))).toList
       val wtParams = for {
         mu <- muList
-        i <- (uSigFracMin to 1.0 by uSigFracMin).toList
+        i <- uSigFracList
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
 
       def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format (
@@ -762,64 +763,66 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(bounds: Tree, in: List[Double]): List[Weight] = {
+  def biWeight(bounds: Tree, in: List[Double]): List[Weight] = 
 
-    val minVal = if (logSpace) log(in.min) else in.min
-    val maxVal = if (logSpace) log(in.max) else in.max
-    val minMuDiff =
-      (maxVal - minVal) / EstCC.numParameters("biMuNumber")
+    if (EstCC.numParameters("biMuNumber") < 3) Nil
+    else {
+      val minVal = if (logSpace) log(in.min) else in.min
+      val maxVal = if (logSpace) log(in.max) else in.max
+      val minMuDiff =
+        (maxVal - minVal) / (EstCC.numParameters("biMuNumber") + 1.0)
 
-    // Finds maximum SD given certain conditions to parameterize one of the two
-    // Gaussians in the bimodal distribution
-    def maxSD(mPair: Pair[Double], b: Double): Double =
-      List((mPair._2 - mPair._1) / 4.0,
-        (mPair._1 - b).abs / 3.0, (b - mPair._2).abs / 3.0).min
+      // Finds maximum SD given certain conditions to parameterize one of the two
+      // Gaussians in the bimodal distribution
+      def maxSD(mPair: Pair[Double], b: Double): Double =
+        List((mPair._2 - mPair._1) / 4.0,
+          (mPair._1 - b).abs / 3.0, (b - mPair._2).abs / 3.0).min
 
-    // Generates mu pairs for the two modes
-    val mp = for {
-      m1 <- (minMuDiff + minVal until maxVal by minMuDiff).toList
-      m2 <- (minMuDiff + m1 until maxVal by minMuDiff).toList
-    } yield (m1, m2)
+      // Generates mu pairs for the two modes
+      val mp = for {
+        i1 <- (1 until EstCC.numParameters("biMuNumber").toInt-1)
+        i2 <- (i1+1 until EstCC.numParameters("biMuNumber").toInt)
+      } yield (minVal + i1*minMuDiff, minVal + i2*minMuDiff)
 
-    // Adds sigma values and relative contributions from the two Gaussians for
-    // each mu pair
-    val bSigListMin = 1.0 / EstCC.numParameters("biSigmaNumber")
-    val bRelCont =
-      EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
-    val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
-      p <- mp
-      s <- (bSigListMin until 1.0 by bSigListMin).toList map
-        (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
-      if (s._1 > 0.0001 && s._2 > 0.0001)
-      w <- bRelCont
-    } yield (p, s, w)
+      // Adds sigma values and relative contributions from the two Gaussians for
+      // each mu pair
+      val bSigFracList = ((1 to EstCC.numParameters("biSigmaNumber").toInt) map (x => 
+          x * (1.0 / (1.0 + x.toDouble)))).toList
+      val bRelCont =
+        EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
+      val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
+        p <- mp.toList
+        s <- bSigFracList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
+        if (s._1 > 0.0001 && s._2 > 0.0001)
+        w <- bRelCont
+      } yield (p, s, w)
 
-    // Constructs a string label for each weight
-    def genWeightLabel(t: (Pair[Double], Pair[Double], Pair[Double])) = {
-      val gauss1 = "G1(%1.2f, %1.2f)" format (t._1._1, t._2._1)
-      val gauss2 = "G2(%1.2f, %1.2f)" format (t._1._2, t._2._2)
-      s"${t._3._1} * ${gauss1}, ${t._3._2} * ${gauss2}"
+      // Constructs a string label for each weight
+      def genWeightLabel(t: (Pair[Double], Pair[Double], Pair[Double])) = {
+        val gauss1 = "G1(%1.2f, %1.2f)" format (t._1._1, t._2._1)
+        val gauss2 = "G2(%1.2f, %1.2f)" format (t._1._2, t._2._2)
+        s"${t._3._1} * ${gauss1}, ${t._3._2} * ${gauss2}"
+      }
+
+      // Calculates and tests weights. Takes a tuple containing parameters for a
+      // bimodal Gaussian and makes sure that the proposed weights cover a
+      // sufficient range of the inputs
+      def weights(
+        t: (Pair[Double], Pair[Double], Pair[Double])): Weight = {
+        val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
+        val boundList = bounds.toList
+        def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
+        val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
+        val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
+          for (x <- 0 until (boundList.length - 1)) yield calcWeight(
+              wtFunc, boundList(x), boundList(x + 1))
+        }.toList)
+        (rawWeights map normWeight(bounds), genWeightLabel(t))
+      }
+      // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
+      // return
+      for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
     }
-
-    // Calculates and tests weights. Takes a tuple containing parameters for a
-    // bimodal Gaussian and makes sure that the proposed weights cover a
-    // sufficient range of the inputs
-    def weights(
-      t: (Pair[Double], Pair[Double], Pair[Double])): Weight = {
-      val muPair = t._1; val sigmaPair = t._2; val pPair = t._3
-      val boundList = bounds.toList
-      def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
-      val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
-      val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
-        for (x <- 0 until (boundList.length - 1)) yield calcWeight(
-            wtFunc, boundList(x), boundList(x + 1))
-      }.toList)
-      (rawWeights map normWeight(bounds), genWeightLabel(t))
-    }
-    // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
-    // return
-    for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
-  }
 
   /**
    * Generates a list of weights for n-dim input data

@@ -3,6 +3,8 @@
 Code to estimate the channel capacity between a set of (signal, response)
 ordered pairs
 
+![Build status](https://travis-ci.org/ryants/EstCC.svg?branch=master)
+
 ### DEPENDENCIES
 
 Built using scala v2.11.0, sbt v0.13.5, and java v1.7.0_51. In order to build

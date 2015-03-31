@@ -722,14 +722,16 @@ object EstimateCC {
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
 
-      val uMuFracList = ((1 to EstCC.numParameters("uniMuNumber").toInt) map (x => 
-          x * (1.0 / (1.0 + x.toDouble)))).toList
+      val numMu = EstCC.numParameters("uniMuNumber").toInt
+      val uMuFracList = ((1 to numMu) map (x => 
+          x * (1.0 / (1.0 + numMu)))).toList
       val muList = uMuFracList map (x => minVal + (maxVal - minVal) * x)
 
       // Attaches various sigma values to mu values, resulting in a list of
       // (mu, sigma) combinations as a list of Pair[Double]
-      val uSigFracList = ((1 to EstCC.numParameters("uniSigmaNumber").toInt) map (x => 
-          x * (1.0 / (1.0 + x.toDouble)))).toList
+      val numSig = EstCC.numParameters("uniSigmaNumber").toInt
+      val uSigFracList = ((1 to numSig) map (x => 
+          x * (1.0 / (1.0 + numSig)))).toList
       val wtParams = for {
         mu <- muList
         i <- uSigFracList
@@ -786,8 +788,9 @@ object EstimateCC {
 
       // Adds sigma values and relative contributions from the two Gaussians for
       // each mu pair
-      val bSigFracList = ((1 to EstCC.numParameters("biSigmaNumber").toInt) map (x => 
-          x * (1.0 / (1.0 + x.toDouble)))).toList
+      val numSig = EstCC.numParameters("biSigmaNumber").toInt
+      val bSigFracList = ((1 to numSig) map (x => 
+          x * (1.0 / (1.0 + numSig)))).toList
       val bRelCont =
         EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
       val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {

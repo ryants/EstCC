@@ -133,8 +133,9 @@ object CTBuild {
    *
    * Makes use of [[DRData.calcBinKey]] to map index pair to single index
    *
-   * @param pair ordered pair data point to be inserted into contingency table
-   * @param binDelims pair of delimiting trees used to determine respective
+   * @param tuple (possibly multidimensional) data point to be inserted into 
+   * contingency table
+   * @param binDelims tuple of delimiting trees used to determine respective
    * bin indices
    * @param v vector of bin indices, whose index is used for insertion into
    * the contingency table
@@ -146,9 +147,17 @@ object CTBuild {
     binDelims: NTuple[Tree],
     v: Vector[NTuple[Int]]): Int = {
 
-    val indices = Range(0, tuple.length).toVector map (x =>
+    val indices: IndexedSeq[Int] = Range(0, tuple.length) map (x =>
       findIndex(tuple(x), binDelims(x)))
-    v indexOf indices
+    
+    @tailrec
+    def myIndexOf(vect: Vector[NTuple[Int]], ind: IndexedSeq[Int], elem: Int): Int = 
+      if (vect.head == ind) elem
+      else {
+        myIndexOf(vect.tail, ind, elem+1)
+      }
+    
+    myIndexOf(v, indices, 0)
 
   }
 

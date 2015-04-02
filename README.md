@@ -8,9 +8,8 @@ ordered pairs
 ### DEPENDENCIES
 
 Built using scala v2.11.0, sbt v0.13.5, and java v1.7.0_51. In order to build
-an executable JAR file, run `sbt one-jar` in the project's root directory
-to generate the JAR file.  Additional information on this plugin can be found 
-at https://github.com/sbt/sbt-onejar
+an executable JAR file, run `sbt one-jar` in the project's root directory. 
+Additional information on this plugin can be found at https://github.com/sbt/sbt-onejar
 
 This code also contains a number of methods from the [Colt Project](http://acs.lbl.gov/software/colt/).  This 
 dependency is included in the build.sbt file.

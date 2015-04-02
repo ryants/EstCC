@@ -8,7 +8,7 @@ biPeakWeights	0.4 0.5 0.6
 
 numRandom	10
 numForCutoff	1
-cutoffValue	0.0
+cutoffValue	0
 uniMuNumber	4
 uniSigmaNumber	5
 biMuNumber	5

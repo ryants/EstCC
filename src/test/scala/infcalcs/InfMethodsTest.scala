@@ -392,8 +392,8 @@ class MultiVarTest extends FlatSpec with Matchers {
     EstCC.valueParameters = InfConfig.defaultParameters._4
     val data5 = new DRData(testValues2, testValues2)
     val bins = 2
-    data5 sigKey bins shouldBe Vector(Vector(0, 0), Vector(0, 1), Vector(1, 0),
-      Vector(1, 1))
+    data5 sigKey bins shouldBe Map(Vector(0, 0)->0, Vector(0, 1)->1, Vector(1, 0)->2,
+      Vector(1, 1)->3)
     (data5 sigDelims bins).length shouldBe 2
     (data5 sigDelims bins) map (_.entries) shouldBe Vector(2, 2)
     //1s exist in both partitions of the second dimension

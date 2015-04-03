@@ -145,19 +145,12 @@ object CTBuild {
   def findVectIndex(
     tuple: NTuple[Double],
     binDelims: NTuple[Tree],
-    v: Vector[NTuple[Int]]): Int = {
+    m: Map[NTuple[Int],Int]): Int = {
 
-    val indices: IndexedSeq[Int] = Range(0, tuple.length) map (x =>
-      findIndex(tuple(x), binDelims(x)))
+    val indices: Vector[Int] = (Range(0, tuple.length) map (x =>
+      findIndex(tuple(x), binDelims(x)))).toVector
     
-    @tailrec
-    def myIndexOf(vect: Vector[NTuple[Int]], ind: IndexedSeq[Int], elem: Int): Int = 
-      if (vect.head == ind) elem
-      else {
-        myIndexOf(vect.tail, ind, elem+1)
-      }
-    
-    myIndexOf(v, indices, 0)
+    m(indices)
 
   }
 
@@ -178,8 +171,8 @@ object CTBuild {
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
 
-    val tDimR = sigKey.length
-    val tDimC = respKey.length
+    val tDimR = sigKey.size
+    val tDimC = respKey.size
 
     val table = {
       for {
@@ -620,7 +613,7 @@ object EstimateMI {
     seed: Int,
     wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] = {
 
-    val tDims = (x: Pair[Int]) => ((pl sigKey x._1).length, (pl respKey x._2).length)
+    val tDims = (x: Pair[Int]) => ((pl sigKey x._1).size, (pl respKey x._2).size)
 
     binTupList map
       (bt => (tDims(bt), multIntercepts(calcMultRegs(

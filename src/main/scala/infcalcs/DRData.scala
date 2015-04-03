@@ -29,8 +29,8 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   
   var exSigDelims: HashMap[Int, NTuple[Tree]] = HashMap()
   var exRespDelims: HashMap[Int, NTuple[Tree]] = HashMap()
-  var exSigKeys: HashMap[Int, Vector[NTuple[Int]]] = HashMap()
-  var exRespKeys: HashMap[Int, Vector[NTuple[Int]]] = HashMap()
+  var exSigKeys: HashMap[Int, Map[NTuple[Int],Int]] = HashMap()
+  var exRespKeys: HashMap[Int, Map[NTuple[Int],Int]] = HashMap()
 
   lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
@@ -73,10 +73,11 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
    *  
    */
   private def calcBinKey(
-    trees: NTuple[Tree]): Vector[NTuple[Int]] = {
+    trees: NTuple[Tree]): Map[NTuple[Int],Int] = {
 
     val dimLengths = trees map (_.toList.length)
-    CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
+    val vtups = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
+    ((0 until vtups.length) map (x => (vtups(x),x))).toMap
   }
 
   private def delims(
@@ -92,9 +93,9 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     }
 
   private def keys(
-    h: HashMap[Int, Vector[NTuple[Int]]],
+    h: HashMap[Int, Map[NTuple[Int],Int]],
     trees: NTuple[Tree],
-    nb: Int): Vector[NTuple[Int]] =
+    nb: Int): Map[NTuple[Int],Int] =
     if (h contains nb) h(nb)
     else {
       val k = calcBinKey(trees)
@@ -107,9 +108,9 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   def respDelims(numBins: Int): NTuple[Tree] =
     delims(respVals, resp, exRespDelims, numBins)
 
-  def sigKey(numBins: Int): Vector[NTuple[Int]] =
+  def sigKey(numBins: Int): Map[NTuple[Int],Int] =
     keys(exSigKeys, sigDelims(numBins), numBins)
-  def respKey(numBins: Int): Vector[NTuple[Int]] =
+  def respKey(numBins: Int): Map[NTuple[Int],Int] =
     keys(exRespKeys, respDelims(numBins), numBins)
     
   override def toString() = 

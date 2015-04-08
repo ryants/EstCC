@@ -58,8 +58,8 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     numBins: Int): NTuple[Tree] =
 
     if (valuesPresent)
-      (data.transpose.view map (_.toSet.toList) map (x =>
-        TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
+      (EstCC.valueParameters("signalValues").get.transpose map (_.toSet.toList) map 
+        (x => TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
     else
       (data.transpose map (z => CTBuild.getBinDelims(z, numBins))).toVector
 
@@ -118,5 +118,16 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
       s"${sig(x)}\t${resp(x)}\n"
     }).mkString
   
-
+  def toFile(f: String) = {
+    val writer =
+      new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
+    for (i <- (0 until sig.length).toList) {
+      writer.write(s"${sig(i).mkString(" ")}\t${resp(i).mkString(" ")}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+    
+    
 }

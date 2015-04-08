@@ -7,7 +7,7 @@ import TreeDef._
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
   import cern.jet.random.engine.MersenneTwister
-
+  import EstimateMI.makeUniform
   /**
    * Divides list into sublists with approximately equal numbers of elements.
    *
@@ -170,7 +170,7 @@ object CTBuild {
 
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
-
+    
     val tDimR = sigKey.size
     val tDimC = respKey.size
 
@@ -200,11 +200,13 @@ object CTBuild {
       }
     }
 
-    val ct = eng match {
-      case Some(e) => addValues(table,
-        (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
-      case None => addValues(table, (data.zippedVals).toList)
-    }
+    val ct = makeUniform(
+      eng match {
+        case Some(e) => addValues(table,
+          (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
+        case None => addValues(table, (data.zippedVals).toList)
+      }
+    )
 
     weights match {
       case None => new ConstructedTable(ct)
@@ -551,7 +553,7 @@ object EstimateMI {
   def calcMultRegs(r: RegDataMult): (SLR, List[Option[SLR]]) = {
     // Regression on original data
     val regLine = new SLR(r._1, r._2 map (_.mutualInformation), r._4.last)
-    //regLine.toFile(s"rd_${regLine.label}.dat")
+    // regLine.toFile(s"rd_${regLine.label}.dat")
     // Regression on randomized data
     val regdataRand =
       (0 until numRandTables).toList map (x => ((r._1, r._2, r._3(x), r._4),x))

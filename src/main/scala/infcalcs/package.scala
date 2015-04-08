@@ -93,7 +93,7 @@ package object infcalcs {
    * Data containing a pair of bin numbers, a corresponding list of (mean, 95conf) 
    * estimates and an optional weight
    */
-  type EstTuple = (Pair[Int], List[Pair[Double]], Option[Weight])
+  type EstTuple = (Pair[NTuple[Int]], List[Pair[Double]], Option[Weight])
 
   /** Tuple containing configuration parameters.
     *

@@ -133,9 +133,7 @@ object IOFile {
    * optional weight)
    * @param f Name of the file to write.
    */
-  def estimatesToFileMult(
-    d: List[EstTuple],
-    f: String): Unit = {
+  def estimatesToFileMult(d: Vector[EstTuple], f: String): Unit = {
     val numRandTables = EstCC.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map
@@ -148,9 +146,11 @@ object IOFile {
     }
     writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
+    
     val lines =
-      for (x <- d) yield s"${x._1._1} ${x._1._2} ${x._2.head._1} ${x._2.head._2} " +
-        (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
+      for (x <- d) yield s"${x._1._1.mkString(",")} ${x._1._2.mkString(",")} " + 
+        "${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (
+            y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)
       writer.newLine()

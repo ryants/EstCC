@@ -52,23 +52,43 @@ object EstCC extends App with CLOpts {
   var listParameters = parameters._1
   var numParameters = parameters._2
   var stringParameters = parameters._3
-  var valueParameters = parameters._4
+  var srParameters = parameters._4
 
   // Load data given pair of columns
   val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)
   val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
   val p = loadList(dataFile, sigCols, respCols)
   
+  val sigDim = sigCols.length
+  val respDim = respCols.length
+  
   // Determine number of response bins if values not specified
-  val responseBins: List[Int] = valueParameters("responseValues") match {
-    case None => listParameters("responseBins").get map (_.toInt)
-    case Some(x) => List(x.length)
+  val responseBins: Vector[Vector[Int]] = srParameters("responseValues") match {
+    case None => srParameters("responseBins") match {
+      case None => throw new Exception(
+          "must specify either responseBins or responseValues in parameter file"
+          )
+      case Some(x) => x map (y => y map (_.toInt))
+    }
+    case Some(x) => {
+      val xt = x.transpose
+      assert(xt.length == respDim)
+      Vector(xt map (_.toSet.size))
+    }
   }
 
   // Determine number of signal bins if values not specified
-  val signalBins: List[Int] = valueParameters("signalValues") match {
-    case None => listParameters("signalBins").get map (_.toInt)
-    case Some(x) => List(x.length)
+  val signalBins: Vector[Vector[Int]] = srParameters("signalValues") match {
+    case None => srParameters("signalBins") match {
+      case None => throw new Exception(
+          "must specify either signalBins or signalValues in parameter file")
+      case Some(x) => x map (y => y map (_.toInt))
+    }
+    case Some(x) => {
+      val xt = x.transpose
+      assert(xt.length == sigDim)
+      Vector(xt map (_.toSet.size))
+    }
   }
 
   //Mutable variable for testing purposes
@@ -89,28 +109,38 @@ object EstCC extends App with CLOpts {
   }
     
   //Confirm that there are fewer (or an equal number of) bins than data entries
-  //for the lowest fraction of jackknifed data
-  valueParameters("signalValues") match {
-    case None => Predef.require(p.sig.length * 
-        listParameters("sampleFractions").get.min >= 
-          listParameters("signalBins").get.max,
-        "number of signal bins must be less than the smallest jackknifed " +
-        "data sample") 
-    case Some(x) => 
+  //for the lowest fraction of jackknifed data in each dimension
+  srParameters("signalValues") match {
+    case None => {
+      val ptSig = p.sig.transpose map (_.toSet.size)
+      val pbSigMax = srParameters("signalBins").get.transpose map (_.max)
+       Predef.require((0 until ptSig.length).foldLeft(true){ (prev, x) =>
+         val test = 
+           listParameters("sampleFractions").get.min * pbSigMax(x) <= ptSig(x)
+         prev && test
+       },"number of signal bins must be less than the smallest jackknifed " +
+        "data sample")
+    }
+    case Some(x) =>
   }
-  valueParameters("responseValues") match {
-    case None => Predef.require(p.resp.length * 
-        listParameters("sampleFractions").get.min >= 
-          listParameters("responseBins").get.max,
-        "number of response bins must be less than the smallest jackknifed " +
-        "data sample") 
+  srParameters("responseValues") match {
+    case None => {
+      val ptResp = p.resp.transpose map (_.toSet.size)
+      val pbRespMax = srParameters("responseBins").get.transpose map (_.max)
+      Predef.require((0 until ptResp.length).foldLeft(true){ (prev, x) => 
+        val test =
+          listParameters("sampleFractions").get.min * pbRespMax(x) <= ptResp(x)
+        prev && test
+      },"number of signal bins must be less than the smallest jackknifed " +
+        "data sample")
+    }  
     case Some(x) =>
   }
   
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
-  val signalTrees: List[NTuple[Tree]] = signalBins map (x => p sigDelims x)
-  val aw: List[List[Weight]] =
+  val signalTrees: Vector[NTuple[Tree]] = signalBins map (x => p sigDelims x)
+  val aw: Vector[List[Weight]] =
     signalTrees map (y => List(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
           genWeights(y, p.sig, pwWeight)).flatten)
   

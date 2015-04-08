@@ -251,7 +251,7 @@ object OtherFuncs {
       else if (p._3 contains l.head._1)
         updateParameters(l.tail,
           (p._1, p._2, p._3 updated (l.head._1, l.head._2), p._4))
-      // Check if valueParams is to be updated
+      // Check if *values needs to be updated
       else if (l.head._1 matches ".*Vals[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
@@ -263,6 +263,19 @@ object OtherFuncs {
             (p._1, p._2, p._3,
               p._4 updated ("signalValues",
                 stringToValList(l.head._2, p._4("signalValues")))))
+        else throw new Exception(s"illegal parameter: ${l.head._1}")
+      // Check if *bins needs to be updated
+      else if (l.head._1 matches ".*Bins[0-9]*")
+        if (l.head._1 matches "^resp.*")
+          updateParameters(l.tail,
+            (p._1, p._2, p._3,
+              p._4 updated ("responseBins",
+                stringToValList(l.head._2, p._4("responseBins")))))
+        else if (l.head._1 matches "^sig.*")
+          updateParameters(l.tail,
+            (p._1, p._2, p._3,
+              p._4 updated ("signalBins",
+                stringToValList(l.head._2, p._4("signalBins")))))
         else throw new Exception(s"illegal parameter: ${l.head._1}")
       // The key was not found! Throw an exception
       else throw new Exception(s"illegal parameter: ${l.head._1}")

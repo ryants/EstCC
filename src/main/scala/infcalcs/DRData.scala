@@ -21,16 +21,16 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
 
   lazy val zippedVals = (sig, resp).zipped.toSeq
   
-  lazy val sigVals = EstCC.valueParameters("signalValues") != None
-  lazy val respVals = EstCC.valueParameters("responseValues") != None
+  lazy val sigVals = EstCC.srParameters("signalValues") != None
+  lazy val respVals = EstCC.srParameters("responseValues") != None
   
   val sigDim = dim(sig)
   val respDim = dim(resp)
   
-  var exSigDelims: HashMap[Int, NTuple[Tree]] = HashMap()
-  var exRespDelims: HashMap[Int, NTuple[Tree]] = HashMap()
-  var exSigKeys: HashMap[Int, Map[NTuple[Int],Int]] = HashMap()
-  var exRespKeys: HashMap[Int, Map[NTuple[Int],Int]] = HashMap()
+  var exSigDelims: HashMap[NTuple[Int], NTuple[Tree]] = HashMap()
+  var exRespDelims: HashMap[NTuple[Int], NTuple[Tree]] = HashMap()
+  var exSigKeys: HashMap[NTuple[Int], Map[NTuple[Int],Int]] = HashMap()
+  var exRespKeys: HashMap[NTuple[Int], Map[NTuple[Int],Int]] = HashMap()
 
   lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
@@ -55,13 +55,15 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def getDelims(
     valuesPresent: Boolean,
     data: Vector[NTuple[Double]],
-    numBins: Int): NTuple[Tree] =
+    numBins: NTuple[Int]): NTuple[Tree] =
 
     if (valuesPresent)
-      (EstCC.valueParameters("signalValues").get.transpose map (_.toSet.toList) map 
+      (EstCC.srParameters("signalValues").get.transpose map (_.toSet.toList) map 
         (x => TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
-    else
-      (data.transpose map (z => CTBuild.getBinDelims(z, numBins))).toVector
+    else {
+      val dt = data.transpose
+      ((0 until dim(data)) map (x => CTBuild.getBinDelims(dt(x),numBins(x)))).toVector
+    }
 
   /** 
    *  Calculates key for vector of bin-delimiting trees
@@ -83,8 +85,8 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
   private def delims(
     v: Boolean,
     data: Vector[NTuple[Double]],
-    h: HashMap[Int, NTuple[Tree]],
-    nb: Int): NTuple[Tree] =
+    h: HashMap[NTuple[Int], NTuple[Tree]],
+    nb: NTuple[Int]): NTuple[Tree] =
     if (h contains nb) h(nb)
     else {
       val d = getDelims(v, data, nb)
@@ -93,9 +95,9 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     }
 
   private def keys(
-    h: HashMap[Int, Map[NTuple[Int],Int]],
+    h: HashMap[NTuple[Int], Map[NTuple[Int],Int]],
     trees: NTuple[Tree],
-    nb: Int): Map[NTuple[Int],Int] =
+    nb: NTuple[Int]): Map[NTuple[Int],Int] =
     if (h contains nb) h(nb)
     else {
       val k = calcBinKey(trees)
@@ -103,14 +105,14 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
       k
     }
 
-  def sigDelims(numBins: Int): NTuple[Tree] =
+  def sigDelims(numBins: NTuple[Int]): NTuple[Tree] =
     delims(sigVals, sig, exSigDelims, numBins)
-  def respDelims(numBins: Int): NTuple[Tree] =
+  def respDelims(numBins: NTuple[Int]): NTuple[Tree] =
     delims(respVals, resp, exRespDelims, numBins)
 
-  def sigKey(numBins: Int): Map[NTuple[Int],Int] =
+  def sigKey(numBins: NTuple[Int]): Map[NTuple[Int],Int] =
     keys(exSigKeys, sigDelims(numBins), numBins)
-  def respKey(numBins: Int): Map[NTuple[Int],Int] =
+  def respKey(numBins: NTuple[Int]): Map[NTuple[Int],Int] =
     keys(exRespKeys, respDelims(numBins), numBins)
     
   override def toString() = 

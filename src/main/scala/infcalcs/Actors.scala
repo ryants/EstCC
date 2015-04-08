@@ -13,6 +13,7 @@ object Actors {
   case class Result(res: EstTuple)
 
   class Distributor(wts: List[List[Weight]]) extends Actor {
+
     val numLists = wts.length //quantity of considered signal bin numbers
     var rLists = wts.length //remaining signal bin numbers
 
@@ -48,7 +49,7 @@ object Actors {
           if (EstCC.config.verbose){
             println("calculation finished, estimated channel capacity:")
           }
-          val maxOpt = EstimateMI.optMIMult(estList.toList)
+          val maxOpt = EstimateMI.optMIMult(estList.toVector)
           EstimateMI.finalEstimation(
               maxOpt._1,
               EstCC.p,

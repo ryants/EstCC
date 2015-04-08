@@ -165,7 +165,7 @@ object CTBuild {
    */
   def buildTable(eng: Option[MersenneTwister])(
     data: DRData,
-    nb: Pair[Int],
+    nb: Pair[NTuple[Int]],
     weights: Option[Weight] = None): ConstructedTable = {
 
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
@@ -253,8 +253,8 @@ object EstimateMI {
    * (1, 4), (2, 3), (2, 4)).
    */
   def genBins(
-    binList: List[Int],
-    otherBinList: List[Int] = List()): List[Pair[Int]] = {
+    binList: Vector[Vector[Int]],
+    otherBinList: Vector[Vector[Int]] = Vector(Vector())): Vector[Pair[Vector[Int]]] = {
     val cBinList = if (otherBinList.isEmpty) binList else otherBinList
     for (r <- binList; c <- cBinList) yield (r, c)
   }
@@ -419,7 +419,7 @@ object EstimateMI {
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
   def buildDataMult(
-    binPair: Pair[Int],
+    binPair: Pair[NTuple[Int]],
     data: DRData,
     seed: Int,
     wts: Option[Weight] = None): RegDataMult = {
@@ -474,7 +474,7 @@ object EstimateMI {
    * Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
    */
   def bDMAlt(
-    binPair: Pair[Int],
+    binPair: Pair[NTuple[Int]],
     data: DRData,
     seed: Int,
     wts: Option[Weight] = None): RegDataMult = {
@@ -611,15 +611,14 @@ object EstimateMI {
    */
   def genEstimatesMult(
     pl: DRData,
-    binTupList: List[Pair[Int]],
+    binTupList: Vector[Pair[NTuple[Int]]],
     seed: Int,
-    wts: Option[Weight] = None): List[EstTuple] = {
-
-    val tDims = (x: Pair[Int]) => ((pl sigKey x._1).size, (pl respKey x._2).size)
+    wts: Option[Weight] = None): Vector[EstTuple] = {
 
     binTupList map
-      (bt => (tDims(bt), multIntercepts(calcMultRegs(
+      (bt => (bt, multIntercepts(calcMultRegs(
         buildDataMult(bt, pl, seed, wts))),wts))
+
   }
 
   /**
@@ -636,26 +635,21 @@ object EstimateMI {
    * @return Entry from the list d the optimizes the MI estimate.
    */
   def optMIMult(
-    d: List[EstTuple]): EstTuple = {
-
+      d: Vector[EstTuple]): EstTuple = {
     // Finds maximum value
     @tailrec
     def opt(
-      i: EstTuple,
-      ds: List[EstTuple]): EstTuple =
+        i: EstTuple,
+        ds: Vector[EstTuple]): EstTuple =
       if (ds.isEmpty) i
       else {
         val v = ds.head._2.head._1
         if (i._2.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
       }
-    
-    //to initialize opt
-    val base = 
-      ((0, 0), (0 until d.head._2.length).toList map (x => (0.0, 0.0)), None)
+    val baseTuple = (d.head._1._1 map (x => 0),d.head._1._2 map (x => 0))
+    val base = (baseTuple, (0 until d.head._2.length).toList map (x => (0.0, 0.0)),None)
 
-    // Determines if estimates are biased using randomization data sets
-    def removeBiased(l: List[EstTuple]): List[EstTuple] = {
-
+    def removeBiased(l: Vector[EstTuple]): Vector[EstTuple] = {
       // Determines if estimate is biased given mutual information of
       // randomized data and the specified cutoff value
       @tailrec
@@ -671,7 +665,7 @@ object EstimateMI {
   }
   
   def finalEstimation(
-      binPair: Pair[Int], 
+      binPair: Pair[NTuple[Int]], 
       data: DRData, 
       seed: Int, 
       wts: Option[Weight]): Unit = {
@@ -931,7 +925,7 @@ object EstimateCC {
    * @return The maximum MI estimate.
    */
   def getResultsMult(
-      est: List[List[EstTuple]],
+      est: Vector[Vector[EstTuple]],
       filePrefix: Option[String]): EstTuple = {
     filePrefix match {
       case Some(f) =>
@@ -1007,7 +1001,7 @@ object EstimateCC {
     optList = optList :+ opt
     println(s"  1) Weight: None, Est. MI: ${opt._2(0)._1} " +
       s"${0xB1.toChar} ${opt._2(0)._2}")
-    val maxOpt = EstimateMI.optMIMult(optList.toList)
+    val maxOpt = EstimateMI.optMIMult(optList.toVector)
     EstimateMI.finalEstimation(
         maxOpt._1,
         pl,

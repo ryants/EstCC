@@ -209,7 +209,7 @@ object CTBuild {
     )
 
     weights match {
-      case None => new ConstructedTable(ct)
+      case None => new ConstructedTable(makeUniform(ct))
       case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 

@@ -90,6 +90,10 @@ object EstCC extends App with CLOpts {
       Vector(xt map (_.toSet.size))
     }
   }
+  
+  //confirm that bin dimensions correspond to data dimensions
+  assert((signalBins map (x => x.length)).foldLeft(true)((x,y) => x && y== sigDim))
+  assert((responseBins map (x => x.length)).foldLeft(true)((x,y) => x && y== respDim))
 
   //Mutable variable for testing purposes
   var fracList = ({

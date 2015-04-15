@@ -18,6 +18,11 @@ object CTBuild {
    * will contain k+1 elements, while all preceding bins will contain k
    * elements. Therefore the number of elements in the bins will not differ by
    * more than one.
+   * 
+   * Note that the maximum from each List element becomes a bin delimiter, so
+   * if the sequence of Doubles is partitioned such that the maximum in more 
+   * than one distinct List elements is identical, the bins in question are 
+   * effectively collapsed into one bin 
    *
    * @param v The list of doubles to be partitioned.
    * @param numBins The number of bins to divide the list into.
@@ -200,16 +205,14 @@ object CTBuild {
       }
     }
 
-    val ct = makeUniform(
-      eng match {
+    val ct = eng match {
         case Some(e) => addValues(table,
           (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
         case None => addValues(table, (data.zippedVals).toList)
       }
-    )
 
     weights match {
-      case None => new ConstructedTable(makeUniform(ct))
+      case None => new ConstructedTable(ct)
       case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 
@@ -236,15 +239,6 @@ object CTBuild {
 object EstimateMI {
   import CTBuild.{ buildTable, weightSignalData }
   import cern.jet.random.engine.MersenneTwister
-
-  /** Number of data randomizations to determine bin-based calculation bias. */
-  val numRandTables = EstCC.numParameters("numRandom").toInt
-
-  /**
-   * The number of randomized tables that must fall below MIRandCutoff to
-   * produce a valid estimate.
-   */
-  val numTablesForCutoff = EstCC.numParameters("numForCutoff").toInt
 
   /**
    * Generates all (row, col) bin number tuples.
@@ -480,6 +474,7 @@ object EstimateMI {
     wts: Option[Weight] = None): RegDataMult = {
 
     val engine = new MersenneTwister(seed)
+    val numRandTables = EstCC.numParameters("numRandom").toInt
 
     // generates data with subSample method
     val table = buildTable(None)(data, binPair, wts)
@@ -556,7 +551,8 @@ object EstimateMI {
     // regLine.toFile(s"rd_${regLine.label}.dat")
     // Regression on randomized data
     val regdataRand =
-      (0 until numRandTables).toList map (x => ((r._1, r._2, r._3(x), r._4),x))
+      (0 until EstCC.numParameters("numRandom").toInt).toList map (x => 
+        ((r._1, r._2, r._3(x), r._4),x))
     val regLinesRand = regdataRand map (x => calcRandRegs(x._1,x._2))
     (regLine, regLinesRand)
   }
@@ -654,7 +650,7 @@ object EstimateMI {
       // randomized data and the specified cutoff value
       @tailrec
       def bFilter(plt: List[Pair[Double]], numTrue: Int): Boolean = {
-        if (plt.isEmpty) numTrue >= numTablesForCutoff
+        if (plt.isEmpty) numTrue >= EstCC.numParameters("numForCutoff").toInt
         else if (plt.head._1 - plt.head._2 <=
           EstCC.numParameters("cutoffValue")) bFilter(plt.tail, numTrue + 1)
         else bFilter(plt.tail, numTrue)

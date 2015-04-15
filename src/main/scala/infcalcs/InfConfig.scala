@@ -11,7 +11,7 @@ object InfConfig {
   val listParams: Map[String, Option[List[Double]]] =
     Map("signalColumns" -> Some(List(0.0)),
       "responseColumns" -> Some(List(1.0)),
-      "sampleFractions" -> Some(List(0.4,0.475,0.55,0.625,0.7,0.775,0.85,0.925)),
+      "sampleFractions" -> Some(List(0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975)),
       "biPeakWeights" -> Some(List(0.4, 0.5, 0.6)))
 
   /** Parameters that have numerical values. */

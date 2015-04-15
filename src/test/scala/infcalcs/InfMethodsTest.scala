@@ -232,7 +232,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     cts(fracListLength - 1) shouldBe ct
     // Check the randomized contingency tables
     val rcts = rdm._3
-    rcts.length shouldBe numRandTables
+    rcts.length shouldBe EstCC.numParameters("numRandom").toInt
     rcts(0).length shouldBe fracListLength
     // Check the label list
     val labels = rdm._4
@@ -242,7 +242,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   "calcMultRegs" should "produce the correct number of regression results" in {
     val rdm = buildDataMult(numBins, pl, 1234567)
     val regs = calcMultRegs(rdm)
-    regs._2.length shouldBe numRandTables
+    regs._2.length shouldBe EstCC.numParameters("numRandom").toInt
   }
 
   "genEstimatesMult" should
@@ -312,22 +312,26 @@ class MultiVarTest extends FlatSpec with Matchers {
   val d3d = d2d map (x => x :+ 1.0)
   val r2d = Vector(Vector(1.0, 0.0), Vector(1.0, 0.0), Vector(1.0, 1.0),
     Vector(1.0, 1.0))
+  
   val data = new DRData(d2d, r2d)
   val data2 = new DRData(d3d, r2d)
-  val binTuple2 = Tuple2(Vector(2), Vector(2))
-  val rd = data sigDelims binTuple2._1
-  val cd = data respDelims binTuple2._2
+  
+  val binTuple = Tuple2(Vector(1,2), Vector(2,2))
+  val rd = data sigDelims binTuple._1
+  val cd = data respDelims binTuple._2
+  val ct = buildTable(None)(data, binTuple)
+  
+  val binTuple2 = Tuple2(Vector(2,3,1),Vector(2,2))
   val rd2 = data2 sigDelims binTuple2._1
-  val ct = buildTable(None)(data, binTuple2)
   val ct2 = buildTable(None)(data2, binTuple2)
 
-  "2-dimensional dose-response data" should "produce correct data structures" in {
-    rd.length shouldBe 2
-    cd.length shouldBe 2
-    rd2.length shouldBe 3
-    ct.rows shouldBe 4
+  "n-dimensional dose-response data" should "produce correct data structures" in {
+    rd.length shouldBe 2 
+    cd.length shouldBe 2 
+    rd2.length shouldBe 3 
+    ct.rows shouldBe 2
     ct.cols shouldBe 4
-    ct2.rows shouldBe 8
+    ct2.rows shouldBe 6
     ct2.cols shouldBe 4
   }
 
@@ -351,23 +355,22 @@ class MultiVarTest extends FlatSpec with Matchers {
   } yield Vector(x, y, z)
 
   val testValues2 = for {
-    x <- Vector(0.0, 0.0, 1.0)
-    y <- Vector(0.0, 1.0, 1.0)
+    x <- Vector(0.0, 1.0, 2.0, 3.0)
+    y <- Vector(0.0, 1.0, 2.0)
   } yield Vector(x, y)
-
-  val data3 = new DRData(testValues, testValues)
 
   "multidimensional data" should
     "produce correct ContTable dimensions" in {
       EstCC.srParameters = EstCC.srParameters updated (
         "signalValues", Some(testValues))
       EstCC.srParameters = EstCC.srParameters updated (
-        "responseValues", Some(testValues))      
+        "responseValues", Some(testValues))
+      val data3 = new DRData(testValues, testValues)
       val ct3 = buildTable(None)(data3, binTuple2)
       ct3.rows shouldBe 16
       ct3.cols shouldBe 16
     }
-
+  
   "DRData" should "reject signal/response data of unequal length" in {
     val d = Vector(Vector(0.0))
     val d2 = Vector(Vector(0.0, 1.0), Vector(1.0))
@@ -377,33 +380,32 @@ class MultiVarTest extends FlatSpec with Matchers {
   }
 
   it should "produce a tree for each signal or response variable" in {
+    EstCC.srParameters = InfConfig.defaultParameters._4
     val data4 = new DRData(testValues, testValues map (x => x :+ (x(0) + 3.0)))
-    (data4 sigDelims Vector(2)).length shouldBe 3
-    (data4 respDelims Vector(12)).length shouldBe 4
+    (data4 sigDelims Vector(2,4,1)).length shouldBe 3
+    (data4 respDelims Vector(12,2,2,6)).length shouldBe 4
   }
   
   it should "recall existing binDelims and binKeys" in {
-    data3.exSigDelims contains Vector(3) shouldBe false
-    val bd = data3 sigDelims Vector(3)  
-    data3.exSigDelims contains Vector(3) shouldBe true
+    val data = new DRData(testValues, testValues)
+    data.exSigDelims contains Vector(1,2,3) shouldBe false
+    val bd = data sigDelims Vector(1,2,3)  
+    data.exSigDelims contains Vector(1,2,3) shouldBe true
   }
 
   "calcBinKeys" should "correctly place values in the contingency table" in {
     EstCC.srParameters = InfConfig.defaultParameters._4
     val data5 = new DRData(testValues2, testValues2)
-    val bins = Vector(2)
+    val bins = Vector(3,2)
     data5 sigKey bins shouldBe Map(Vector(0, 0)->0, Vector(0, 1)->1, Vector(1, 0)->2,
-      Vector(1, 1)->3)
+      Vector(1, 1)->3, Vector(2, 0)->4, Vector(2, 1)->5)
     (data5 sigDelims bins).length shouldBe 2
-    (data5 sigDelims bins) map (_.entries) shouldBe Vector(2, 2)
-    //1s exist in both partitions of the second dimension
-    (data5 sigDelims bins) map (_.toList) shouldBe Vector(List(0.0, 1.0), 
-        List(1.0, 1.0))
+    (data5 sigDelims bins) map (_.entries) shouldBe Vector(3, 2)
     val ct4 = buildTable(None)(data5, (bins, bins))
-    ct4.rows shouldBe 4
-    ct4.cols shouldBe 4
-    ct4.table shouldBe Vector(Vector(6, 0, 0, 0), Vector(0, 0, 0, 0), Vector(0, 0, 3, 0),
-      Vector(0, 0, 0, 0))
+    ct4.rows shouldBe 6
+    ct4.cols shouldBe 6
+    //ct4.table shouldBe Vector(Vector(6, 0, 0, 0), Vector(0, 0, 0, 0), Vector(0, 0, 3, 0),
+      //Vector(0, 0, 0, 0))
   }
 
 }

@@ -144,8 +144,8 @@ object EstCC extends App with CLOpts {
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
   val signalTrees: Vector[NTuple[Tree]] = signalBins map (x => p sigDelims x)
-  val aw: Vector[List[Weight]] =
-    signalTrees map (y => List(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
+  val aw: List[List[Weight]] =
+    signalTrees.toList map (y => List(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
           genWeights(y, p.sig, pwWeight)).flatten)
   
   // Function to add string to an original string
@@ -160,7 +160,7 @@ object EstCC extends App with CLOpts {
   if (numParameters("biMuNumber").toInt == 0 && numParameters("uniMuNumber").toInt == 0) {
     val unifEst = genEstimatesMult(p, bins, genSeed(rEngine))
     val unifOpt = EstimateMI.optMIMult(unifEst)
-    val unifRes = getResultsMult(List(unifEst), addLabel(outF, "_unif"))
+    val unifRes = getResultsMult(Vector(unifEst), addLabel(outF, "_unif"))
     if (config.verbose) {
       println(s"Weight: None, Est. MI: ${unifOpt._2(0)._1} " +
         s"${0xB1.toChar} ${unifOpt._2(0)._2}")
@@ -188,18 +188,18 @@ object EstCC extends App with CLOpts {
       println(estList.max)
     } // Silent sequential mode (all immutable data structures except parameters)
     else {
-      val weightIndices = (0 until aw.length).toList
+      val weightIndices = (0 until aw.length).toVector
       val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
-      val ubRes: List[EstTuple] = weightIndices map (n => getResultsMult(
-        calcWithWeightsMult(aw(n), p),
+      val ubRes: Vector[EstTuple] = weightIndices map (n => getResultsMult(
+        calcWithWeightsMult(aw(n), p).toVector,
         addLabel(outF, "_s" + binIndices(n))))
       val nRes: EstTuple =
         getResultsMult(
-          List(genEstimatesMult(p, bins, genSeed(rEngine))),
+          Vector(genEstimatesMult(p, bins, genSeed(rEngine))),
           addLabel(outF, "_unif"))
 
-      val maxOpt = EstimateMI.optMIMult(List(ubRes, List(nRes)) map 
+      val maxOpt = EstimateMI.optMIMult(Vector(ubRes, Vector(nRes)) map 
           (EstimateMI.optMIMult))
       EstimateMI.finalEstimation(maxOpt._1,p,genSeed(rEngine),maxOpt._3)
       // Print estimated channel capacity to stdout

@@ -404,8 +404,6 @@ class MultiVarTest extends FlatSpec with Matchers {
     val ct4 = buildTable(None)(data5, (bins, bins))
     ct4.rows shouldBe 6
     ct4.cols shouldBe 6
-    //ct4.table shouldBe Vector(Vector(6, 0, 0, 0), Vector(0, 0, 0, 0), Vector(0, 0, 3, 0),
-      //Vector(0, 0, 0, 0))
   }
 
 }

@@ -24,7 +24,7 @@ object InfConfig {
       "biMuNumber" -> 5,
       "biSigmaNumber" -> 5,
       "repsPerFraction" -> 20,
-      "pwUnifWeights" -> 1) //pwUnifWeights takes either 1 or 0 
+      "pwUnifWeights" -> 0) //pwUnifWeights takes either 1 or 0 
 
   /** Parameters that have string values. */
   val stringParams: Map[String, String] =

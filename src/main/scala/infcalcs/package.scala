@@ -88,6 +88,12 @@ package object infcalcs {
   type RegDataMult =
     (Vector[Double], Vector[ConstructedTable], Vector[Vector[ConstructedTable]],
       Vector[String])
+      
+  /**
+   * Data containing a pair of bin numbers, a corresponding list of (mean, 95conf) 
+   * estimates and an optional weight
+   */
+  type EstTuple = (Pair[Int], List[Pair[Double]], Option[Weight])
 
   /** Tuple containing configuration parameters.
     *

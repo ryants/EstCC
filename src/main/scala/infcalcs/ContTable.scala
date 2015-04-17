@@ -122,6 +122,17 @@ trait ContTable {
    */
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
+  lazy val ctVals: Map[String, Double] = Map(
+    "signalEntropy" -> this.margRowEntropy, 
+    "responseEntropy" -> this.margColEntropy,
+    "condSignalEntropy" -> this.condRowEntropy,
+    "condResponseEntropy" -> this.condColEntropy, 
+    "mutualInformation" -> this.mutualInformation,
+    "transferEfficiency" -> this.transferEfficiency
+  )
+  
+  def apply(s: String): Double = ctVals(s)
+  
   /** Checks two contingency tables for equality. */
   override def equals(ct: Any): Boolean = ct match {
     case that: ContTable => this.table == that.table
@@ -144,10 +155,14 @@ trait ContTable {
 
 /** Class for reading contingency tables from a file. */
 class ImportedTable(fileName: String) extends ContTable {
+  val table: Vector[Vector[Int]] =
+    importData(fileName) map (x => x map (y => y.toInt))
+  
   lazy val rows: Int = table.length
   lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
-  lazy val table: Vector[Vector[Int]] =
-    importData(fileName) map (x => x map (y => y.toInt))
+    
+  /** Pretty-prints contingency table to stdout. */
+  override def toString = (for (x <- table) yield (x mkString " ")).mkString("\n")
 }
 
 /** Class for building a contingency table from scratch. */

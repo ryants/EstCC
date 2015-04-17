@@ -83,7 +83,8 @@ object EstCC extends App with CLOpts {
 
   if (config.verbose) {
     printParameters(parameters)
-    println(bins+"\n")
+    println("List of bin tuples")
+    bins map (x => println(s"${x._1}, ${x._2}"))
   }
     
   //Confirm that there are fewer (or an equal number of) bins than data entries
@@ -134,7 +135,8 @@ object EstCC extends App with CLOpts {
       println(s"Weight: None, Est. MI: ${unifOpt._2(0)._1} " +
         s"${0xB1.toChar} ${unifOpt._2(0)._2}")
     }
-    println(unifRes)
+    EstimateMI.finalEstimation(unifRes._1,p,genSeed(rEngine),unifRes._3)
+    println(unifRes._2.head._1)
   } else {
     // Parallel mode (includes mutable data structures)
     if (config.cores > 1) {
@@ -159,17 +161,19 @@ object EstCC extends App with CLOpts {
       val weightIndices = (0 until w.length).toList
       val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
-      val ubRes: List[Double] = weightIndices map (n => getResultsMult(
+      val ubRes: List[EstTuple] = weightIndices map (n => getResultsMult(
         calcWithWeightsMult(aw(n), p),
         addLabel(outF, "_s" + binIndices(n))))
-      val nRes: Double =
+      val nRes: EstTuple =
         getResultsMult(
           List(genEstimatesMult(p, bins, genSeed(rEngine))),
           addLabel(outF, "_unif"))
 
-      val ccMult: Double = (List(ubRes, List(nRes)) map (_.max)).max
+      val maxOpt = EstimateMI.optMIMult(List(ubRes, List(nRes)) map 
+          (EstimateMI.optMIMult))
+      EstimateMI.finalEstimation(maxOpt._1,p,genSeed(rEngine),maxOpt._3)
       // Print estimated channel capacity to stdout
-      println(ccMult)
+      println(maxOpt._2.head._1)
     }
   }
 }

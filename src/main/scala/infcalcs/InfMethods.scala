@@ -611,13 +611,13 @@ object EstimateMI {
     pl: DRData,
     binTupList: List[Pair[Int]],
     seed: Int,
-    wts: Option[Weight] = None): List[(Pair[Int], List[Pair[Double]])] = {
+    wts: Option[Weight] = None): List[EstTuple] = {
 
     val tDims = (x: Pair[Int]) => ((pl sigKey x._1).size, (pl respKey x._2).size)
 
     binTupList map
       (bt => (tDims(bt), multIntercepts(calcMultRegs(
-        buildDataMult(bt, pl, seed, wts)))))
+        buildDataMult(bt, pl, seed, wts))),wts))
   }
 
   /**
@@ -634,22 +634,25 @@ object EstimateMI {
    * @return Entry from the list d the optimizes the MI estimate.
    */
   def optMIMult(
-    d: List[(Pair[Int], List[Pair[Double]])]): (Pair[Int], List[Pair[Double]]) = {
+    d: List[EstTuple]): EstTuple = {
 
     // Finds maximum value
     @tailrec
     def opt(
-      i: (Pair[Int], List[Pair[Double]]),
-      ds: List[(Pair[Int], List[Pair[Double]])]): (Pair[Int], List[Pair[Double]]) =
+      i: EstTuple,
+      ds: List[EstTuple]): EstTuple =
       if (ds.isEmpty) i
       else {
         val v = ds.head._2.head._1
         if (i._2.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
       }
-    val base = ((0, 0), (0 until d.head._2.length).toList map (x => (0.0, 0.0)))
+    
+    //to initialize opt
+    val base = 
+      ((0, 0), (0 until d.head._2.length).toList map (x => (0.0, 0.0)), None)
 
     // Determines if estimates are biased using randomization data sets
-    def removeBiased(l: List[(Pair[Int], List[Pair[Double]])]): List[(Pair[Int], List[Pair[Double]])] = {
+    def removeBiased(l: List[EstTuple]): List[EstTuple] = {
 
       // Determines if estimate is biased given mutual information of
       // randomized data and the specified cutoff value
@@ -664,11 +667,35 @@ object EstimateMI {
     }
     opt(base, removeBiased(d))
   }
+  
+  def finalEstimation(
+      binPair: Pair[Int], 
+      data: DRData, 
+      seed: Int, 
+      wts: Option[Weight]): Unit = {
+    val engine = new MersenneTwister(seed)
+    val tupleInit = (Vector[Double](), Vector[ConstructedTable]())
+    val (invFracs, tables) =
+      EstCC.fracList.foldLeft(tupleInit) { (acc, x) =>
+        val (inv, tab) = acc
+        val newInv = inv :+ invSS(x, data.sig)
+        val sub = jackknife(x, data, engine)
+        val newTab = tab :+ buildTable(None)(sub, binPair, wts)
+        (newInv, newTab)
+      }
+    val slrs: Iterable[SLR] = tables.head.ctVals.keys map 
+      (x => new SLR(invFracs, tables map (_(x)), x))
+    val estimates: Map[String, Pair[Double]] = (slrs map (x => 
+      (x.label, (x.intercept, x.i95Conf)))).toMap
+    IOFile.optInfoToFile(estimates, EstCC.stringParameters("filePrefix"))
+  }
+  
 }
 
 /** Contains functions for estimating the channel capacity. */
 object EstimateCC {
   import LowProb.testWeights
+  import OtherFuncs.genSeed
 
   /** Parameter specifying whether the signal is distributed logarithmically. */
   val logSpace = EstCC.stringParameters("logSpace").toBoolean
@@ -869,15 +896,15 @@ object EstimateCC {
    * @return The maximum MI estimate.
    */
   def getResultsMult(
-    est: List[List[(Pair[Int], List[Pair[Double]])]],
-    filePrefix: Option[String]): Double = {
+    est: List[List[EstTuple]],
+    filePrefix: Option[String]): EstTuple = {
     filePrefix match {
       case Some(f) =>
         for (e <- 0 until est.length) yield IOFile.estimatesToFileMult(est(e),
           filePrefix.get + "_" + e.toString + ".dat")
       case None => {}
     }
-    (est.view map EstimateMI.optMIMult map (x => x._2.head._1)).max
+    EstimateMI.optMIMult(est map EstimateMI.optMIMult)
   }
 
   /**
@@ -896,7 +923,7 @@ object EstimateCC {
       // Filter to make sure weights are applied to correct set of signal bins
     } yield EstimateMI.genEstimatesMult(pl,
       EstCC.bins filter (x =>
-        x._1 == w._1.length), OtherFuncs.genSeed(EstCC.rEngine), Some(w))
+        x._1 == w._1.length), genSeed(EstCC.rEngine), Some(w))
   }
 
   /**
@@ -910,9 +937,9 @@ object EstimateCC {
    * @param fp Optional string for outputting estimation data to file
    * @return Channel capacity estimate for given list of weights
    */
-  def verboseResults(wts: List[Weight], pl: DRData, fp: Option[String]) = {
+  def verboseResults(wts: List[Weight], pl: DRData, fp: Option[String]): Double = {
     val binNum = wts(0)._1.length
-    var optList: Array[Double] = Array()
+    var optList: Array[EstTuple] = Array()
     println(s"# Signal Bins: ${binNum}\t${wts.length + 1} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
@@ -921,7 +948,7 @@ object EstimateCC {
         val est = EstimateMI.genEstimatesMult(
           pl,
           EstCC.bins filter (x => x._1 == binNum),
-          OtherFuncs.genSeed(EstCC.rEngine),
+          genSeed(EstCC.rEngine),
           Some(wts(w)))
         fp match {
           case Some(f) =>
@@ -929,22 +956,29 @@ object EstimateCC {
           case None => {}
         }
         val opt = EstimateMI.optMIMult(est)
-        optList = optList :+ opt._2(0)._1
+        optList = optList :+ opt
         println(s"  ${wts.length + 1 - w}) Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
           s"${0xB1.toChar} ${opt._2(0)._2}")
       }
     }
     val est = EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x =>
-      x._1 == binNum), OtherFuncs.genSeed(EstCC.rEngine))
+      x._1 == binNum), genSeed(EstCC.rEngine))
     fp match {
       case Some(f) =>
         IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")
       case None => {}
     }
     val opt = EstimateMI.optMIMult(est)
-    optList = optList :+ opt._2(0)._1
+    optList = optList :+ opt
     println(s"  1) Weight: None, Est. MI: ${opt._2(0)._1} " +
       s"${0xB1.toChar} ${opt._2(0)._2}")
-    optList.max
+    val maxOpt = EstimateMI.optMIMult(optList.toList)
+    EstimateMI.finalEstimation(
+        maxOpt._1,
+        pl,
+        genSeed(EstCC.rEngine),
+        maxOpt._3)
+    maxOpt._2.head._1
   }
+  
 }

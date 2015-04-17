@@ -273,7 +273,7 @@ object OtherFuncs {
     p._1.keys map { x =>
       p._1(x) match {
         case None => println(s"${x}\tNone")
-        case Some(y) => println(s"${x}\t${y}")
+        case Some(y) => println(s"${x}\t${y.mkString(", ")}")
       }
     }
     println()
@@ -284,7 +284,11 @@ object OtherFuncs {
     p._4.keys map { x =>
       p._4(x) match {
         case None => println(s"${x}\tNone")
-        case Some(y) => println(s"${x}\t${y}")
+        case Some(y) => {
+          val elByLine = y map (z => z.mkString(","))
+          println(s"${x}")
+          elByLine map (z => println(s"\t\t(${z})"))
+        }
       }
     }
     println()

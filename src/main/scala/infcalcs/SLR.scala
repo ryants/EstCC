@@ -47,7 +47,7 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
   lazy val s95Conf = sError * studentTInverse(0.05, xList.length - 2)
 
   /** Alternative constructor: takes x and y data but applies an empty label. */
-  def this(xList: List[Double], yList: List[Double]) = this(xList, yList, "")
+  def this(xList: Seq[Double], yList: Seq[Double]) = this(xList, yList, "")
 
   /**
    * Writes the regression data to a file.

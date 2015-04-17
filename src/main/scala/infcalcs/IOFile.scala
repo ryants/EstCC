@@ -27,7 +27,7 @@ object IOFile {
     for {
       l <- readData.toVector
       if (!l.startsWith("#"))
-    } yield (l.split("\\s") map (x => x.toDouble)).toVector
+    } yield (l.split("\\s+") map (x => x.toDouble)).toVector
   }
 
   /**
@@ -133,7 +133,7 @@ object IOFile {
    * @param f Name of the file to write.
    */
   def estimatesToFileMult(
-    d: List[(Pair[Int], List[Pair[Double]])],
+    d: List[EstTuple],
     f: String): Unit = {
     val numRandTables = EstCC.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
@@ -146,6 +146,16 @@ object IOFile {
         (x._2.tail map (y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+  
+  def optInfoToFile(c: Map[String, Pair[Double]], s: String): Unit = {
+    val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
+    val data = c.keys map { x => 
+      writer.write(s"${x}\t${c(x)}")
       writer.newLine()
     }
     writer.flush()

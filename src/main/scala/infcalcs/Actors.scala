@@ -9,6 +9,8 @@ object Actors {
   case class Estimate(wt: Weight, index: Int, seed: Int)
 
   case class Uniform(ns: Int, seed: Int)
+  
+  case class Result(res: EstTuple)
 
   class Distributor(wts: List[List[Weight]]) extends Actor {
     val numLists = wts.length
@@ -16,16 +18,16 @@ object Actors {
 
     var rWeights = wts(numLists - rLists).length
 
-    var ccList: Array[Double] = Array()
+    var estList: Array[EstTuple] = Array()
     var totRem = (wts map (_.length)).sum + wts.length
 
     def receive = {
-      case d: Double => {
+      case r: Result => {
         totRem -= 1
         if (EstCC.config.verbose) {
           println(s"$totRem remaining calculations")
         }
-        ccList = ccList :+ d
+        estList = estList :+ r.res
         if (rWeights > 0) {
           val curList = numLists - rLists
           val index = wts(curList).length - rWeights
@@ -48,7 +50,13 @@ object Actors {
           if (EstCC.config.verbose){
             println("calculation finished, estimated channel capacity:")
           }
-          println(s"${ccList.max}")
+          val maxOpt = EstimateMI.optMIMult(estList.toList)
+          EstimateMI.finalEstimation(
+              maxOpt._1,
+              EstCC.p,
+              genSeed(EstCC.rEngine),
+              maxOpt._3)
+          println(s"${maxOpt._2.head._1}")
           context.system.shutdown()
         }
       }
@@ -95,11 +103,11 @@ object Actors {
             estMI,
             s"${s}_s${numSignals}_${i}.dat")
         }
-        val opt = EstimateMI.optMIMult(estMI)._2.head._1
+        val opt = EstimateMI.optMIMult(estMI)
         if (EstCC.config.verbose){
-          println(s"${w._2}\tI = $opt")
+          println(s"${w._2}\tI = ${opt._2.head._1}")
         }
-        sender ! opt
+        sender ! Result(opt)
       }
 
       case Uniform(n, s) => {
@@ -110,11 +118,11 @@ object Actors {
             estMI,
             s"${s}_s${n}_unif.dat")
         }
-        val opt = EstimateMI.optMIMult(estMI)._2.head._1
+        val opt = EstimateMI.optMIMult(estMI)
         if (EstCC.config.verbose){
-          println(s"Uniform\tI = $opt")
+          println(s"Uniform\tI = ${opt._2.head._1}")
         }
-        sender ! opt
+        sender ! Result(opt)
       }
     }
   }

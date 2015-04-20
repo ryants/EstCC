@@ -55,8 +55,8 @@ object EstCC extends App with CLOpts {
   var srParameters = parameters._4
 
   // Load data given pair of columns
-  val sigCols = listParameters("signalColumns").get.toVector map (_.toInt)
-  val respCols = listParameters("responseColumns").get.toVector map (_.toInt)
+  val sigCols = listParameters("signalColumns").toVector map (_.toInt)
+  val respCols = listParameters("responseColumns").toVector map (_.toInt)
   val p = loadList(dataFile, sigCols, respCols)
   
   val sigDim = sigCols.length
@@ -98,7 +98,7 @@ object EstCC extends App with CLOpts {
   //Mutable variable for testing purposes
   var fracList = ({
     for {
-      f <- listParameters("sampleFractions").get
+      f <- listParameters("sampleFractions")
       n <- 0 until numParameters("repsPerFraction").toInt
     } yield f
   } :+ 1.0).toVector
@@ -120,7 +120,7 @@ object EstCC extends App with CLOpts {
       val pbSigMax = srParameters("signalBins").get.transpose map (_.max)
        Predef.require((0 until ptSig.length).foldLeft(true){ (prev, x) =>
          val test = 
-           listParameters("sampleFractions").get.min * pbSigMax(x) <= ptSig(x)
+           listParameters("sampleFractions").min * pbSigMax(x) <= ptSig(x)
          prev && test
        },"number of signal bins must be less than the smallest jackknifed " +
         "data sample")
@@ -133,7 +133,7 @@ object EstCC extends App with CLOpts {
       val pbRespMax = srParameters("responseBins").get.transpose map (_.max)
       Predef.require((0 until ptResp.length).foldLeft(true){ (prev, x) => 
         val test =
-          listParameters("sampleFractions").get.min * pbRespMax(x) <= ptResp(x)
+          listParameters("sampleFractions").min * pbRespMax(x) <= ptResp(x)
         prev && test
       },"number of signal bins must be less than the smallest jackknifed " +
         "data sample")

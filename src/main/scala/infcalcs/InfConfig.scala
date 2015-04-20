@@ -8,11 +8,11 @@ package infcalcs
 object InfConfig {
 
   /** Parameters that have list values. */
-  val listParams: Map[String, Option[List[Double]]] =
-    Map("signalColumns" -> Some(List(0.0)),
-      "responseColumns" -> Some(List(1.0)),
-      "sampleFractions" -> Some(List(0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975)),
-      "biPeakWeights" -> Some(List(0.4, 0.5, 0.6)))
+  val listParams: Map[String, List[Double]] =
+    Map("signalColumns" -> List(0.0),
+      "responseColumns" -> List(1.0),
+      "sampleFractions" -> List(0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975),
+      "biPeakWeights" -> List(0.4, 0.5, 0.6))
 
   /** Parameters that have numerical values. */
   val numParams: Map[String, Double] =

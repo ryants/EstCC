@@ -242,7 +242,7 @@ object OtherFuncs {
       // Check if listParams contains the current key
       if (p._1 contains l.head._1)
         updateParameters(l.tail,
-          (p._1 updated (l.head._1, stringToSList(l.head._2)), p._2, p._3, p._4))
+          (p._1 updated (l.head._1, stringToSList(l.head._2).get), p._2, p._3, p._4))
       // Check if numParams contains the current key
       else if (p._2 contains l.head._1)
         updateParameters(l.tail,
@@ -283,12 +283,7 @@ object OtherFuncs {
   }
 
   def printParameters(p: Parameters): Unit = {
-    p._1.keys map { x =>
-      p._1(x) match {
-        case None => println(s"${x}\tNone")
-        case Some(y) => println(s"${x}\t${y.mkString(", ")}")
-      }
-    }
+    p._1.keys map { x => println(s"${x}\t${p._1(x).mkString(", ")}") }
     println()
     p._2.keys map (x => println(s"${x}\t${p._2(x)}"))
     println()

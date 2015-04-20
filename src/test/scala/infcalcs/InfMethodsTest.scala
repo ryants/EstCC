@@ -120,7 +120,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   EstCC.rEngine = new MersenneTwister
   EstCC.fracList = ({
     for {
-      f <- EstCC.listParameters("sampleFractions").get
+      f <- EstCC.listParameters("sampleFractions")
       n <- 0 until EstCC.numParameters("repsPerFraction").toInt
     } yield f
   }.toVector :+ 1.0)
@@ -216,7 +216,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Seeded with some integer
     val rdm = buildDataMult(numBins, pl, 1234567)
     // Check the inverse sample sizes
-    val fracs = EstCC.listParameters("sampleFractions").get
+    val fracs = EstCC.listParameters("sampleFractions")
     val invss = rdm._1
     // Check the length of the inverse sample sizes
     val fracListLength = (fracs.length * numReps) + 1

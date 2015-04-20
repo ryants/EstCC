@@ -813,7 +813,7 @@ object EstimateCC {
       val bSigFracList = ((1 to numSig) map (x => 
           x * (1.0 / (1.0 + numSig)))).toList
       val bRelCont =
-        EstCC.listParameters("biPeakWeights").get map (x => (x, 1 - x))
+        EstCC.listParameters("biPeakWeights") map (x => (x, 1 - x))
       val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
         p <- mp.toList
         s <- bSigFracList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))

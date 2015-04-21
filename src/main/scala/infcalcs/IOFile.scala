@@ -149,7 +149,7 @@ object IOFile {
     
     val lines =
       for (x <- d) yield s"${x._1._1.mkString(",")} ${x._1._2.mkString(",")} " + 
-        "${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (
+        s"${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (
             y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)

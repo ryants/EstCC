@@ -68,7 +68,6 @@ object MathFuncs {
    * @param ls List of doubles
    * @return (mean, 95% confidence interval)
    */
-
   def meanAndConf(ls: Iterable[Double]): Pair[Double] = {
     val K = ls.head
     val (sum, len, sumSq) = ls.foldLeft((0.0, 0.0, 0.0)) { (acc, b) =>
@@ -125,6 +124,11 @@ object MathFuncs {
 /** Contains a handful of utility functions. */
 object OtherFuncs {
 
+  /**
+   * Generates an Int between 0 and 1e6, non-inclusive
+   * 
+   * @param e PRNG engine
+   */
   def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
 
   /**
@@ -282,6 +286,11 @@ object OtherFuncs {
     }
   }
 
+  /**
+   * Prints all parameters to stdout
+   * 
+   * @param p parameters of type [[Parameter]], that govern mutual information estimation
+   */
   def printParameters(p: Parameters): Unit = {
     p._1.keys map { x => println(s"${x}\t${p._1(x).mkString(", ")}") }
     println()

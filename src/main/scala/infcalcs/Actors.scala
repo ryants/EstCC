@@ -4,14 +4,42 @@ import OtherFuncs.genSeed
 
 object Actors {
 
+  /**
+   * Case class for sending initial list of [[Calculator]] actors to [[Distributor]]
+   * 
+   * @param as List of [[Calculator]] actors
+   */
   case class Init(as: List[ActorRef])
 
+  /**
+   * Case class for weighted mutual information estimation
+   * 
+   * @param wt [[Weight]]
+   * @param index calculation ID number
+   * @param seed initializes [[Calculator]] PRNG
+   */
   case class Estimate(wt: Weight, index: Int, seed: Int)
 
+  /**
+   * Case class for unweighted mutual information estimation
+   * 
+   * @param ns number of signal bins
+   * @param seed initializes [[Calculator]] PRNG
+   */
   case class Uniform(ns: Int, seed: Int)
   
+  /**
+   * Case class for sending estimate back to [[Distributor]]
+   * 
+   * @param res estimation results ([[EstTuple]])
+   */
   case class Result(res: EstTuple)
 
+  /**
+   * Actor responsible for distributing and organizing calculations
+   * 
+   * @param wts list of list of [[Weight]]
+   */
   class Distributor(wts: List[List[Weight]]) extends Actor {
 
     val numLists = wts.length //quantity of considered signal bin numbers
@@ -85,6 +113,9 @@ object Actors {
     }
   }
 
+  /**
+   * Actor responsible for executing mutual information estimations
+   */
   class Calculator extends Actor {
 
     def receive = {
@@ -93,9 +124,9 @@ object Actors {
         val validBins = EstCC.bins filter (_._1 == numSignals)
         val estMI = EstimateMI.genEstimatesMult(EstCC.p, validBins, s, Some(w))
         EstCC.outF match {
-          case Some(s) => IOFile.estimatesToFileMult(
+          case Some(str) => IOFile.estimatesToFileMult(
             estMI,
-            s"${s}_s${numSignals}_${i}.dat")
+            s"${str}_s${numSignals}_${i}.dat")
         }
         val opt = EstimateMI.optMIMult(estMI)
         if (EstCC.config.verbose){
@@ -108,9 +139,9 @@ object Actors {
         val validBins = EstCC.bins filter (_._1 == n)
         val estMI = EstimateMI.genEstimatesMult(EstCC.p, validBins, s)
         EstCC.outF match {
-          case Some(s) => IOFile.estimatesToFileMult(
+          case Some(str) => IOFile.estimatesToFileMult(
             estMI,
-            s"${s}_s${n}_unif.dat")
+            s"${str}_s${n}_unif.dat")
         }
         val opt = EstimateMI.optMIMult(estMI)
         if (EstCC.config.verbose){

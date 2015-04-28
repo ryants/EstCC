@@ -159,6 +159,12 @@ object IOFile {
     writer.close()
   }
   
+  /**
+   * Writes relevant estimate information to file
+   * 
+   * @param c Map of value names and their estimate and error
+   * @param s file name
+   */
   def optInfoToFile(c: Map[String, Pair[Double]], s: String): Unit = {
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
     val data = c.keys map { x => 

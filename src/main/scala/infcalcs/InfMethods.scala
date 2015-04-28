@@ -660,6 +660,17 @@ object EstimateMI {
     opt(base, removeBiased(d))
   }
   
+  /**
+   * Takes the pair of n-dimensional bin number vectors resulting in maximal
+   * mutual information in order to estimate all relevant quantities as defined
+   * in [[ContTable.ctVals]].  These data are outputted to an information file
+   * 
+   * @param binPair pair of n-dimensional bin number vectors
+   * @param data [[DRData]]
+   * @param seed initializes PRNG
+   * @param wts optional [[Weight]] depending on which weight resulted in 
+   * maximal mutual information
+   */
   def finalEstimation(
       binPair: Pair[NTuple[Int]], 
       data: DRData, 

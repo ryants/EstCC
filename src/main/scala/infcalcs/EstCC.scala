@@ -157,7 +157,8 @@ object EstCC extends App with CLOpts {
   // Calculate and output estimated mutual information values given calculated
   // weights
 
-  if (numParameters("biMuNumber").toInt == 0 && numParameters("uniMuNumber").toInt == 0) {
+  // If there are no weights
+  if (aw.isEmpty) {
     val unifEst = genEstimatesMult(p, bins, genSeed(rEngine))
     val unifOpt = EstimateMI.optMIMult(unifEst)
     val unifRes = getResultsMult(Vector(unifEst), addLabel(outF, "_unif"))
@@ -167,7 +168,8 @@ object EstCC extends App with CLOpts {
     }
     EstimateMI.finalEstimation(unifRes._1,p,genSeed(rEngine),unifRes._3)
     println(unifRes._2.head._1)
-  } else {
+  } else { // If there are weights
+    
     // Parallel mode (includes mutable data structures)
     if (config.cores > 1) {
       val system = ActorSystem(s"EstCC")

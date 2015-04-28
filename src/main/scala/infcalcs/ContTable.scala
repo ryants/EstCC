@@ -48,6 +48,14 @@ trait ContTable {
    */
   def margEntFunc: Vector[Int] => Double = probVect andThen eTerm
     
+  /**
+   * Higher order function that returns a function for calculating the negated
+   * sum of a numerical data set that has a another function applied to it
+   * 
+   * @param f function to apply to numerical data
+   * @return function which applies f to a data set and calculates the 
+   * negation of the resulting sum 
+   */ 
   def mapNegSum[A,B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
     import n.mkNumericOps
     s => -(s map f).sum
@@ -68,6 +76,9 @@ trait ContTable {
    * }}}
    *
    * this function calculates the marginal entropy of the row variable X, H(X).
+   * 
+   * @param t 2-dimensional vector of integer vectors
+   * @return marginal entropy
    */
   def margEntropy(t: Vector[Vector[Int]]): Double = mapNegSum(margEntFunc) apply t
 
@@ -87,6 +98,9 @@ trait ContTable {
    *
    * this function calculates the entropy of the row variable X conditional
    * on the column variable Y, H(X|Y).
+   * 
+   * @param t 2-dimensional vector of integer vectors
+   * @return conditional entropy
    */
   def condEntropy(t: Vector[Vector[Int]]): Double = {
     val trans = t.transpose
@@ -122,6 +136,9 @@ trait ContTable {
    */
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
+  /**
+   * Map of strings to various [[ContTable]] values
+   */
   lazy val ctVals: Map[String, Double] = Map(
     "signalEntropy" -> this.margRowEntropy, 
     "responseEntropy" -> this.margColEntropy,
@@ -131,6 +148,12 @@ trait ContTable {
     "transferEfficiency" -> this.transferEfficiency
   )
   
+  /**
+   * Makes [[ContTable]] callable, retrieving values according to String keys
+   * in [[ctVals]]
+   * 
+   * @param s string present in [[ctVals]]' keys
+   */
   def apply(s: String): Double = ctVals(s)
   
   /** Checks two contingency tables for equality. */

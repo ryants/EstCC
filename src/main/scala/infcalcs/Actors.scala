@@ -15,18 +15,17 @@ object Actors {
    * Case class for weighted mutual information estimation
    * 
    * @param wt [[Weight]]
+   * @param bins relevant signal and response bin tuples, given weight
+   * @param sigID tracks output based on signal bin tuple
    * @param index calculation ID number
    * @param seed initializes [[Calculator]] PRNG
    */
-  case class Estimate(wt: Weight, index: Int, seed: Int)
-
-  /**
-   * Case class for unweighted mutual information estimation
-   * 
-   * @param ns number of signal bins
-   * @param seed initializes [[Calculator]] PRNG
-   */
-  case class Uniform(ns: Int, seed: Int)
+  case class Estimate(
+      wt: Option[Weight],
+      bins: Vector[Pair[NTuple[Int]]], 
+      sigID: Int, 
+      index: Int, 
+      seed: Int)
   
   /**
    * Case class for sending estimate back to [[Distributor]]
@@ -40,7 +39,7 @@ object Actors {
    * 
    * @param wts list of list of [[Weight]]
    */
-  class Distributor(wts: List[List[Weight]]) extends Actor {
+  class Distributor(wts: List[List[Option[Weight]]]) extends Actor {
 
     val numLists = wts.length //quantity of considered signal bin numbers
     var rLists = wts.length //remaining signal bin numbers
@@ -50,8 +49,8 @@ object Actors {
 
     //list of recorded channel capacity estimations
     var estList: Array[EstTuple] = Array()
-    //total remaining weight calculations
-    var totRem = (wts map (_.length)).sum + wts.length
+    //total remaining calculations
+    var totRem = (wts map (_.length)).sum
 
     def receive = {
       case r: Result => {
@@ -62,17 +61,11 @@ object Actors {
         estList = estList :+ r.res
         if (rWeights > 0) {
           val curList = numLists - rLists
+          val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
           val index = wts(curList).length - rWeights
           val seed = genSeed(EstCC.rEngine)
-          sender ! Estimate(wts(curList)(index), index, seed)
+          sender ! Estimate(wts(curList)(index), bins, curList, index, seed)
           rWeights -= 1
-        } else if (rLists > 1) {
-          rLists -= 1
-          val curList = numLists - rLists
-          val index = 0
-          val seed = genSeed(EstCC.rEngine)
-          sender ! Estimate(wts(curList)(index), index, seed)
-          rWeights = wts(numLists - rLists).length - 1
         } else if (totRem == 0) {
           if (EstCC.config.verbose){
             println("calculation finished, estimated channel capacity:")
@@ -93,16 +86,18 @@ object Actors {
           {
             if (rWeights > 0) {
               val curList = numLists - rLists
+              val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
               val index = wts(curList).length - rWeights
               val seed = genSeed(EstCC.rEngine)
-              cs(c) ! Estimate(wts(curList)(index), index, seed)
+              cs(c) ! Estimate(wts(curList)(index), bins, curList, index, seed)
               rWeights -= 1
             } else if (rLists > 1) {
               rLists -= 1
               val curList = numLists - rLists
+              val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
               val index = 0
               val seed = genSeed(EstCC.rEngine)
-              cs(c) ! Estimate(wts(curList)(index), index, seed)
+              cs(c) ! Estimate(wts(curList)(index), bins, curList, index, seed)
               rWeights = wts(numLists - rLists).length - 1
             } else {
               println("excess actors")
@@ -119,33 +114,19 @@ object Actors {
   class Calculator extends Actor {
 
     def receive = {
-      case Estimate(w, i, s) => {
-        val numSignals = w._1.length
-        val validBins = EstCC.bins filter (_._1 == numSignals)
-        val estMI = EstimateMI.genEstimatesMult(EstCC.p, validBins, s, Some(w))
+      case Estimate(w, b, sid, i, s) => {
+        val estMI = EstimateMI.genEstimatesMult(EstCC.p, b, s, w)
         EstCC.outF match {
           case Some(str) => IOFile.estimatesToFileMult(
             estMI,
-            s"${str}_s${numSignals}_${i}.dat")
+            s"${str}_${sid}_${i}.dat")
         }
         val opt = EstimateMI.optMIMult(estMI)
-        if (EstCC.config.verbose){
-          println(s"${w._2}\tI = ${opt._2.head._1}")
+        if (EstCC.config.verbose){ w match {
+          case Some(o) => println(s"${o._2}\tI = ${opt._2.head._1}")
+          case None => println(s"Uniform\tI = ${opt._2.head._1}")
         }
-        sender ! Result(opt)
-      }
-
-      case Uniform(n, s) => {
-        val validBins = EstCC.bins filter (_._1 == n)
-        val estMI = EstimateMI.genEstimatesMult(EstCC.p, validBins, s)
-        EstCC.outF match {
-          case Some(str) => IOFile.estimatesToFileMult(
-            estMI,
-            s"${str}_s${n}_unif.dat")
-        }
-        val opt = EstimateMI.optMIMult(estMI)
-        if (EstCC.config.verbose){
-          println(s"Uniform\tI = ${opt._2.head._1}")
+          
         }
         sender ! Result(opt)
       }

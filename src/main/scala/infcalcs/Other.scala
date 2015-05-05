@@ -289,7 +289,7 @@ object OtherFuncs {
   /**
    * Prints all parameters to stdout
    * 
-   * @param p parameters of type [[Parameter]], that govern mutual information estimation
+   * @param p parameters of type [[Parameters]], that govern mutual information estimation
    */
   def printParameters(p: Parameters): Unit = {
     p._1.keys map { x => println(s"${x}\t${p._1(x).mkString(", ")}") }

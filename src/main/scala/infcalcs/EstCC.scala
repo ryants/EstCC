@@ -13,7 +13,7 @@ import EstimateCC.{
 }
 import IOFile.{ loadList, importParameters }
 import TreeDef.Tree
-import EstimateMI.genEstimatesMult
+import EstimateMI.{ genEstimatesMult, genBins }
 import akka.actor.{ ActorSystem, Props }
 import Actors._
 
@@ -63,7 +63,7 @@ object EstCC extends App with CLOpts {
   val respDim = respCols.length
   
   // Determine number of response bins if values not specified
-  val responseBins: Vector[Vector[Int]] = srParameters("responseValues") match {
+  val responseBins: Vector[NTuple[Int]] = srParameters("responseValues") match {
     case None => srParameters("responseBins") match {
       case None => throw new Exception(
           "must specify either responseBins or responseValues in parameter file"
@@ -78,7 +78,7 @@ object EstCC extends App with CLOpts {
   }
 
   // Determine number of signal bins if values not specified
-  val signalBins: Vector[Vector[Int]] = srParameters("signalValues") match {
+  val signalBins: Vector[NTuple[Int]] = srParameters("signalValues") match {
     case None => srParameters("signalBins") match {
       case None => throw new Exception(
           "must specify either signalBins or signalValues in parameter file")
@@ -103,13 +103,14 @@ object EstCC extends App with CLOpts {
     } yield f
   } :+ 1.0).toVector
 
-  // List of bin pairs
-  val bins = EstimateMI.genBins(signalBins, responseBins)
+  // List of bin pairs (mutable for testing purposes)
+  val bins = genBins(signalBins, responseBins)
 
   if (config.verbose) {
     printParameters(parameters)
-    println("List of bin tuples")
+    println("List of bin tuples\n")
     bins map (x => println(s"${x._1}, ${x._2}"))
+    println("\nResults:\n")
   }
     
   //Confirm that there are fewer (or an equal number of) bins than data entries
@@ -144,9 +145,12 @@ object EstCC extends App with CLOpts {
   // Build list of weight pairs (unimodal and bimodal) given a list of bin
   // sizes specified by the configuration parameters
   val signalTrees: Vector[NTuple[Tree]] = signalBins map (x => p sigDelims x)
-  val aw: List[List[Weight]] =
-    signalTrees.toList map (y => List(genWeights(y, p.sig, uniWeight), genWeights(y, p.sig, biWeight),
-          genWeights(y, p.sig, pwWeight)).flatten)
+  val aw: List[List[Option[Weight]]] =
+    signalTrees.toList map (y => 
+      None :: (List(
+          genWeights(y, p.sig, uniWeight),
+          genWeights(y, p.sig, biWeight),
+          genWeights(y, p.sig, pwWeight)).flatten map (x => Some(x))))
   
   // Function to add string to an original string
   def addLabel(s: Option[String], l: String): Option[String] =
@@ -183,8 +187,9 @@ object EstCC extends App with CLOpts {
     } // Verbose sequential mode (also has mutable data structures)
     else if (config.verbose) {
       var estList: Array[Double] = Array()
-      aw foreach { wt =>
-        val res = verboseResults(wt, p, outF)
+      (0 until aw.length) foreach { i =>
+        val validBins = genBins(Vector(signalBins(i)),responseBins)
+        val res = verboseResults(aw(i), validBins, i, p, outF)
         estList = estList :+ res
       }
       println(estList.max)
@@ -193,15 +198,13 @@ object EstCC extends App with CLOpts {
       val weightIndices = (0 until aw.length).toVector
       val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
-      val ubRes: Vector[EstTuple] = weightIndices map (n => getResultsMult(
-        calcWithWeightsMult(aw(n), p).toVector,
-        addLabel(outF, "_s" + binIndices(n))))
-      val nRes: EstTuple =
-        getResultsMult(
-          Vector(genEstimatesMult(p, bins, genSeed(rEngine))),
-          addLabel(outF, "_unif"))
+      val res: Vector[EstTuple] = weightIndices map (n => getResultsMult(
+        calcWithWeightsMult(
+            aw(n), 
+            genBins(Vector(signalBins(n)),responseBins), p).toVector,
+            addLabel(outF, "_" + n)))
 
-      val maxOpt = EstimateMI.optMIMult(Vector(ubRes, Vector(nRes)) map 
+      val maxOpt = EstimateMI.optMIMult(Vector(res) map 
           (EstimateMI.optMIMult))
       EstimateMI.finalEstimation(maxOpt._1,p,genSeed(rEngine),maxOpt._3)
       // Print estimated channel capacity to stdout

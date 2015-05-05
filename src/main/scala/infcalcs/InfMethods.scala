@@ -136,8 +136,6 @@ object CTBuild {
   /**
    * Returns index for insertion of data point into contingency table
    *
-   * Makes use of [[DRData.calcBinKey]] to map index pair to single index
-   *
    * @param tuple (possibly multidimensional) data point to be inserted into 
    * contingency table
    * @param binDelims tuple of delimiting trees used to determine respective
@@ -241,14 +239,11 @@ object EstimateMI {
   import cern.jet.random.engine.MersenneTwister
 
   /**
-   * Generates all (row, col) bin number tuples.
-   *
-   * For example, given (1, 2) and (3, 4) as arguments, returns List((1, 3),
-   * (1, 4), (2, 3), (2, 4)).
+   * Generates all (row, col) bin tuple pairs.
    */
   def genBins(
-    binList: Vector[Vector[Int]],
-    otherBinList: Vector[Vector[Int]] = Vector(Vector())): Vector[Pair[Vector[Int]]] = {
+    binList: Vector[NTuple[Int]],
+    otherBinList: Vector[NTuple[Int]] = Vector(Vector())): Vector[Pair[NTuple[Int]]] = {
     val cBinList = if (otherBinList.isEmpty) binList else otherBinList
     for (r <- binList; c <- cBinList) yield (r, c)
   }
@@ -953,13 +948,11 @@ object EstimateCC {
    * @param pl The input/output dataset.
    * @return List of MI estimates as from [[EstimateMI.genEstimatesMult]].
    */
-  def calcWithWeightsMult(weights: List[Weight], pl: DRData) = {
+  def calcWithWeightsMult(weights: List[Option[Weight]], bins: Vector[Pair[NTuple[Int]]], pl: DRData) = {
     for {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
-    } yield (EstimateMI.genEstimatesMult(pl,
-      EstCC.bins filter (x =>
-        x._1 == w._1.length), genSeed(EstCC.rEngine), Some(w)))
+    } yield (EstimateMI.genEstimatesMult(pl, bins, genSeed(EstCC.rEngine), w))
   }
 
   /**
@@ -973,35 +966,42 @@ object EstimateCC {
    * @param fp Optional string for outputting estimation data to file
    * @return Channel capacity estimate for given list of weights
    */
-  def verboseResults(wts: List[Weight], pl: DRData, fp: Option[String]): Double = {
-    val binNum = wts(0)._1.length
+  def verboseResults(
+      wts: List[Option[Weight]], 
+      bins: Vector[Pair[NTuple[Int]]],
+      index: Int,
+      pl: DRData, 
+      fp: Option[String]): Double = {
     var optList: Array[EstTuple] = Array()
-    println(s"# Signal Bins: ${binNum}\t${wts.length + 1} calculations")
+    println(s"# Signal Bins: ${bins.head._1.product}\t${wts.length + 1} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
     (0 until wts.length) foreach { w =>
       {
         val est = EstimateMI.genEstimatesMult(
           pl,
-          EstCC.bins filter (x => x._1 == binNum),
+          bins,
           genSeed(EstCC.rEngine),
-          Some(wts(w)))
+          wts(w))
         fp match {
           case Some(f) =>
-            IOFile.estimatesToFileMult(est, s"${f}_${w}_s${binNum}.dat")
+            IOFile.estimatesToFileMult(est, s"${f}_${w}_${index}.dat")
           case None => {}
         }
         val opt = EstimateMI.optMIMult(est)
         optList = optList :+ opt
-        println(s"  ${wts.length + 1 - w}) Weight: ${wts(w)._2}, Est. MI: ${opt._2(0)._1} " +
-          s"${0xB1.toChar} ${opt._2(0)._2}")
+        wts(w) match {
+          case Some(o) => println(s"  ${wts.length + 1 - w}) Weight: ${o._2}, " +
+            s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
+          case None => println(s"  ${wts.length + 1 - w}) Weight: Uniform, " +
+            s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
+        }
       }
     }
-    val est = EstimateMI.genEstimatesMult(pl, EstCC.bins filter (x =>
-      x._1 == binNum), genSeed(EstCC.rEngine))
+    val est = EstimateMI.genEstimatesMult(pl, bins, genSeed(EstCC.rEngine))
     fp match {
       case Some(f) =>
-        IOFile.estimatesToFileMult(est, s"${f}_unif_s${binNum}.dat")
+        IOFile.estimatesToFileMult(est, s"${f}_unif_${index}.dat")
       case None => {}
     }
     val opt = EstimateMI.optMIMult(est)

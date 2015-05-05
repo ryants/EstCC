@@ -123,7 +123,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
    * an n-dimensional data set. This function constructs a Map from n-dimensinal
    * bin indices to 1-dimensional bin indices
    * 
-   * @param h HashMap of previously calculated keys (similar to [[delims]])
+   * @param h HashMap of previously calculated keys 
    * @param trees n-dimensional bin-delimiting trees for data
    * @param nb n-dimensional vector of bin numbers
    * @return mapping of n-dimensional indices to 1-dimensional indices  
@@ -140,7 +140,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     }
 
   /**
-   * Implements [[delims]] for signal space
+   * Delimiters for signal space
    * 
    * @param numBins n-dimensional vector of bin numbers
    * @return n-dimensional vector of bin-delimiting [[TreeDef.Tree]]s
@@ -149,7 +149,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     delims(sigVals, sig, exSigDelims, numBins)
     
   /**
-   * Implements [[delims]] for response space
+   * Delimiters for response space
    * 
    * @param numBins n-dimensional vector of bin numbers
    * @return n-dimensional vector of bin-delimiting [[TreeDef.Tree]]s
@@ -158,7 +158,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     delims(respVals, resp, exRespDelims, numBins)
 
   /**
-   * Implements [[keys]] for response space
+   * Index key for signal space
    * 
    * @param numBins n-dimensional vector of bin numbers
    * @return mapping of n-dimensional indices to 1-dimensional indices
@@ -167,7 +167,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     keys(exSigKeys, sigDelims(numBins), numBins)
   
   /**
-   * Implements [[keys]] for response space
+   * Index key for response space
    * 
    * @param numBins n-dimensional vector of bin numbers
    * @return mapping of n-dimensional indices to 1-dimensional indices

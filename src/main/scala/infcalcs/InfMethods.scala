@@ -473,13 +473,14 @@ object EstimateMI {
 
     // generates data with subSample method
     val table = buildTable(None)(data, binPair, wts)
-    val randTable = buildTable(Some(engine))(data, binPair, wts)
     val (invFracs, subSamples, randSubSamples) = {
       val tuples = EstCC.fracList map { x =>
         val inv = invSS(x, data.sig)
         val subTable = subSample(x, table)
-        val randSubs = (for (n <- 0 until numRandTables) yield subSample(x, randTable)).toVector
-        (inv, subTable, randSubs)
+        val randTables = (0 until numRandTables) map (y => 
+          buildTable(Some(engine))(data, binPair, wts))
+        val randSubTables = (randTables map (y => subSample(x, y))).toVector
+        (inv, subTable, randSubTables)
       }
       tuples.unzip3
     }
@@ -608,7 +609,7 @@ object EstimateMI {
 
     binTupList map
       (bt => (bt, multIntercepts(calcMultRegs(
-        buildDataMult(bt, pl, seed, wts))),wts))
+        bDMAlt(bt, pl, seed, wts))),wts))
 
   }
 

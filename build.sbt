@@ -4,15 +4,16 @@ scalaVersion := "2.11.4"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
-libraryDependencies += "colt" % "colt" % "1.2.0"
+libraryDependencies ++= Seq("colt" % "colt" % "1.2.0", 
+"org.scalatest" % "scalatest_2.11" % "2.1.5" % "test",
+"com.github.scopt" %% "scopt" % "3.2.0",
+"com.typesafe.akka" %% "akka-actor" % "2.3.3",
+"com.storm-enroute" %% "scalameter" % "0.6")
 
-libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.1.5" % "test"
+resolvers ++= Seq(Resolver.sonatypeRepo("public"),
+"Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases")
 
-libraryDependencies += "com.github.scopt" %% "scopt" % "3.2.0"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.3"
-
-resolvers += Resolver.sonatypeRepo("public")
+testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
 
 exportJars := true
 

@@ -319,9 +319,9 @@ object EstimateMI {
     val numToRemove = ((1 - frac) * t.numSamples).toInt
 
     // All (row, column) index pairs
-    val allIndices: List[Pair[Int]] = for {
-      r <- (0 until t.rows).toList
-      c <- (0 until t.cols).toList
+    val allIndices: IndexedSeq[Pair[Int]] = for {
+      r <- (0 until t.rows)
+      c <- (0 until t.cols)
     } yield (r, c)
 
     // Constructs list of (row, col) indices with shrinkable (nonzero) values,
@@ -334,7 +334,7 @@ object EstimateMI {
     @tailrec
     def shrinkTable(
       counter: Int,
-      validIndices: List[(Pair[Int], Int)],
+      validIndices: IndexedSeq[(Pair[Int], Int)],
       st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
       if (counter == 0) st
       else {

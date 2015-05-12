@@ -229,7 +229,7 @@ object CTBuild {
  *    datasets.
  *
  * Other important methods include:
- *  - [[buildDataMult]], which builds resampled and randomized contingency
+ *  - [[buildRegData]], which builds resampled and randomized contingency
  *    tables
  *  - [[calcMultRegs]], which estimates the mutual information by linear
  *    regression.
@@ -257,6 +257,7 @@ object EstimateMI {
    * @param pl The dose/response data.
    * @return Randomly selected fraction of the dataset.
    */
+  @deprecated("deprecated in favor of the subSample method","")
   def jackknife(frac: Double, pl: DRData, e: MersenneTwister): DRData =
     if (frac == 1.0) pl
     else {
@@ -428,6 +429,7 @@ object EstimateMI {
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
+  @deprecated("deprecated in favor of buildRegData","")
   def buildDataMult(
     binPair: Pair[NTuple[Int]],
     data: DRData,
@@ -481,9 +483,39 @@ object EstimateMI {
   }
 
   /**
-   * Same purpose as [[buildDataMult]], but uses [[subSample]] for resampling.
+   * Returns resampled and randomized contingency tables for estimation of MI.
+   *
+   * The data structure returned by this function contains all of the
+   * information required to calculate the MI for a single pair of bin sizes,
+   * including contingency tables for randomly subsampled datasets (for
+   * unbiased estimation of MI at each bin size) and randomly shuffled
+   * contingency tables (for selection of the appropriate bin size).
+   *
+   * Resampling of the dataset is performed using the [[subSample]] method.
+   *
+   * The return value is a tuple containing:
+   *  - a list of the inverse sample sizes for each resampling fraction. This
+   *    list has length (repsPerFraction * number of fractions) + 1. The extra
+   *    entry in the list (the + 1 in the expression) is due to the inclusion
+   *    of the full dataset (with fraction 1.0) in the list of sampling
+   *    fractions.
+   *  - a list of contingency tables for subsamples of the data, length as for
+   *    the inverse sample size list.
+   *  - a list of lists of randomized contingency tables. Because there are
+   *    numRandTables randomized tables used for every estimate, the outer list
+   *    contains numRandTables entries; each entry consists of
+   *    (repsPerFraction * number of fractions) + 1 randomized contingency
+   *    tables.
+   *  - a list of string labels for output and logging purposes, length as for
+   *    the inverse sample size list.
+   *
+   * @param bt Pair containing the numbers of row and column bins.
+   * @param pl The input/output dataset.
+   * @param wts An optional weights vector to be applied to the rows.
+   *
+   * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
-  def bDMAlt(
+  def buildRegData(
     binPair: Pair[NTuple[Int]],
     data: DRData,
     seed: Int,
@@ -629,7 +661,7 @@ object EstimateMI {
 
     binTupList map
       (bt => (bt, multIntercepts(calcMultRegs(
-        bDMAlt(bt, pl, seed, wts))),wts))
+        buildRegData(bt, pl, seed, wts))),wts))
 
   }
 

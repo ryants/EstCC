@@ -7,7 +7,7 @@ ordered pairs
 
 ### DEPENDENCIES
 
-Built using scala v2.11.0, sbt v0.13.5, and java v1.7.0_51. In order to build
+Built using scala v2.11, sbt v0.13.5, and java v1.7.0_51. In order to build
 an executable JAR file, run `sbt one-jar` in the project's root directory. 
 Additional information on this plugin can be found at https://github.com/sbt/sbt-onejar
 
@@ -24,9 +24,9 @@ i.e. `cp target/scala-2.1x/estcc_2.1x-0.1-SNAPSHOT-one-jar.jar /my/working/dir/M
 Given a plaintext file with data organized into whitespace-delimited columns,
 the channel capacity can be estimated using the following command:
 
-`java -jar MyEstCC.jar -d datafile (-p paramfile)`
+`java -jar MyEstCC.jar -d datafile -p paramfile`
 
-where the optional 'paramfile' contains calculation parameters modified from 
+where the 'paramfile' contains calculation parameters modified from 
 their default values and 'datafile' contains the whitespace-delimited columns
 of data
 

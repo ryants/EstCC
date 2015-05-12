@@ -214,7 +214,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Get the RegDataMult result
     val numReps = EstCC.numParameters("repsPerFraction").toInt
     // Seeded with some integer
-    val rdm = bDMAlt(numBins, pl, 1234567)
+    val rdm = buildRegData(numBins, pl, 1234567)
     // Check the inverse sample sizes
     val fracs = EstCC.listParameters("sampleFractions")
     val invss = rdm._1
@@ -240,14 +240,14 @@ class EstimateMITest extends FlatSpec with Matchers {
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {
-    val rdm = bDMAlt(numBins, pl, 1234567)
+    val rdm = buildRegData(numBins, pl, 1234567)
     val regs = calcMultRegs(rdm)
     regs._2.length shouldBe EstCC.numParameters("numRandom").toInt
   }
 
   "genEstimatesMult" should
     "get a list of MI results for a small sample dataset" in {
-      val rdm = bDMAlt(numBins, pl, 1234567)
+      val rdm = buildRegData(numBins, pl, 1234567)
       val regs = calcMultRegs(rdm)
       val intercepts = multIntercepts(regs)
       val binSizes = Vector((Vector(2), Vector(4)))

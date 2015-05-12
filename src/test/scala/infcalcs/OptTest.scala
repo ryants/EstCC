@@ -1,7 +1,7 @@
 package infcalcs
 
 import org.scalameter.api._
-import EstimateMI.{ buildDataMult, bDMAlt }
+import EstimateMI.{ buildDataMult, buildRegData }
 import CTBuild.buildTable
 import cern.jet.random.engine.MersenneTwister
 import annotation.tailrec
@@ -54,12 +54,12 @@ class OptTest extends PerformanceTest.Quickbenchmark {
           }
       }
     }
-    measure method "bDMAlt" in {
+    measure method "buildRegData" in {
       using(binTuples) in {
         r =>
           {
-            bDMAlt(r, randData, 23456)
-            bDMAlt(r, corrData, 23456)
+            buildRegData(r, randData, 23456)
+            buildRegData(r, corrData, 23456)
           }
       }
     }

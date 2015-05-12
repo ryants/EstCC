@@ -295,6 +295,24 @@ object EstimateMI {
       weightSignalData(t, uWts)
     }
   }
+  
+  /**
+   * Updates a data structure tracking non-zero values in a [[ContTable]]
+   * 
+   * @param indices a Seq of [[ContTable]] coordinates and the associated value
+   * @param index corresponds to an element of indices whose value is to be 
+   * decreased by one or removed if less than 1
+   * @return an updated Seq
+   */
+  def updateIndices(
+      indices: IndexedSeq[(Pair[Int],Int)], 
+      index: Int): IndexedSeq[(Pair[Int], Int)] = {
+    if (indices(index)._2 == 1) (indices take index) ++ (indices drop (index + 1))
+    else {
+      val element = indices(index) 
+      indices updated (index, (element._1, element._2 - 1))
+    }
+  }
 
   /**
    * Resample a fraction of data by modifying the contingency table.
@@ -325,20 +343,22 @@ object EstimateMI {
     } yield (r, c)
 
     // Constructs list of (row, col) indices with shrinkable (nonzero) values,
-    // sorted in order of the number of observations
-    val nonzeroIndices = allIndices filter (x => t.table(x._1)(x._2) > 0) map
-      (x => (x, t.table(x._1)(x._2))) sortBy (x => x._2)
+    // sorted in decreasing order of the number of observations
+    val nonzeroIndices = (allIndices filter (x => t.table(x._1)(x._2) > 0) map
+      (x => (x, t.table(x._1)(x._2))) sortBy (x => x._2)).reverse
 
+    val numPossible = (nonzeroIndices map (x => x._2)).sum
+      
     // Randomly samples values to be removed from a contingency table and
     // returns the updated table
     @tailrec
     def shrinkTable(
       counter: Int,
       validIndices: IndexedSeq[(Pair[Int], Int)],
+      numPossible: Int,
       st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
       if (counter == 0) st
       else {
-        val numPossible = (validIndices map (x => x._2)).sum
         val randSample = EstCC.rEngine.raw() * numPossible
 
         @tailrec
@@ -348,16 +368,17 @@ object EstimateMI {
 
         val chosenIndex = findIndex(randSample, 0, 0)
 
-        val row = validIndices(chosenIndex)._1._1
-        val col = validIndices(chosenIndex)._1._2
+        val (row, col) = validIndices(chosenIndex)._1
         val newTable: Vector[Vector[Int]] =
           st updated (row, st(row) updated (col, st(row)(col) - 1))
-        val updatedIndices = validIndices filter (x => x._2 > 0)
-        shrinkTable(counter - 1, updatedIndices, newTable)
+        val updatedVal = ((row,col),validIndices(chosenIndex)._2-1)
+        val updatedIndices = updateIndices(validIndices, chosenIndex)
+        shrinkTable(counter - 1, updatedIndices, numPossible-1, newTable)
       }
     }
     // Shrink the table and then make it uniform
-    val sTable = makeUniform(shrinkTable(numToRemove, nonzeroIndices, t.table))
+    val sTable = makeUniform(
+        shrinkTable(numToRemove, nonzeroIndices, numPossible, t.table))
 
     // Apply weights, if any
     weights match {
@@ -473,18 +494,17 @@ object EstimateMI {
 
     // generates data with subSample method
     val table = buildTable(None)(data, binPair, wts)
+    val randTables = (0 until numRandTables) map (y => buildTable(Some(engine))(data, binPair, wts))
     val (invFracs, subSamples, randSubSamples) = {
       val tuples = EstCC.fracList map { x =>
         val inv = invSS(x, data.sig)
         val subTable = subSample(x, table)
-        val randTables = (0 until numRandTables) map (y => 
-          buildTable(Some(engine))(data, binPair, wts))
-        val randSubTables = (randTables map (y => subSample(x, y))).toVector
+        val randSubTables = randTables map (y => subSample(x,y))
         (inv, subTable, randSubTables)
       }
       tuples.unzip3
     }
-
+    
     val l = wts match {
       case None => "n"
       case Some((wtList, tag)) => tag

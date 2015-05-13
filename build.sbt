@@ -1,6 +1,6 @@
 name := "EstCC"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.6"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 

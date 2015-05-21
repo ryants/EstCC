@@ -1031,7 +1031,7 @@ object EstimateCC {
       pl: DRData, 
       fp: Option[String]): Double = {
     var optList: Array[EstTuple] = Array()
-    println(s"# Signal Bins: ${bins.head._1.product}\t${wts.length + 1} calculations")
+    println(s"# Signal Bins: ${bins.head._1.product}\t${wts.length} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
     (0 until wts.length) foreach { w =>
@@ -1049,23 +1049,13 @@ object EstimateCC {
         val opt = EstimateMI.optMIMult(est)
         optList = optList :+ opt
         wts(w) match {
-          case Some(o) => println(s"  ${wts.length + 1 - w}) Weight: ${o._2}, " +
+          case Some(o) => println(s"  ${wts.length - w}) Weight: ${o._2}, " +
             s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
-          case None => println(s"  ${wts.length + 1 - w}) Weight: Uniform, " +
+          case None => println(s"  ${wts.length - w}) Weight: Uniform, " +
             s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
         }
       }
     }
-    val est = EstimateMI.genEstimatesMult(pl, bins, genSeed(EstCC.rEngine))
-    fp match {
-      case Some(f) =>
-        IOFile.estimatesToFileMult(est, s"${f}_unif_${index}.dat")
-      case None => {}
-    }
-    val opt = EstimateMI.optMIMult(est)
-    optList = optList :+ opt
-    println(s"  1) Weight: None, Est. MI: ${opt._2(0)._1} " +
-      s"${0xB1.toChar} ${opt._2(0)._2}")
     val maxOpt = EstimateMI.optMIMult(optList.toVector)
     EstimateMI.finalEstimation(
         maxOpt._1,

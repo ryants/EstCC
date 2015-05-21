@@ -161,54 +161,41 @@ object EstCC extends App with CLOpts {
   // Calculate and output estimated mutual information values given calculated
   // weights
 
-  // If there are no weights
-  if (aw.isEmpty) {
-    val unifEst = genEstimatesMult(p, bins, genSeed(rEngine))
-    val unifOpt = EstimateMI.optMIMult(unifEst)
-    val unifRes = getResultsMult(Vector(unifEst), addLabel(outF, "_unif"))
-    if (config.verbose) {
-      println(s"Weight: None, Est. MI: ${unifOpt._2(0)._1} " +
-        s"${0xB1.toChar} ${unifOpt._2(0)._2}")
+  // Parallel mode (includes mutable data structures)
+  if (config.cores > 1) {
+    val system = ActorSystem(s"EstCC")
+    val dist = system.actorOf(Props(new Distributor(aw)), "dist")
+    val calcList = (0 until config.cores - 1).toList map (x =>
+      system.actorOf(Props(new Calculator), s"calc_${x}"))
+
+    dist ! Init(calcList)
+
+    system.awaitTermination()
+  } // Verbose sequential mode (also has mutable data structures)
+  else if (config.verbose) {
+    var estList: Array[Double] = Array()
+    (0 until aw.length) foreach { i =>
+      val validBins = genBins(Vector(signalBins(i)), responseBins)
+      val res = verboseResults(aw(i), validBins, i, p, outF)
+      estList = estList :+ res
     }
-    EstimateMI.finalEstimation(unifRes._1,p,genSeed(rEngine),unifRes._3)
-    println(unifRes._2.head._1)
-  } else { // If there are weights
-    
-    // Parallel mode (includes mutable data structures)
-    if (config.cores > 1) {
-      val system = ActorSystem(s"EstCC")
-      val dist = system.actorOf(Props(new Distributor(aw)), "dist")
-      val calcList = (0 until config.cores - 1).toList map (x =>
-        system.actorOf(Props(new Calculator), s"calc_${x}"))
+    println(estList.max)
+  } // Silent sequential mode (all immutable data structures except parameters)
+  else {
+    val weightIndices = (0 until aw.length).toVector
+    val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
 
-      dist ! Init(calcList)
+    val res: Vector[EstTuple] = weightIndices map (n => getResultsMult(
+      calcWithWeightsMult(
+        aw(n),
+        genBins(Vector(signalBins(n)), responseBins), p).toVector,
+      addLabel(outF, "_" + n)))
 
-      system.awaitTermination()
-    } // Verbose sequential mode (also has mutable data structures)
-    else if (config.verbose) {
-      var estList: Array[Double] = Array()
-      (0 until aw.length) foreach { i =>
-        val validBins = genBins(Vector(signalBins(i)),responseBins)
-        val res = verboseResults(aw(i), validBins, i, p, outF)
-        estList = estList :+ res
-      }
-      println(estList.max)
-    } // Silent sequential mode (all immutable data structures except parameters)
-    else {
-      val weightIndices = (0 until aw.length).toVector
-      val binIndices = weightIndices map (x => bins.unzip._1.distinct(x))
-
-      val res: Vector[EstTuple] = weightIndices map (n => getResultsMult(
-        calcWithWeightsMult(
-            aw(n), 
-            genBins(Vector(signalBins(n)),responseBins), p).toVector,
-            addLabel(outF, "_" + n)))
-
-      val maxOpt = EstimateMI.optMIMult(Vector(res) map 
-          (EstimateMI.optMIMult))
-      EstimateMI.finalEstimation(maxOpt._1,p,genSeed(rEngine),maxOpt._3)
-      // Print estimated channel capacity to stdout
-      println(maxOpt._2.head._1)
-    }
+    val maxOpt = EstimateMI.optMIMult(Vector(res) map
+      (EstimateMI.optMIMult))
+    EstimateMI.finalEstimation(maxOpt._1, p, genSeed(rEngine), maxOpt._3)
+    // Print estimated channel capacity to stdout
+    println(maxOpt._2.head._1)
   }
+  
 }

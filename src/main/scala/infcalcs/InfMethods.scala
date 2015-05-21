@@ -735,6 +735,10 @@ object EstimateMI {
         (inv, subTable)
       }).unzip
     
+    val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
+    val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)
+    IOFile.delimInfoToFile((rd,cd), (sigKey,respKey), EstCC.stringParameters("filePrefix"))
+    
     val slrs: Iterable[SLR] = tables.head.ctVals.keys map 
       (x => new SLR(invFracs, tables map (_(x)), x))
     val estimates: Map[String, Pair[Double]] = (slrs map (x => 

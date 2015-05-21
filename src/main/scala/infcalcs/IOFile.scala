@@ -10,6 +10,7 @@ object IOFile {
   import java.io.FileWriter
   import java.io.File
   import scala.io.Source.fromFile
+  import TreeDef.Tree
 
   /**
    * Loads a 2D data table from a file as a matrix of Doubles.
@@ -169,6 +170,45 @@ object IOFile {
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
     val data = c.keys map { x => 
       writer.write(s"${x}\t${c(x)}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+  
+  /**
+   * Writes relevant delimiter information to file
+   * 
+   * @param dPair Pair of delimiters as [[NTuple]] of type [[TreeDef.Tree]]
+   * @param kPair Pair of mappings from n-dim data indices to 1-dim indices
+   * @param s file name
+   */
+  def delimInfoToFile(
+      dPair: Pair[NTuple[Tree]], 
+      kPair: Pair[Map[NTuple[Int],Int]],
+      s: String): Unit = {
+    
+    val dLPair = (dPair._1 map (_.toList.toVector), dPair._2 map (_.toList.toVector))
+    val sIndices = CTBuild.keyFromDimLengths(dLPair._1 map (_.length),Vector(Vector()))
+    val rIndices = CTBuild.keyFromDimLengths(dLPair._2 map (_.length),Vector(Vector()))
+    
+    val writer = new BufferedWriter(new FileWriter(new File(s"${s}_delims.dat")))
+    
+    writer.write("# Signal Delimiters")
+    writer.newLine()
+    for (x <- sIndices) { 
+      val delim = (0 until x.length) map (y => dLPair._1(y)(x(y)))
+      val dString = delim.mkString("\\s")
+      writer.write(s"${dString}\t${kPair._1(x)}")
+      writer.newLine()
+    }
+    writer.newLine()
+    writer.write("# Response Delimiters")
+    writer.newLine()
+    for (x <- rIndices) {
+      val delim = (0 until x.length) map (y => dLPair._2(y)(x(y)))
+      val dString = delim.mkString("\\s")
+      writer.write(s"${dString}\t${kPair._2(x)}")
       writer.newLine()
     }
     writer.flush()

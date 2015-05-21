@@ -530,8 +530,8 @@ object EstimateMI {
     val (invFracs, subSamples, randSubSamples) = {
       val tuples = EstCC.fracList map { x =>
         val inv = invSS(x, data.sig)
-        val subTable = subSample(x, table)
-        val randSubTables = randTables map (y => subSample(x,y))
+        val subTable = subSample(x, table, wts)
+        val randSubTables = randTables map (y => subSample(x,y,wts))
         (inv, subTable, randSubTables)
       }
       tuples.unzip3
@@ -726,14 +726,15 @@ object EstimateMI {
       wts: Option[Weight]): Unit = {
     val engine = new MersenneTwister(seed)
     val tupleInit = (Vector[Double](), Vector[ConstructedTable]())
-    val (invFracs, tables) =
-      EstCC.fracList.foldLeft(tupleInit) { (acc, x) =>
-        val (inv, tab) = acc
-        val newInv = inv :+ invSS(x, data.sig)
-        val sub = jackknife(x, data, engine)
-        val newTab = tab :+ buildTable(None)(sub, binPair, wts)
-        (newInv, newTab)
-      }
+    val table = buildTable(None)(data, binPair, wts)
+    val (invFracs, tables) = 
+      (EstCC.fracList map { x =>
+        val inv = 1.0 / (x * data.sig.length)
+        val subTable = subSample(x, table, wts)
+        subTable.tableToFile(s"ct_fe_${x}.dat")
+        (inv, subTable)
+      }).unzip
+    
     val slrs: Iterable[SLR] = tables.head.ctVals.keys map 
       (x => new SLR(invFracs, tables map (_(x)), x))
     val estimates: Map[String, Pair[Double]] = (slrs map (x => 

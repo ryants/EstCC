@@ -6,7 +6,7 @@ import CTBuild.buildTable
 import cern.jet.random.engine.MersenneTwister
 import annotation.tailrec
 
-class OptTest extends PerformanceTest.Quickbenchmark {
+class BuildBenchMark extends PerformanceTest.Quickbenchmark {
 
   EstCC.parameters = InfConfig.defaultParameters
   EstCC.listParameters = EstCC.parameters._1

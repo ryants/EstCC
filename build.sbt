@@ -20,3 +20,5 @@ exportJars := true
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 
 parallelExecution in Test := false
+
+testOptions in Test := Seq(Tests.Filter(s => s.endsWith("Test")))

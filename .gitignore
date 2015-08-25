@@ -3,3 +3,4 @@ src/main/scala/infcalcs/test.sc
 .worksheet/
 .cache
 *.swp
+.idea/

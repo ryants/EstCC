@@ -136,7 +136,7 @@ object EstCC extends App with CLOpts {
         val test =
           listParameters("sampleFractions").min * pbRespMax(x) <= ptResp(x)
         prev && test
-      },"number of signal bins must be less than the smallest jackknifed " +
+      },"number of response bins must be less than the smallest jackknifed " +
         "data sample")
     }  
     case Some(x) =>

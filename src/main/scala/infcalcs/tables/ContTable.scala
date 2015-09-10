@@ -1,6 +1,6 @@
-package infcalcs
+package infcalcs.tables
 
-import IOFile.importData
+import infcalcs.MathFuncs
 
 /** A mixin for implementing contingency tables. */
 trait ContTable {
@@ -47,20 +47,20 @@ trait ContTable {
    * Composition to produce marginal entropy function
    */
   def margEntFunc: Vector[Int] => Double = probVect andThen eTerm
-    
+
   /**
    * Higher order function that returns a function for calculating the negated
    * sum of a numerical data set that has a another function applied to it
-   * 
+   *
    * @param f function to apply to numerical data
-   * @return function which applies f to a data set and calculates the 
-   * negation of the resulting sum 
-   */ 
+   * @return function which applies f to a data set and calculates the
+   * negation of the resulting sum
+   */
   def mapNegSum[A,B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
     import n.mkNumericOps
     s => -(s map f).sum
   }
-  
+
   /**
    * Returns the marginal entropy (marginalized across columns) of a 2D table.
    *
@@ -76,7 +76,7 @@ trait ContTable {
    * }}}
    *
    * this function calculates the marginal entropy of the row variable X, H(X).
-   * 
+   *
    * @param t 2-dimensional vector of integer vectors
    * @return marginal entropy
    */
@@ -98,7 +98,7 @@ trait ContTable {
    *
    * this function calculates the entropy of the row variable X conditional
    * on the column variable Y, H(X|Y).
-   * 
+   *
    * @param t 2-dimensional vector of integer vectors
    * @return conditional entropy
    */
@@ -140,22 +140,22 @@ trait ContTable {
    * Map of strings to various [[ContTable]] values
    */
   lazy val ctVals: Map[String, Double] = Map(
-    "signalEntropy" -> this.margRowEntropy, 
+    "signalEntropy" -> this.margRowEntropy,
     "responseEntropy" -> this.margColEntropy,
     "condSignalEntropy" -> this.condRowEntropy,
-    "condResponseEntropy" -> this.condColEntropy, 
+    "condResponseEntropy" -> this.condColEntropy,
     "mutualInformation" -> this.mutualInformation,
     "transferEfficiency" -> this.transferEfficiency
   )
-  
+
   /**
    * Makes [[ContTable]] callable, retrieving values according to String keys
    * in [[ctVals]]
-   * 
+   *
    * @param s string present in [[ctVals]]' keys
    */
   def apply(s: String): Double = ctVals(s)
-  
+
   /** Checks two contingency tables for equality. */
   override def equals(ct: Any): Boolean = ct match {
     case that: ContTable => this.table == that.table
@@ -174,26 +174,4 @@ trait ContTable {
     writer.flush()
     writer.close()
   }
-}
-
-/** Class for reading contingency tables from a file. */
-class ImportedTable(fileName: String) extends ContTable {
-  val table: Vector[Vector[Int]] =
-    importData(fileName) map (x => x map (y => y.toInt))
-  
-  lazy val rows: Int = table.length
-  lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
-    
-  /** Pretty-prints contingency table to stdout. */
-  override def toString = (for (x <- table) yield (x mkString " ")).mkString("\n")
-}
-
-/** Class for building a contingency table from scratch. */
-class ConstructedTable(v: Vector[Vector[Int]]) extends ContTable {
-  lazy val rows = table.length
-  lazy val cols = if (table.isEmpty) 0 else table(0).length
-  lazy val table = v
-
-  /** Pretty-prints contingency table to stdout. */
-  override def toString = (for (x <- v) yield (x mkString " ")).mkString("\n")
 }

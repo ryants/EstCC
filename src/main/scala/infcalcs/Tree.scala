@@ -2,16 +2,16 @@ package infcalcs
 
 /** Implementation of binary trees containing Double values at each node.
   *
-  * The trait [[Tree]] defines the methods and properties of each node in the
-  * tree: regular nodes are implemented by the class [[Node]], while empty
+  * The trait [[TreeDef.Tree]] defines the methods and properties of each node in the
+  * tree: regular nodes are implemented by the class [[TreeDef.Node]], while empty
   * nodes (indicating that their parent is a terminal node) are implemented by
-  * the singleton object [[EmptyTree]].
+  * the singleton object [[TreeDef.EmptyTree]].
   *
   * A binary tree for a set of numbers (Doubles) is constructed by first
-  * obtaining an ordered (but unconnected) list of [[Node]] instances using the
-  * function [[buildOrderedNodeList]]. The ordered list of Nodes returned by
-  * this function can then be passed to the function [[buildTree]] to return an
-  * instance of [[Tree]] containing the binary tree.
+  * obtaining an ordered (but unconnected) list of [[TreeDef.Node]] instances using the
+  * function [[TreeDef.buildOrderedNodeList]]. The ordered list of Nodes returned by
+  * this function can then be passed to the function [[TreeDef.buildTree]] to return an
+  * instance of [[TreeDef.Tree]] containing the binary tree.
   */
 object TreeDef {
 

@@ -15,14 +15,16 @@ import scala.collection.mutable.HashMap
  *  @param sig 2D vector of signal values
  *  @param resp 2D vector of response values
  */
-class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) {
+class DRData(calcConfig: CalcConfig)
+    (val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) {
+
   Predef.assert(sig.length == resp.length)
   Predef.assert(checkSize(sig) == 1 && checkSize(resp) == 1)
 
   lazy val zippedVals = (sig, resp).zipped.toSeq
   
-  lazy val sigVals = EstCC.srParameters("signalValues") != None
-  lazy val respVals = EstCC.srParameters("responseValues") != None
+  lazy val sigVals = calcConfig.srParameters("signalValues") != None
+  lazy val respVals = calcConfig.srParameters("responseValues") != None
   
   val sigDim = dim(sig)
   val respDim = dim(resp)
@@ -71,7 +73,7 @@ class DRData(val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) 
     numBins: NTuple[Int]): NTuple[Tree] =
 
     if (valuesPresent)
-      (EstCC.srParameters("signalValues").get.transpose map (_.toSet.toList) map 
+      (calcConfig.srParameters("signalValues").get.transpose map (_.toSet.toList) map
         (x => TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
     else {
       val dt = data.transpose

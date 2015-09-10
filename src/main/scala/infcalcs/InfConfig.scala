@@ -1,5 +1,7 @@
 package infcalcs
 
+import infcalcs.Containers.Parameters
+
 /**
  * Defines default values for the channel capacity calculation parameters.
  *
@@ -41,6 +43,6 @@ object InfConfig {
 
   /** Instance of [[Parameters]] containing default parameter values. */
   val defaultParameters: Parameters =
-    (listParams, numParams, stringParams, srParams)
+    Parameters(listParams, numParams, stringParams, srParams)
 
 }

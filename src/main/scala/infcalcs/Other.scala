@@ -2,6 +2,7 @@ package infcalcs
 
 import cern.jet.stat.Probability.{ errorFunction => erf }
 import cern.jet.random.engine.MersenneTwister
+import infcalcs.Containers.Parameters
 import annotation.tailrec
 
 /**
@@ -42,7 +43,7 @@ object LowProb {
 
 /** Contains a handful of useful mathematical functions. */
 object MathFuncs {
-  import math.{ log, sqrt, pow }
+  import math.{ log, sqrt }
 
   /** Returns the base b logarithm of a number. */
   def logb(b: Int): Double => Double = (a: Double) => log(a) / log(b)
@@ -244,70 +245,69 @@ object OtherFuncs {
     if (l.isEmpty) p
     else {
       // Check if listParams contains the current key
-      if (p._1 contains l.head._1)
+      if (p.listParams contains l.head._1)
         updateParameters(l.tail,
-          (p._1 updated (l.head._1, stringToSList(l.head._2).get), p._2, p._3, p._4))
+          Parameters(
+            p.listParams updated (l.head._1, stringToSList(l.head._2).get),
+            p.numParams, 
+            p.stringParams, 
+            p.sigRespParams))
       // Check if numParams contains the current key
-      else if (p._2 contains l.head._1)
+      else if (p.numParams contains l.head._1)
         updateParameters(l.tail,
-          (p._1, p._2 updated (l.head._1, l.head._2.toDouble), p._3, p._4))
+          Parameters(
+            p.listParams, 
+            p.numParams updated (l.head._1, l.head._2.toDouble), 
+            p.stringParams, 
+            p.sigRespParams))
       // Check if stringParams contains the current key
-      else if (p._3 contains l.head._1)
+      else if (p.stringParams contains l.head._1)
         updateParameters(l.tail,
-          (p._1, p._2, p._3 updated (l.head._1, l.head._2), p._4))
+          Parameters(
+            p.listParams, 
+            p.numParams, 
+            p.stringParams updated (l.head._1, l.head._2), 
+            p.sigRespParams))
       // Check if *values needs to be updated
       else if (l.head._1 matches ".*Vals[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
-            (p._1, p._2, p._3,
-              p._4 updated ("responseValues",
-                stringToValList(l.head._2, p._4("responseValues")))))
+            Parameters(
+              p.listParams, 
+              p.numParams, 
+              p.stringParams,
+              p.sigRespParams updated 
+                ("responseValues", stringToValList(l.head._2, p.sigRespParams("responseValues")))))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
-            (p._1, p._2, p._3,
-              p._4 updated ("signalValues",
-                stringToValList(l.head._2, p._4("signalValues")))))
+            Parameters(
+              p.listParams, 
+              p.numParams, 
+              p.stringParams,
+              p.sigRespParams updated 
+                ("signalValues", stringToValList(l.head._2, p.sigRespParams("signalValues")))))
         else throw new Exception(s"illegal parameter: ${l.head._1}")
       // Check if *bins needs to be updated
       else if (l.head._1 matches ".*Bins[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
-            (p._1, p._2, p._3,
-              p._4 updated ("responseBins",
-                stringToValList(l.head._2, p._4("responseBins")))))
+            Parameters(
+              p.listParams, 
+              p.numParams, 
+              p.stringParams,
+              p.sigRespParams updated 
+                ("responseBins", stringToValList(l.head._2, p.sigRespParams("responseBins")))))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
-            (p._1, p._2, p._3,
-              p._4 updated ("signalBins",
-                stringToValList(l.head._2, p._4("signalBins")))))
+            Parameters(
+              p.listParams, 
+              p.numParams, 
+              p.stringParams,
+              p.sigRespParams updated 
+                ("signalBins", stringToValList(l.head._2, p.sigRespParams("signalBins")))))
         else throw new Exception(s"illegal parameter: ${l.head._1}")
       // The key was not found! Throw an exception
       else throw new Exception(s"illegal parameter: ${l.head._1}")
     }
-  }
-
-  /**
-   * Prints all parameters to stdout
-   * 
-   * @param p parameters of type [[Parameters]], that govern mutual information estimation
-   */
-  def printParameters(p: Parameters): Unit = {
-    p._1.keys map { x => println(s"${x}\t${p._1(x).mkString(", ")}") }
-    println()
-    p._2.keys map (x => println(s"${x}\t${p._2(x)}"))
-    println()
-    p._3.keys map (x => println(s"${x}\t${p._3(x)}"))
-    println()
-    p._4.keys map { x =>
-      p._4(x) match {
-        case None => println(s"${x}\tNone")
-        case Some(y) => {
-          val elByLine = y map (z => z.mkString(","))
-          println(s"${x}")
-          elByLine map (z => println(s"\t\t(${z})"))
-        }
-      }
-    }
-    println()
   }
 }

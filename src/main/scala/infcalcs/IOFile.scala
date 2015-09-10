@@ -1,5 +1,8 @@
 package infcalcs
 
+import infcalcs.Containers.EstTuple
+import infcalcs.tables.ImportedTable
+
 /**
  * This object contains methods for writing and reading various types of
  * data to and from files.
@@ -55,21 +58,22 @@ object IOFile {
    *  Currently, the remainder of the program can only handle
    *  4 columns or fewer correctly
    *
-   *  @param f Name of file to load.
-   * @param cols List of integers indicating which columns of the file to load.
+   * @param f Name of file to load.
+   * @param sigCols List of integers indicating which columns of the file to load for signal values.
+   * @param respCols List of integers indicating which columns of the file to load for response values.
    * @return 2D vector of data from file
    */
   def loadList(
     f: String,
     sigCols: Vector[Int],
-    respCols: Vector[Int]): DRData = {
+    respCols: Vector[Int])(implicit calcConfig: CalcConfig): DRData = {
     
     val d = importData(f)
-    if (d.isEmpty) new DRData(Vector(), Vector())
+    if (d.isEmpty) new DRData(calcConfig)(Vector(), Vector())
     else {
       val sig = d map (x => sigCols map (y => x(y)))
       val resp = d map (x => respCols map (y => x(y)))
-      new DRData(sig, resp)
+      new DRData(calcConfig)(sig, resp)
     }
     
   }
@@ -134,23 +138,23 @@ object IOFile {
    * optional weight)
    * @param f Name of the file to write.
    */
-  def estimatesToFileMult(d: Vector[EstTuple], f: String): Unit = {
-    val numRandTables = EstCC.numParameters("numRandom").toInt
+  def estimatesToFileMult(d: Vector[EstTuple], f: String)(implicit calcConfig: CalcConfig): Unit = {
+    val numRandTables = calcConfig.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map
       (x => ("\tMIRand " + x + "\tSDRand " + x))
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
     writer.newLine()
-    val wtString = d.head._3 match {
+    val wtString = d.head.weight match {
       case None => "None"
-      case Some(x) => x._2
+      case Some(x) => x.label
     }
     writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
     
     val lines =
-      for (x <- d) yield s"${x._1._1.mkString(",")} ${x._1._2.mkString(",")} " + 
-        s"${x._2.head._1} ${x._2.head._2} " + (x._2.tail map (
+      for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +
+        s"${x.estimates.head._1} ${x.estimates.head._2} " + (x.estimates.tail map (
             y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)

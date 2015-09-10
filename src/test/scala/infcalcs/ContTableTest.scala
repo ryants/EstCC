@@ -1,5 +1,6 @@
 package infcalcs
 
+import infcalcs.tables.ConstructedTable
 import org.scalatest._
 
 class ContTableTest extends FlatSpec with Matchers {

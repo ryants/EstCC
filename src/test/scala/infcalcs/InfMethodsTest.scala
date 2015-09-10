@@ -1,5 +1,6 @@
 package infcalcs
 
+import infcalcs.Containers.Weight
 import org.scalatest._
 import cern.jet.random.engine.MersenneTwister
 
@@ -8,13 +9,13 @@ import EstimateMI._
 import EstimateCC._
 
 class CTBuildTest extends FlatSpec with Matchers {
-  val parameters = InfConfig.defaultParameters
-  EstCC.srParameters = parameters._4
+
+  val testConfig = CalcConfig(new MersenneTwister(12345))
 
   val dList1 = Vector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
   val dList2 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0)
 
-  val dr = new DRData(dList1 map (x => Vector(x)), dList2 map (x => Vector(x)))
+  val dr = new DRData(testConfig)(dList1 map (x => Vector(x)), dList2 map (x => Vector(x)))
 
   "A contingency table builder" should "divide lists into equal sublists" in {
     // Divide into 4 bins
@@ -91,7 +92,7 @@ class CTBuildTest extends FlatSpec with Matchers {
       Vector(x))
     val responses = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
       Vector(x))
-    val data = new DRData(doses, responses)
+    val data = new DRData(testConfig)(doses, responses)
     val numBins = Tuple2(Vector(2), Vector(4))
     // Call with no weighting and no randomization
     val ct = buildTable(None)(data, numBins)
@@ -104,26 +105,15 @@ class CTBuildTest extends FlatSpec with Matchers {
     ct.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 4, 0))
 
     // Now try building a table with weights
-    val wts = Option((List(1.0, 2.0), "testWeight"))
+    val wts = Option(Weight(List(1.0, 2.0), "testWeight"))
     val ct2 = buildTable(None)(data, numBins, wts)
     ct2.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 8, 0))
   }
 }
 
 class EstimateMITest extends FlatSpec with Matchers {
-  val parameters = InfConfig.defaultParameters
-  EstCC.parameters = parameters
-  EstCC.listParameters = parameters._1
-  EstCC.numParameters = parameters._2
-  EstCC.stringParameters = parameters._3
-  EstCC.srParameters = parameters._4
-  EstCC.rEngine = new MersenneTwister
-  EstCC.fracList = ({
-    for {
-      f <- EstCC.listParameters("sampleFractions")
-      n <- 0 until EstCC.numParameters("repsPerFraction").toInt
-    } yield f
-  }.toVector :+ 1.0)
+
+  val testConfig = CalcConfig(new MersenneTwister(12345))
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
     Vector(x))
@@ -132,7 +122,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   val responses = Vector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0) map (x =>
     Vector(x))
 
-  val pl = new DRData(doses1, responses)
+  val pl = new DRData(testConfig)(doses1, responses)
   val numBins = Tuple2(Vector(2), Vector(4))
   val ct = buildTable(None)(pl, numBins)
 
@@ -145,20 +135,6 @@ class EstimateMITest extends FlatSpec with Matchers {
     bins shouldBe (Vector((1, 11), (1, 12), (1, 13),
       (2, 11), (2, 12), (2, 13),
       (3, 11), (3, 12), (3, 13)) map (x => (Vector(x._1),Vector(x._2))))
-  }
-
-  "jackknife" should "subsample data" in {
-    val data = new DRData(responses, responses)
-    val jkData = jackknife(0.5, data, EstCC.rEngine)
-    jkData.sig.length shouldBe 4
-    jkData.resp.length shouldBe 4
-    // Show that the doses and responses are shuffled together, not independently
-    val inputs = jkData.sig
-    val outputs = jkData.resp
-    inputs(0) shouldBe outputs(0)
-    inputs(1) shouldBe outputs(1)
-    inputs(2) shouldBe outputs(2)
-    inputs(3) shouldBe outputs(3)
   }
 
   "isUniform" should "identify a uniform contingency table as uniform" in {
@@ -205,63 +181,63 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "subSample" should
     "shrink the number of observations in a contingency table" in {
-      val sample = subSample(0.5, ct)
+      val sample = subSample(testConfig)(0.5, ct)
       ct.numSamples shouldBe 8
       sample.numSamples shouldBe 4
     }
 
   "buildDataMultAlt" should "return an appropriate RegDataMult data structure" in {
     // Get the RegDataMult result
-    val numReps = EstCC.numParameters("repsPerFraction").toInt
+    val numReps = testConfig.numParameters("repsPerFraction").toInt
     // Seeded with some integer
-    val rdm = buildRegData(numBins, pl, 1234567)
+    val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
     // Check the inverse sample sizes
-    val fracs = EstCC.listParameters("sampleFractions")
-    val invss = rdm._1
+    val fracs = testConfig.listParameters("sampleFractions")
+    val invss = rdm.iss
     // Check the length of the inverse sample sizes
     val fracListLength = (fracs.length * numReps) + 1
     invss.length shouldBe fracListLength // check the length
     // Check the first inverse sample size
     invss(0) shouldBe 1 / (fracs(0) * doses1.length)
     // Check the resampled contingency tables
-    val cts = rdm._2
+    val cts = rdm.subContTables
     // Check the length of the CT list
     cts.length shouldBe fracListLength
     // The last contingency table (fraction 1.0) should be the same as the
     // original
     cts(fracListLength - 1) shouldBe ct
     // Check the randomized contingency tables
-    val rcts = rdm._3
-    rcts.length shouldBe EstCC.numParameters("numRandom").toInt
+    val rcts = rdm.randContTableVect
+    rcts.length shouldBe testConfig.numParameters("numRandom").toInt
     rcts(0).length shouldBe fracListLength
     // Check the label list
-    val labels = rdm._4
+    val labels = rdm.labels
     labels.length shouldBe fracListLength
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {
-    val rdm = buildRegData(numBins, pl, 1234567)
-    val regs = calcMultRegs(rdm)
-    regs._2.length shouldBe EstCC.numParameters("numRandom").toInt
+    val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
+    val regs = calcMultRegs(testConfig)(rdm)
+    regs._2.length shouldBe testConfig.numParameters("numRandom").toInt
   }
 
   "genEstimatesMult" should
     "get a list of MI results for a small sample dataset" in {
-      val rdm = buildRegData(numBins, pl, 1234567)
-      val regs = calcMultRegs(rdm)
+      val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
+      val regs = calcMultRegs(testConfig)(rdm)
       val intercepts = multIntercepts(regs)
       val binSizes = Vector((Vector(2), Vector(4)))
-      val genResult = genEstimatesMult(pl, binSizes, 1234567)
+      val genResult = genEstimatesMult(testConfig)(pl, binSizes, 1234567)
       // We should get one result back because we only gave one bin size
       genResult.length shouldBe 1
       // The first tuple in the list
       val firstResult = genResult(0)
       // The first entry in the tuple should be the bin size we provided
-      firstResult._1 shouldBe binSizes(0)
+      firstResult.pairBinTuples shouldBe binSizes(0)
       // The second entry should be the same length as the list of intercepts
       // we calculated; we can't explicitly compare them because they have been
       // randomized differently
-      firstResult._2.length shouldBe intercepts.length
+      firstResult.estimates.length shouldBe intercepts.length
     }
 
 }
@@ -270,33 +246,26 @@ class EstimateCCTest extends FlatSpec with Matchers {
 
   import OtherFuncs.updateParameters
   
-  // Mock up the global parameters in EstCC
-  val parameters = updateParameters(List(("biMuNumber","3")),InfConfig.defaultParameters)
-  EstCC.parameters = parameters
-  EstCC.listParameters = parameters._1
-  EstCC.numParameters = parameters._2
-  EstCC.stringParameters = parameters._3
-  EstCC.srParameters = parameters._4
-  EstCC.rEngine = new MersenneTwister
+  val testConfig = CalcConfig(new MersenneTwister(12345))
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x => Vector(x))
   val doses2 = Vector(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0) map (x => Vector(x))
   val responses = Vector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0) map (x => Vector(x))
-  val pl = new DRData(responses, responses)
+  val pl = new DRData(testConfig)(responses, responses)
   val numBins = Tuple2(Vector(4), Vector(4))
   val ct = buildTable(None)(pl, numBins)
 
   "EstimateCC" should "generate unimodal Gaussian weights" in {
     val rd = pl sigDelims numBins._1
-    val uniWts = genWeights(rd, pl.sig, uniWeight)
+    val uniWts = genWeights(rd, pl.sig, uniWeight(testConfig))
     uniWts.length shouldBe
-      (EstCC.numParameters("uniMuNumber").toInt) *
-      EstCC.numParameters("uniSigmaNumber").toInt
+      (testConfig.numParameters("uniMuNumber").toInt) *
+        testConfig.numParameters("uniSigmaNumber").toInt
   }
   
   it should "generate bimodel Gaussian weights" in {
     val rd = pl sigDelims numBins._1
-    val biWts = genWeights(rd, pl.sig, biWeight)
+    val biWts = genWeights(rd, pl.sig, biWeight(testConfig))
     biWts.length > 1
   }
 }
@@ -304,8 +273,7 @@ class EstimateCCTest extends FlatSpec with Matchers {
 class MultiVarTest extends FlatSpec with Matchers {
   import OtherFuncs._
 
-  val parameters = InfConfig.defaultParameters
-  EstCC.srParameters = parameters._4
+  val testConfig = CalcConfig(new MersenneTwister(12345))
 
   val d2d = Vector(Vector(0.0, 0.0), Vector(0.0, 1.0), Vector(1.0, 0.0),
     Vector(1.0, 1.0))
@@ -313,8 +281,8 @@ class MultiVarTest extends FlatSpec with Matchers {
   val r2d = Vector(Vector(1.0, 0.0), Vector(1.0, 0.0), Vector(1.0, 1.0),
     Vector(1.0, 1.0))
   
-  val data = new DRData(d2d, r2d)
-  val data2 = new DRData(d3d, r2d)
+  val data = new DRData(testConfig)(d2d, r2d)
+  val data2 = new DRData(testConfig)(d3d, r2d)
   
   val binTuple = Tuple2(Vector(1,2), Vector(2,2))
   val rd = data sigDelims binTuple._1
@@ -344,8 +312,8 @@ class MultiVarTest extends FlatSpec with Matchers {
     "generate appropriate signal parameters" in {
       val params = InfConfig.defaultParameters
       val newParams = updateParameters(sigList, params)
-      newParams._4("signalValues").get.head shouldBe Vector(0, 1, 4)
-      newParams._4("signalValues").get.last shouldBe Vector(2, 3, 8)
+      newParams.sigRespParams("signalValues").get.head shouldBe Vector(0, 1, 4)
+      newParams.sigRespParams("signalValues").get.last shouldBe Vector(2, 3, 8)
     }
 
   val testValues: Vector[Vector[Double]] = for {
@@ -361,11 +329,12 @@ class MultiVarTest extends FlatSpec with Matchers {
 
   "multidimensional data" should
     "produce correct ContTable dimensions" in {
-      EstCC.srParameters = EstCC.srParameters updated (
-        "signalValues", Some(testValues))
-      EstCC.srParameters = EstCC.srParameters updated (
-        "responseValues", Some(testValues))
-      val data3 = new DRData(testValues, testValues)
+      val parameters =
+        (testConfig.parameters
+          .updateSigRespParams("signalValues", Some(testValues))
+          .updateSigRespParams("responseValues", Some(testValues)))
+      val testConfig2 = CalcConfig(parameters)
+      val data3 = new DRData(testConfig2)(testValues, testValues)
       val ct3 = buildTable(None)(data3, binTuple2)
       ct3.rows shouldBe 16
       ct3.cols shouldBe 16
@@ -375,27 +344,25 @@ class MultiVarTest extends FlatSpec with Matchers {
     val d = Vector(Vector(0.0))
     val d2 = Vector(Vector(0.0, 1.0), Vector(1.0))
     val r = Vector(Vector(0.0), Vector(1.0))
-    an [AssertionError] should be thrownBy new DRData(d, r)
-    an [AssertionError] should be thrownBy new DRData(d2, r)
+    an [AssertionError] should be thrownBy new DRData(testConfig)(d, r)
+    an [AssertionError] should be thrownBy new DRData(testConfig)(d2, r)
   }
 
   it should "produce a tree for each signal or response variable" in {
-    EstCC.srParameters = InfConfig.defaultParameters._4
-    val data4 = new DRData(testValues, testValues map (x => x :+ (x(0) + 3.0)))
+    val data4 = new DRData(testConfig)(testValues, testValues map (x => x :+ (x(0) + 3.0)))
     (data4 sigDelims Vector(2,4,1)).length shouldBe 3
     (data4 respDelims Vector(12,2,2,6)).length shouldBe 4
   }
   
   it should "recall existing binDelims and binKeys" in {
-    val data = new DRData(testValues, testValues)
+    val data = new DRData(testConfig)(testValues, testValues)
     data.exSigDelims contains Vector(1,2,3) shouldBe false
     val bd = data sigDelims Vector(1,2,3)  
     data.exSigDelims contains Vector(1,2,3) shouldBe true
   }
 
   "calcBinKeys" should "correctly place values in the contingency table" in {
-    EstCC.srParameters = InfConfig.defaultParameters._4
-    val data5 = new DRData(testValues2, testValues2)
+    val data5 = new DRData(testConfig)(testValues2, testValues2)
     val bins = Vector(3,2)
     data5 sigKey bins shouldBe Map(Vector(0, 0)->0, Vector(0, 1)->1, Vector(1, 0)->2,
       Vector(1, 1)->3, Vector(2, 0)->4, Vector(2, 1)->5)

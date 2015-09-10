@@ -1,6 +1,7 @@
 package infcalcs
 import akka.actor.{ ActorRef, Actor }
 import OtherFuncs.genSeed
+import infcalcs.Containers.{EstTuple, Weight}
 
 object Actors {
 
@@ -39,7 +40,7 @@ object Actors {
    * 
    * @param wts list of list of [[Weight]]
    */
-  class Distributor(wts: List[List[Option[Weight]]]) extends Actor {
+  class Distributor(wts: List[List[Option[Weight]]])(implicit calcConfig: CalcConfig) extends Actor {
 
     val numLists = wts.length //quantity of considered signal bin numbers
     var rLists = wts.length //remaining signal bin numbers
@@ -55,28 +56,28 @@ object Actors {
     def receive = {
       case r: Result => {
         totRem -= 1
-        if (EstCC.config.verbose) {
+        if (EstCC.appConfig.verbose) {
           println(s"$totRem remaining calculations")
         }
         estList = estList :+ r.res
         if (rWeights > 0) {
           val curList = numLists - rLists
-          val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
+          val bins = EstimateMI.genBins(Vector(calcConfig.signalBins(curList)),calcConfig.responseBins)
           val index = wts(curList).length - rWeights
-          val seed = genSeed(EstCC.rEngine)
+          val seed = genSeed(calcConfig.rEngine)
           sender ! Estimate(wts(curList)(index), bins, curList, index, seed)
           rWeights -= 1
         } else if (totRem == 0) {
-          if (EstCC.config.verbose){
+          if (EstCC.appConfig.verbose){
             println("calculation finished, estimated channel capacity:")
           }
-          val maxOpt = EstimateMI.optMIMult(estList.toVector)
+          val maxOpt = EstimateMI.optMIMult(calcConfig)(estList.toVector)
           EstimateMI.finalEstimation(
-              maxOpt._1,
+              maxOpt.pairBinTuples,
               EstCC.p,
-              genSeed(EstCC.rEngine),
-              maxOpt._3)
-          println(s"${maxOpt._2.head._1}")
+              genSeed(calcConfig.rEngine),
+              maxOpt.weight)(calcConfig)
+          println(s"${maxOpt.estimates.head._1}")
           context.system.shutdown()
         }
       }
@@ -86,17 +87,17 @@ object Actors {
           {
             if (rWeights > 0) {
               val curList = numLists - rLists
-              val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
+              val bins = EstimateMI.genBins(Vector(calcConfig.signalBins(curList)),calcConfig.responseBins)
               val index = wts(curList).length - rWeights
-              val seed = genSeed(EstCC.rEngine)
+              val seed = genSeed(calcConfig.rEngine)
               cs(c) ! Estimate(wts(curList)(index), bins, curList, index, seed)
               rWeights -= 1
             } else if (rLists > 1) {
               rLists -= 1
               val curList = numLists - rLists
-              val bins = EstimateMI.genBins(Vector(EstCC.signalBins(curList)),EstCC.responseBins)
+              val bins = EstimateMI.genBins(Vector(calcConfig.signalBins(curList)),calcConfig.responseBins)
               val index = 0
-              val seed = genSeed(EstCC.rEngine)
+              val seed = genSeed(calcConfig.rEngine)
               cs(c) ! Estimate(wts(curList)(index), bins, curList, index, seed)
               rWeights = wts(numLists - rLists).length - 1
             } else {
@@ -111,20 +112,20 @@ object Actors {
   /**
    * Actor responsible for executing mutual information estimations
    */
-  class Calculator extends Actor {
+  class Calculator(implicit calcConfig: CalcConfig) extends Actor {
 
     def receive = {
       case Estimate(w, b, sid, i, s) => {
-        val estMI = EstimateMI.genEstimatesMult(EstCC.p, b, s, w)
-        EstCC.outF match {
+        val estMI = EstimateMI.genEstimatesMult(calcConfig)(EstCC.p, b, s, w)
+        calcConfig.outF match {
           case Some(str) => IOFile.estimatesToFileMult(
             estMI,
             s"${str}_${sid}_${i}.dat")
         }
-        val opt = EstimateMI.optMIMult(estMI)
-        if (EstCC.config.verbose){ w match {
-          case Some(o) => println(s"${o._2}\tI = ${opt._2.head._1}")
-          case None => println(s"Uniform\tI = ${opt._2.head._1}")
+        val opt = EstimateMI.optMIMult(calcConfig)(estMI)
+        if (EstCC.appConfig.verbose){ w match {
+          case Some(Weight(o,l)) => println(s"${l}\tI = ${opt.estimates.head._1}")
+          case None => println(s"Uniform\tI = ${opt.estimates.head._1}")
         }
           
         }

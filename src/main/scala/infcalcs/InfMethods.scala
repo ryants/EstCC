@@ -1,5 +1,8 @@
 package infcalcs
 
+import infcalcs.Containers.{RegData, RegDataMult, EstTuple, Weight}
+import infcalcs.tables.{ContTable, ConstructedTable}
+
 import annotation.tailrec
 import math._
 import TreeDef._
@@ -7,7 +10,6 @@ import TreeDef._
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
   import cern.jet.random.engine.MersenneTwister
-  import EstimateMI.makeUniform
   /**
    * Divides list into sublists with approximately equal numbers of elements.
    *
@@ -140,7 +142,7 @@ object CTBuild {
    * contingency table
    * @param binDelims tuple of delimiting trees used to determine respective
    * bin indices
-   * @param v vector of bin indices, whose index is used for insertion into
+   * @param m mapping of bin indices, whose index is used for insertion into
    * the contingency table
    *
    * @return index of 2D bin
@@ -211,7 +213,7 @@ object CTBuild {
 
     weights match {
       case None => new ConstructedTable(ct)
-      case Some((x, tag)) => new ConstructedTable(weightSignalData(ct, x))
+      case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(ct, x))
     }
 
   }
@@ -221,17 +223,17 @@ object CTBuild {
  * Contains methods for estimating mutual information.
  *
  * The principal methods used by top-level calling functions are:
- *  - [[genEstimatesMult]], which takes a dataset and a set of bin sizes and
+ *  - [[EstimateMI.genEstimatesMult]], which takes a dataset and a set of bin sizes and
  *    returns mutual information estimates for each bin size, and
- *  - [[optMIMult]], which takes the mutual information estimates produced by
- *    [[genEstimatesMult]] and finds the bin size and mutual information that
+ *  - [[EstimateMI.optMIMult]], which takes the mutual information estimates produced by
+ *    [[EstimateMI.genEstimatesMult]] and finds the bin size and mutual information that
  *    maximizes the mutual information for the real but not the randomized
  *    datasets.
  *
  * Other important methods include:
- *  - [[buildRegData]], which builds resampled and randomized contingency
+ *  - [[EstimateMI.buildRegData]], which builds resampled and randomized contingency
  *    tables
- *  - [[calcMultRegs]], which estimates the mutual information by linear
+ *  - [[EstimateMI.calcMultRegs]], which estimates the mutual information by linear
  *    regression.
  */
 object EstimateMI {
@@ -247,25 +249,6 @@ object EstimateMI {
     val cBinList = if (otherBinList.isEmpty) binList else otherBinList
     for (r <- binList; c <- cBinList) yield (r, c)
   }
-
-  /**
-   * Resample data by shuffling and then extracting the first frac entries.
-   *
-   * Note: A likely bottleneck for calculations with large datasets.
-   *
-   * @param frac Fraction of the full dataset to take (between 0 and 1).
-   * @param pl The dose/response data.
-   * @return Randomly selected fraction of the dataset.
-   */
-  @deprecated("deprecated in favor of the subSample method","")
-  def jackknife(frac: Double, pl: DRData, e: MersenneTwister): DRData =
-    if (frac == 1.0) pl
-    else {
-      val numToTake = (frac * pl.sig.length).toInt
-      val shuffledPairs = OtherFuncs.myShuffle(pl.zippedVals, e)
-      val newDR = (shuffledPairs take numToTake).unzip
-      new DRData(newDR._1, newDR._2)
-    }
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -318,8 +301,7 @@ object EstimateMI {
   /**
    * Resample a fraction of data by modifying the contingency table.
    *
-   * An alternative to the [[jackknife]] function.  Resamples the
-   * data by decrementing (nonzero) counts in the contingency table at
+   * Resamples the data by decrementing (nonzero) counts in the contingency table at
    * randomly chosen indices. After shrinking the number of observations, the
    * rows are re-weighted to be uniform using [[EstimateMI.makeUniform]].
    * Finally, an optional weights vector is applied to the rows.
@@ -329,7 +311,7 @@ object EstimateMI {
    * @param weights Weights to be applied to rows after resampling (if any).
    * @return The resampled contingency table.
    */
-  def subSample(
+  def subSample(calcConfig: CalcConfig)(
     frac: Double,
     t: ContTable,
     weights: Option[Weight] = None): ConstructedTable = {
@@ -360,7 +342,7 @@ object EstimateMI {
       st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
       if (counter == 0) st
       else {
-        val randSample = EstCC.rEngine.raw() * numPossible
+        val randSample = calcConfig.rEngine.raw() * numPossible
 
         @tailrec
         def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int =
@@ -384,7 +366,7 @@ object EstimateMI {
     // Apply weights, if any
     weights match {
       case None => new ConstructedTable(sTable)
-      case Some((x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
+      case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
     }
   }
 
@@ -395,92 +377,6 @@ object EstimateMI {
    *  @param ds data set to sample from
    */
   def invSS[T](f: Double, ds: Vector[T]) = 1 / (f * ds.length)
-
-  /**
-   * Returns resampled and randomized contingency tables for estimation of MI.
-   *
-   * The data structure returned by this function contains all of the
-   * information required to calculate the MI for a single pair of bin sizes,
-   * including contingency tables for randomly subsampled datasets (for
-   * unbiased estimation of MI at each bin size) and randomly shuffled
-   * contingency tables (for selection of the appropriate bin size).
-   *
-   * Resampling of the dataset is performed using the [[jackknife]] method.
-   *
-   * The return value is a tuple containing:
-   *  - a list of the inverse sample sizes for each resampling fraction. This
-   *    list has length (repsPerFraction * number of fractions) + 1. The extra
-   *    entry in the list (the + 1 in the expression) is due to the inclusion
-   *    of the full dataset (with fraction 1.0) in the list of sampling
-   *    fractions.
-   *  - a list of contingency tables for subsamples of the data, length as for
-   *    the inverse sample size list.
-   *  - a list of lists of randomized contingency tables. Because there are
-   *    numRandTables randomized tables used for every estimate, the outer list
-   *    contains numRandTables entries; each entry consists of
-   *    (repsPerFraction * number of fractions) + 1 randomized contingency
-   *    tables.
-   *  - a list of string labels for output and logging purposes, length as for
-   *    the inverse sample size list.
-   *
-   * @param bt Pair containing the numbers of row and column bins.
-   * @param pl The input/output dataset.
-   * @param wts An optional weights vector to be applied to the rows.
-   *
-   * @return (inverse sample sizes, CTs, randomized CTs, labels)
-   */
-  @deprecated("deprecated in favor of buildRegData","")
-  def buildDataMult(
-    binPair: Pair[NTuple[Int]],
-    data: DRData,
-    seed: Int,
-    wts: Option[Weight] = None): RegDataMult = {
-
-    // engine for randomization processes
-    val engine = new MersenneTwister(seed)
-
-    // number of randomizations per bin pair
-    val numRandTables = EstCC.numParameters("numRandom").toInt
-
-    // List of inverse sample sizes for all of the resampling reps
-    // AND
-    // For each subsampled dataset, build the contingency table
-    // AND
-    // For each subsampled dataset, build numRandTables randomized contingency
-    // tables
-    val tupleInit = (Vector[Double](), Vector[ConstructedTable](),
-      Vector[Vector[ConstructedTable]]())
-    val (invFracs, tables, randTables) =
-      EstCC.fracList.foldLeft(tupleInit) { (acc, x) =>
-        val (inv, tab, randTab) = acc
-        val newInv = inv :+ invSS(x, data.sig)
-        val sub = jackknife(x, data, engine)
-        val newTab = tab :+ buildTable(None)(sub, binPair, wts)
-        val newRandTab = randTab :+ (for (
-          n <- 0 until numRandTables
-        ) yield buildTable(Some(engine))(sub, binPair, wts)).toVector
-        (newInv, newTab, newRandTab)
-      }
-
-    // Extracts the string tag associated with the weight vector
-    val l = wts match {
-      case None => "n"
-      case Some((wtList, tag)) => tag
-    }
-
-    // List of labels describing features of each resampling result
-    val tags = for {
-      f <- (0 until EstCC.fracList.length).toVector
-      if (EstCC.fracList(f) < 1.0)
-    } yield s"${l}_r${binPair._1}_c${binPair}_${
-      MathFuncs.roundFrac(EstCC.fracList(f))}_${f % EstCC.numParameters(
-        "repsPerFraction").toInt}"
-
-    // Return the assembled outputs
-    (invFracs, tables, randTables.transpose,
-      tags :+ s"${l}_r${binPair._1}_c${binPair._2}")
-
-  }
 
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
@@ -509,29 +405,30 @@ object EstimateMI {
    *  - a list of string labels for output and logging purposes, length as for
    *    the inverse sample size list.
    *
-   * @param bt Pair containing the numbers of row and column bins.
-   * @param pl The input/output dataset.
+   * @param binPair Pair of tuples containing the numbers of row and column bins.
+   * @param data The input/output dataset.
+   * @param seed PRNG seed
    * @param wts An optional weights vector to be applied to the rows.
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
    */
-  def buildRegData(
+  def buildRegData(calcConfig: CalcConfig)(
     binPair: Pair[NTuple[Int]],
     data: DRData,
     seed: Int,
     wts: Option[Weight] = None): RegDataMult = {
 
     val engine = new MersenneTwister(seed)
-    val numRandTables = EstCC.numParameters("numRandom").toInt
+    val numRandTables = calcConfig.numParameters("numRandom").toInt
 
     // generates data with subSample method
     val table = buildTable(None)(data, binPair, wts)
     val randTables = (0 until numRandTables) map (y => buildTable(Some(engine))(data, binPair, wts))
     val (invFracs, subSamples, randSubSamples) = {
-      val tuples = EstCC.fracList map { x =>
+      val tuples = calcConfig.fracList map { x =>
         val inv = invSS(x, data.sig)
-        val subTable = subSample(x, table, wts)
-        val randSubTables = randTables map (y => subSample(x,y,wts))
+        val subTable = subSample(calcConfig)(x, table, wts)
+        val randSubTables = randTables map (y => subSample(calcConfig)(x,y,wts))
         (inv, subTable, randSubTables)
       }
       tuples.unzip3
@@ -539,19 +436,19 @@ object EstimateMI {
     
     val l = wts match {
       case None => "n"
-      case Some((wtList, tag)) => tag
+      case Some(Weight(wtList, tag)) => tag
     }
 
     val tags = for {
-      f <- (0 until EstCC.fracList.length).toVector
-      if (EstCC.fracList(f) < 1.0)
+      f <- (0 until calcConfig.fracList.length).toVector
+      if (calcConfig.fracList(f) < 1.0)
     } yield s"${l}_r${binPair._1}_c${binPair._2}_${
-      MathFuncs.roundFrac(EstCC.fracList(f))
+      MathFuncs.roundFrac(calcConfig.fracList(f))
     }_${
-      f % EstCC.numParameters("repsPerFraction").toInt
+      f % calcConfig.numParameters("repsPerFraction").toInt
     }"
 
-    (invFracs, subSamples, randSubSamples.transpose, tags :+
+    RegDataMult(invFracs, subSamples, randSubSamples.transpose, tags :+
       s"${l}_r${binPair._1}_c${binPair._2}")
   }
 
@@ -565,12 +462,12 @@ object EstimateMI {
    * @return Regression line, None if regression failed.
    */
   def calcRandRegs(r: RegData, i: Int): Option[SLR] = {
-    val MIList = r._2 map (_.mutualInformation)
-    val MIListRand = r._3 map (_.mutualInformation)
-    val regLineRand = new SLR(r._1, MIListRand, r._4.last +
+    val MIList = r.subContTables map (_.mutualInformation)
+    val MIListRand = r.randContTables map (_.mutualInformation)
+    val regLineRand = new SLR(r.iss, MIListRand, r.labels.last +
       "_rand")
     if (regLineRand.intercept.isNaN) {
-      IOFile.regDataToFile((r._1, MIList, MIListRand), "regData_NaNint_" +
+      IOFile.regDataToFile((r.iss, MIList, MIListRand), "regData_NaNint_" +
         regLineRand.label + "_" + i.toString + ".dat")
       // printCTData(r)
       None
@@ -590,18 +487,19 @@ object EstimateMI {
    * Because linear regression may fail on the randomized data, some entries in
    * the list may be None.
    *
-   * @param r RegDataMult structure, eg as returned by [[buildDataMult]].
+   * @param r RegDataMult structure, eg as returned by [[buildRegData]].
    * @return (regression on original data, list of regressions on random data)
    */
-  def calcMultRegs(r: RegDataMult): (SLR, List[Option[SLR]]) = {
+  def calcMultRegs(calcConfig: CalcConfig)
+      (r: RegDataMult): (SLR, List[Option[SLR]]) = {
     // Regression on original data
-    val regLine = new SLR(r._1, r._2 map (_.mutualInformation), r._4.last)
+    val regLine = new SLR(r.iss, r.subContTables map (_.mutualInformation), r.labels.last)
     // regLine.toFile(s"rd_${regLine.label}.dat")
     // Regression on randomized data
-    val regdataRand =
-      (0 until EstCC.numParameters("numRandom").toInt).toList map (x => 
-        ((r._1, r._2, r._3(x), r._4),x))
-    val regLinesRand = regdataRand map (x => calcRandRegs(x._1,x._2))
+    val regDataRand =
+      (0 until calcConfig.numParameters("numRandom").toInt).toList map (x =>
+        (RegData(r.iss, r.subContTables, r.randContTableVect(x), r.labels),x))
+    val regLinesRand = regDataRand map (x => calcRandRegs(x._1,x._2))
     (regLine, regLinesRand)
   }
 
@@ -610,9 +508,9 @@ object EstimateMI {
    * Useful for debugging purposes.
    */
   def printCTData(r: RegData): Unit =
-    for (i <- 0 until r._1.length) yield {
-      r._2(i).tableToFile("ct_" + r._4(i) + ".dat")
-      r._3(i).tableToFile("ct_" + r._4(i) + "_rand.dat")
+    for (i <- 0 until r.iss.length) yield {
+      r.subContTables(i).tableToFile("ct_" + r.labels(i) + ".dat")
+      r.randContTables(i).tableToFile("ct_" + r.labels(i) + "_rand.dat")
     }
 
   /**
@@ -642,7 +540,7 @@ object EstimateMI {
    *
    * For each set of bin sizes given, this function:
    *  - builds the randomized and resampled contingency tables by calling
-   *    [[buildDataMult]]
+   *    [[buildRegData]]
    *  - estimates the unbiased mutual information for the resampled and/or
    *    randomized datasets by linear regression, by calling [[calcMultRegs]]
    *  - extracts the intercepts and confidence intervals from the regression
@@ -653,15 +551,15 @@ object EstimateMI {
    * @param wts Optional weight vector for inputs
    * @return List of ([[ContTable]] dimensions, list of (intercept, conf. int.))
    */
-  def genEstimatesMult(
+  def genEstimatesMult(calcConfig: CalcConfig)(
     pl: DRData,
     binTupList: Vector[Pair[NTuple[Int]]],
     seed: Int,
     wts: Option[Weight] = None): Vector[EstTuple] = {
 
     binTupList map
-      (bt => (bt, multIntercepts(calcMultRegs(
-        buildRegData(bt, pl, seed, wts))),wts))
+      (bt => EstTuple(bt, multIntercepts(calcMultRegs(calcConfig)(
+        buildRegData(calcConfig)(bt, pl, seed, wts))),wts))
 
   }
 
@@ -678,32 +576,33 @@ object EstimateMI {
    * @param d List of (bin size combo, list of (intercept, conf. int.))
    * @return Entry from the list d the optimizes the MI estimate.
    */
-  def optMIMult(
-      d: Vector[EstTuple]): EstTuple = {
+  def optMIMult(calcConfig: CalcConfig)(d: Vector[EstTuple]): EstTuple = {
     // Finds maximum value
     @tailrec
-    def opt(
-        i: EstTuple,
-        ds: Vector[EstTuple]): EstTuple =
+    def opt(i: EstTuple, ds: Vector[EstTuple]): EstTuple =
       if (ds.isEmpty) i
       else {
-        val v = ds.head._2.head._1
-        if (i._2.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
+        val v = ds.head.estimates.head._1
+        if (i.estimates.head._1 > v) opt(i, ds.tail) else opt(ds.head, ds.tail)
       }
-    val baseTuple = (d.head._1._1 map (x => 0),d.head._1._2 map (x => 0))
-    val base = (baseTuple, (0 until d.head._2.length).toList map (x => (0.0, 0.0)),None)
+    val baseTuple = (d.head.pairBinTuples._1 map (x => 0),d.head.pairBinTuples._2 map (x => 0))
+    val base =
+      EstTuple(
+        baseTuple,
+        (0 until d.head.estimates.length).toList map (x => (0.0, 0.0)),
+        None)
 
     def removeBiased(l: Vector[EstTuple]): Vector[EstTuple] = {
       // Determines if estimate is biased given mutual information of
       // randomized data and the specified cutoff value
       @tailrec
       def bFilter(plt: List[Pair[Double]], numTrue: Int): Boolean = {
-        if (plt.isEmpty) numTrue >= EstCC.numParameters("numForCutoff").toInt
+        if (plt.isEmpty) numTrue >= calcConfig.numParameters("numForCutoff").toInt
         else if (plt.head._1 - plt.head._2 <=
-          EstCC.numParameters("cutoffValue")) bFilter(plt.tail, numTrue + 1)
+          calcConfig.numParameters("cutoffValue")) bFilter(plt.tail, numTrue + 1)
         else bFilter(plt.tail, numTrue)
       }
-      l filter (x => bFilter(x._2, 0))
+      l filter (x => bFilter(x.estimates, 0))
     }
     opt(base, removeBiased(d))
   }
@@ -720,30 +619,30 @@ object EstimateMI {
    * maximal mutual information
    */
   def finalEstimation(
-      binPair: Pair[NTuple[Int]], 
-      data: DRData, 
-      seed: Int, 
-      wts: Option[Weight]): Unit = {
+      binPair: Pair[NTuple[Int]],
+      data: DRData,
+      seed: Int,
+      wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
     val engine = new MersenneTwister(seed)
     val tupleInit = (Vector[Double](), Vector[ConstructedTable]())
     val table = buildTable(None)(data, binPair, wts)
     val (invFracs, tables) = 
-      (EstCC.fracList map { x =>
+      (calcConfig.fracList map { x =>
         val inv = 1.0 / (x * data.sig.length)
-        val subTable = subSample(x, table, wts)
+        val subTable = subSample(calcConfig)(x, table, wts)
         subTable.tableToFile(s"ct_fe_${x}.dat")
         (inv, subTable)
       }).unzip
     
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)
-    IOFile.delimInfoToFile((rd,cd), (sigKey,respKey), EstCC.stringParameters("filePrefix"))
+    IOFile.delimInfoToFile((rd,cd), (sigKey,respKey), calcConfig.stringParameters("filePrefix"))
     
     val slrs: Iterable[SLR] = tables.head.ctVals.keys map 
       (x => new SLR(invFracs, tables map (_(x)), x))
     val estimates: Map[String, Pair[Double]] = (slrs map (x => 
       (x.label, (x.intercept, x.i95Conf)))).toMap
-    IOFile.optInfoToFile(estimates, EstCC.stringParameters("filePrefix"))
+    IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
   }
   
 }
@@ -752,9 +651,6 @@ object EstimateMI {
 object EstimateCC {
   import LowProb.testWeights
   import OtherFuncs.genSeed
-
-  /** Parameter specifying whether the signal is distributed logarithmically. */
-  val logSpace = EstCC.stringParameters("logSpace").toBoolean
 
   /**
    * Generates signal weights for n-dim signal data
@@ -767,15 +663,19 @@ object EstimateCC {
    * @return weight for joint distribution
    */
   def makeJoint(wv: Vector[Weight]): Weight = {
-    val dimLengths = wv map (x => x._1.length)
+    val dimLengths = wv map (x => x.weights.length)
     val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
 
-    val wND: List[Double] = testWeights("joint dist failure", (i.toList.view map (x =>
-      (Range(0, x.length) map (y => wv(y)._1(x(y)))).product)).force.toList)
+    val wND: List[Double] =
+      testWeights(
+        "joint dist failure",
+        (i.toList.view map (x =>
+          (Range(0, x.length) map (y =>
+            wv(y).weights(x(y)))).product)).force.toList)
 
-    val jointString = (wv map (x => x._2)).mkString(";")
+    val jointString = (wv map (x => x.label)).mkString(";")
 
-    (wND, jointString)
+    Weight(wND, jointString)
   }
 
   /** Given a function, finds the difference in its evaluation of two numbers. */
@@ -798,23 +698,24 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(bounds: Tree, in: List[Double]): List[Weight] =
+  def uniWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
 
-    if (EstCC.numParameters("uniMuNumber").toInt == 0) Nil
+    if (calcConfig.numParameters("uniMuNumber").toInt == 0) Nil
     else {
 
+      val logSpace = calcConfig.stringParameters("logSpace").toBoolean
       // Create a list of evenly-distributed means that span the input range
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
 
-      val numMu = EstCC.numParameters("uniMuNumber").toInt
+      val numMu = calcConfig.numParameters("uniMuNumber").toInt
       val uMuFracList = ((1 to numMu) map (x => 
           x * (1.0 / (1.0 + numMu)))).toList
       val muList = uMuFracList map (x => minVal + (maxVal - minVal) * x)
 
       // Attaches various sigma values to mu values, resulting in a list of
       // (mu, sigma) combinations as a list of Pair[Double]
-      val numSig = EstCC.numParameters("uniSigmaNumber").toInt
+      val numSig = calcConfig.numParameters("uniSigmaNumber").toInt
       val uSigFracList = ((1 to numSig) map (x => 
           x * (1.0 / (1.0 + numSig)))).toList
       val wtParams = for {
@@ -836,7 +737,7 @@ object EstimateCC {
           for (x <- 0 until (boundList.length - 1)) yield calcWeight(
               wtFunc, boundList(x), boundList(x + 1))
         }.toList)
-        (rawWeights map normWeight(bounds), genWeightString(p))
+        Weight(rawWeights map normWeight(bounds), genWeightString(p))
       }
 
       // Apply genWeights to the (mu, sigma) tuples and return
@@ -850,14 +751,16 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(bounds: Tree, in: List[Double]): List[Weight] = 
+  def biWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
 
-    if (EstCC.numParameters("biMuNumber") < 3) Nil
+    if (calcConfig.numParameters("biMuNumber") < 3) Nil
     else {
+      val logSpace = calcConfig.stringParameters("logSpace").toBoolean
+
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
       val minMuDiff =
-        (maxVal - minVal) / (EstCC.numParameters("biMuNumber") + 1.0)
+        (maxVal - minVal) / (calcConfig.numParameters("biMuNumber") + 1.0)
 
       // Finds maximum SD given certain conditions to parameterize one of the two
       // Gaussians in the bimodal distribution
@@ -867,17 +770,17 @@ object EstimateCC {
 
       // Generates mu pairs for the two modes
       val mp = for {
-        i1 <- (1 until EstCC.numParameters("biMuNumber").toInt-1)
-        i2 <- (i1+1 until EstCC.numParameters("biMuNumber").toInt)
+        i1 <- (1 until calcConfig.numParameters("biMuNumber").toInt-1)
+        i2 <- (i1+1 until calcConfig.numParameters("biMuNumber").toInt)
       } yield (minVal + i1*minMuDiff, minVal + i2*minMuDiff)
 
       // Adds sigma values and relative contributions from the two Gaussians for
       // each mu pair
-      val numSig = EstCC.numParameters("biSigmaNumber").toInt
+      val numSig = calcConfig.numParameters("biSigmaNumber").toInt
       val bSigFracList = ((1 to numSig) map (x => 
           x * (1.0 / (1.0 + numSig)))).toList
       val bRelCont =
-        EstCC.listParameters("biPeakWeights") map (x => (x, 1 - x))
+        calcConfig.listParameters("biPeakWeights") map (x => (x, 1 - x))
       val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
         p <- mp.toList
         s <- bSigFracList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
@@ -905,7 +808,7 @@ object EstimateCC {
           for (x <- 0 until (boundList.length - 1)) yield calcWeight(
               wtFunc, boundList(x), boundList(x + 1))
         }.toList)
-        (rawWeights map normWeight(bounds), genWeightLabel(t))
+        Weight(rawWeights map normWeight(bounds), genWeightLabel(t))
       }
       // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
       // return
@@ -921,8 +824,8 @@ object EstimateCC {
    * function; not actually used in function).
    * @return List of piece-wise weights
    */
-  def pwWeight(bounds: Tree, in: List[Double]): List[Weight] =
-    if (EstCC.numParameters("pwUnifWeights") == 0) {
+  def pwWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
+    if (calcConfig.numParameters("pwUnifWeights") == 0) {
       Nil
     } else {
       val lBoundsList = bounds.toList
@@ -939,7 +842,7 @@ object EstimateCC {
         val wt = 1.0 / (ib._2 - ib._1 + 1.0).toDouble
         val wtList = indices map (x =>
           if (ib._1 <= x && x <= ib._2) wt else 0.0) map normWeight(bounds)
-        (wtList, "PWU(%d, %d)" format (ib._1, ib._2))
+        Weight(wtList, "PWU(%d, %d)" format (ib._1, ib._2))
       }
 
       nodePairs map weights
@@ -986,14 +889,14 @@ object EstimateCC {
    */
   def getResultsMult(
       est: Vector[Vector[EstTuple]],
-      filePrefix: Option[String]): EstTuple = {
+      filePrefix: Option[String])(implicit calcConfig: CalcConfig): EstTuple = {
     filePrefix match {
       case Some(f) =>
         for (e <- 0 until est.length) yield IOFile.estimatesToFileMult(est(e),
           filePrefix.get + "_" + e.toString + ".dat")
       case None => {}
     }
-    EstimateMI.optMIMult(est map EstimateMI.optMIMult)
+    EstimateMI.optMIMult(calcConfig)(est map EstimateMI.optMIMult(calcConfig))
   }
 
   /**
@@ -1006,11 +909,11 @@ object EstimateCC {
    * @param pl The input/output dataset.
    * @return List of MI estimates as from [[EstimateMI.genEstimatesMult]].
    */
-  def calcWithWeightsMult(weights: List[Option[Weight]], bins: Vector[Pair[NTuple[Int]]], pl: DRData) = {
+  def calcWithWeightsMult(calcConfig: CalcConfig)(weights: List[Option[Weight]], bins: Vector[Pair[NTuple[Int]]], pl: DRData) = {
     for {
       w <- weights
       // Filter to make sure weights are applied to correct set of signal bins
-    } yield (EstimateMI.genEstimatesMult(pl, bins, genSeed(EstCC.rEngine), w))
+    } yield (EstimateMI.genEstimatesMult(calcConfig)(pl, bins, genSeed(calcConfig.rEngine), w))
   }
 
   /**
@@ -1029,40 +932,40 @@ object EstimateCC {
       bins: Vector[Pair[NTuple[Int]]],
       index: Int,
       pl: DRData, 
-      fp: Option[String]): Double = {
+      fp: Option[String])(implicit calcConfig: CalcConfig): Double = {
     var optList: Array[EstTuple] = Array()
     println(s"# Signal Bins: ${bins.head._1.product}\t${wts.length} calculations")
     // Indexing results requires concatenation of all weights for a 
     // particular signal bin size into a single list
     (0 until wts.length) foreach { w =>
       {
-        val est = EstimateMI.genEstimatesMult(
+        val est = EstimateMI.genEstimatesMult(calcConfig)(
           pl,
           bins,
-          genSeed(EstCC.rEngine),
+          genSeed(calcConfig.rEngine),
           wts(w))
         fp match {
           case Some(f) =>
             IOFile.estimatesToFileMult(est, s"${f}_${w}_${index}.dat")
           case None => {}
         }
-        val opt = EstimateMI.optMIMult(est)
+        val opt = EstimateMI.optMIMult(calcConfig)(est)
         optList = optList :+ opt
         wts(w) match {
-          case Some(o) => println(s"  ${wts.length - w}) Weight: ${o._2}, " +
-            s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
+          case Some(Weight(v,l)) => println(s"  ${wts.length - w}) Weight: ${l}, " +
+            s"Est. MI: ${opt.estimates(0)._1} ${0xB1.toChar} ${opt.estimates(0)._2}")
           case None => println(s"  ${wts.length - w}) Weight: Uniform, " +
-            s"Est. MI: ${opt._2(0)._1} ${0xB1.toChar} ${opt._2(0)._2}")
+            s"Est. MI: ${opt.estimates(0)._1} ${0xB1.toChar} ${opt.estimates(0)._2}")
         }
       }
     }
-    val maxOpt = EstimateMI.optMIMult(optList.toVector)
+    val maxOpt = EstimateMI.optMIMult(calcConfig)(optList.toVector)
     EstimateMI.finalEstimation(
-        maxOpt._1,
+        maxOpt.pairBinTuples,
         pl,
-        genSeed(EstCC.rEngine),
-        maxOpt._3)
-    maxOpt._2.head._1
+        genSeed(calcConfig.rEngine),
+        maxOpt.weight)
+    maxOpt.estimates.head._1
   }
   
 }

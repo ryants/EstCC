@@ -72,13 +72,15 @@ object EstCC extends App with CLOpts {
     system.awaitTermination()
   } // Verbose sequential mode
   else if (appConfig.verbose) {
-    var estList: Array[Double] = Array()
+    var estList: Array[EstTuple] = Array()
     (0 until aw.length) foreach { i =>
       val validBins = genBins(Vector(sb(i)), rb)
       val res = verboseResults(aw(i), validBins, i, p, calcConfig.outF)
       estList = estList :+ res
     }
-    println(estList.max)
+    val maxOpt = EstimateMI.optMIMult(calcConfig)(estList.toVector)
+    EstimateMI.finalEstimation(maxOpt.pairBinTuples,p,genSeed(calcConfig.rEngine),maxOpt.weight)
+    println(maxOpt.estimates.head._1)
   } // Silent sequential mode
   else {
     val weightIndices = (0 until aw.length).toVector

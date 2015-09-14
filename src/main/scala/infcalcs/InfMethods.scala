@@ -932,7 +932,7 @@ object EstimateCC {
       bins: Vector[Pair[NTuple[Int]]],
       index: Int,
       pl: DRData, 
-      fp: Option[String])(implicit calcConfig: CalcConfig): Double = {
+      fp: Option[String])(implicit calcConfig: CalcConfig): EstTuple = {
     var optList: Array[EstTuple] = Array()
     println(s"# Signal Bins: ${bins.head._1.product}\t${wts.length} calculations")
     // Indexing results requires concatenation of all weights for a 
@@ -959,13 +959,7 @@ object EstimateCC {
         }
       }
     }
-    val maxOpt = EstimateMI.optMIMult(calcConfig)(optList.toVector)
-    EstimateMI.finalEstimation(
-        maxOpt.pairBinTuples,
-        pl,
-        genSeed(calcConfig.rEngine),
-        maxOpt.weight)
-    maxOpt.estimates.head._1
+    EstimateMI.optMIMult(calcConfig)(optList.toVector)
   }
   
 }

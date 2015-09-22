@@ -1,22 +1,24 @@
 signalColumns	0
 responseColumns	1
-responseBins	4,80,4
-signalVals1	0,18,1
-signalBins	None
 sampleFractions	0.4,0.925,0.075
 biPeakWeights	0.4 0.5 0.6
+sigBinSpacing 4 #will be overridden due to the presence of the signalVals1 parameter
+respBinSpacing  4
 
 numRandom	10
 numForCutoff	1
+numConsecRandPos  3
+numConsecBiasedSigEst 3
 cutoffValue	0
-uniMuNumber	4
+uniMuNumber	5
 uniSigmaNumber	5
 biMuNumber	5
 biSigmaNumber	5
 repsPerFraction	20
-
-pwUnifWeights	1
+pwUnifWeights 1
 
 directory	./
 filePrefix	out
 logSpace	false
+
+signalVals1	0,18,1 #signalVals[1-9]* and responseVals[1-9]* can also be specified

@@ -1,6 +1,6 @@
 package infcalcs
 
-import cern.jet.stat.Probability.{ studentTInverse }
+import cern.jet.stat.Probability.{studentTInverse}
 
 /**
  * Implementation of simple least-squares (linear) regression.
@@ -29,7 +29,7 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
   private val alpha = sy / n - beta * sx / n
   private val varEps =
     (1 / (n * (n - 2))) *
-      (n * syy - sy * sy - beta * beta * (n * sxx - sx * sx))
+        (n * syy - sy * sy - beta * beta * (n * sxx - sx * sx))
   private val varBeta = n * varEps / (n * sxx - sx * sx)
   private val varAlpha = varBeta * sxx / n
 

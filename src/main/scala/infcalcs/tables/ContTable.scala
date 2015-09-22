@@ -54,9 +54,9 @@ trait ContTable {
    *
    * @param f function to apply to numerical data
    * @return function which applies f to a data set and calculates the
-   * negation of the resulting sum
+   *         negation of the resulting sum
    */
-  def mapNegSum[A,B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
+  def mapNegSum[A, B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
     import n.mkNumericOps
     s => -(s map f).sum
   }

@@ -1,66 +1,32 @@
 package infcalcs
 
-import cern.jet.stat.Probability.{ errorFunction => erf }
+import cern.jet.stat.Probability.{errorFunction => erf}
 import cern.jet.random.engine.MersenneTwister
-import infcalcs.Containers.Parameters
+import Containers.Parameters
+import exceptions._
 import annotation.tailrec
-
-/**
- * Deals with instances where weights fail to adequately cover the relevant
- * signal space.
- */
-object LowProb {
-
-  /** Exception thrown if weights do not cover the probability space. */
-  class LowProbException(msg: String) extends Exception {
-    println(msg)
-    println("Weight probability is below threshold.")
-  }
-
-  /**
-   * Determines whether the weights cover a sufficient range of the input space.
-   *
-   * If the sum of the weights is above the threshold, the weights are
-   * returned; otherwise a [[LowProbException]] is thrown containing the given
-   * message.
-   *
-   * @param msg String to pass to the exception if thrown.
-   * @param wts The list of weights.
-   * @param threshold The threshold to use to evaluate the weights.
-   * @return The list of weights.
-   * @throws LowProbException
-   */
-  def testWeights(
-    msg: String,
-    wts: List[Double],
-    threshold: Double = 0.95): List[Double] =
-    if (wts.sum > threshold) {
-      wts
-    } else {
-      println(wts); println(wts.sum); throw new LowProbException(msg)
-    }
-}
 
 /** Contains a handful of useful mathematical functions. */
 object MathFuncs {
-  import math.{ log, sqrt }
+
+  import math.{log, sqrt}
 
   /** Returns the base b logarithm of a number. */
   def logb(b: Int): Double => Double = (a: Double) => log(a) / log(b)
 
   /** Returns double truncated to nearest hundredth */
   def roundFrac(d: Double) = "%.2f" format d
-  
+
   /**
    * Converts frequencies to probabilities by normalizing each count by the
    * vector sum.
    */
-  def freqToProb: TraversableOnce[Int] => TraversableOnce[Double] = 
+  def freqToProb: TraversableOnce[Int] => TraversableOnce[Double] =
     l => {
       val s = l.sum.toDouble
       if (s != 0) l map (x => (x / s).toDouble) else l map (x => 0.0)
     }
-  
+
 
   /**
    * Given a list of doubles, returns the mean and 95% confidence interval
@@ -112,12 +78,15 @@ object MathFuncs {
    * @return CDF(x) for the bimodal Gaussian distribution.
    */
   def intBiG(
-    muTuple: Pair[Double],
-    sigmaTuple: Pair[Double],
-    pTuple: Pair[Double])(x: Double): Double = {
-    val p1 = pTuple._1; val p2 = pTuple._2
-    val mu1 = muTuple._1; val mu2 = muTuple._2;
-    val sig1 = sigmaTuple._1; val sig2 = sigmaTuple._2
+      muTuple: Pair[Double],
+      sigmaTuple: Pair[Double],
+      pTuple: Pair[Double])(x: Double): Double = {
+    val p1 = pTuple._1;
+    val p2 = pTuple._2
+    val mu1 = muTuple._1;
+    val mu2 = muTuple._2;
+    val sig1 = sigmaTuple._1;
+    val sig2 = sigmaTuple._2
     p1 * intUniG(mu1, sig1)(x) + p2 * intUniG(mu2, sig2)(x)
   }
 }
@@ -127,7 +96,7 @@ object OtherFuncs {
 
   /**
    * Generates an Int between 0 and 1e6, non-inclusive
-   * 
+   *
    * @param e PRNG engine
    */
   def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
@@ -143,8 +112,8 @@ object OtherFuncs {
    * @return The shuffled list.
    */
   def myShuffle[A: scala.reflect.ClassTag](
-    l: Seq[A],
-    e: MersenneTwister): Vector[A] = {
+      l: Seq[A],
+      e: MersenneTwister): Vector[A] = {
     val a: Array[A] = l.toArray
     for (i <- (1 until l.length).reverse) {
       val j = (e.raw() * (i + 1)).toInt
@@ -154,8 +123,7 @@ object OtherFuncs {
     }
     a.toVector
   }
-  
-  
+
 
   /**
    * Parses strings specifying list or range parameters.
@@ -202,19 +170,19 @@ object OtherFuncs {
   /**
    * Parses strings for generation of n-dim value vectors
    *
-   *  Uses the same parsing function as [[stringToSList]] but compiles
-   *  the results into a two dimensional Vector in which each element is an
-   *  n-tuple denoting a particular signal or response in n-dimensional
-   *  space
+   * Uses the same parsing function as [[stringToSList]] but compiles
+   * the results into a two dimensional Vector in which each element is an
+   * n-tuple denoting a particular signal or response in n-dimensional
+   * space
    *
-   *  @param s The string to parse
-   *  @param cur The current state of the parameter in questions
-   *  @return 2D vector generated from various configuration commands
+   * @param s The string to parse
+   * @param cur The current state of the parameter in questions
+   * @return 2D vector generated from various configuration commands
    *
    */
   def stringToValList(
-    s: String,
-    cur: Option[Vector[NTuple[Double]]]): Option[Vector[NTuple[Double]]] = {
+      s: String,
+      cur: Option[Vector[NTuple[Double]]]): Option[Vector[NTuple[Double]]] = {
     stringToSList(s) match {
       case None => None
       case Some(x) =>
@@ -248,66 +216,66 @@ object OtherFuncs {
       if (p.listParams contains l.head._1)
         updateParameters(l.tail,
           Parameters(
-            p.listParams updated (l.head._1, stringToSList(l.head._2).get),
-            p.numParams, 
-            p.stringParams, 
+            p.listParams updated(l.head._1, stringToSList(l.head._2).get),
+            p.numParams,
+            p.stringParams,
             p.sigRespParams))
       // Check if numParams contains the current key
       else if (p.numParams contains l.head._1)
         updateParameters(l.tail,
           Parameters(
-            p.listParams, 
-            p.numParams updated (l.head._1, l.head._2.toDouble), 
-            p.stringParams, 
+            p.listParams,
+            p.numParams updated(l.head._1, l.head._2.toDouble),
+            p.stringParams,
             p.sigRespParams))
       // Check if stringParams contains the current key
       else if (p.stringParams contains l.head._1)
         updateParameters(l.tail,
           Parameters(
-            p.listParams, 
-            p.numParams, 
-            p.stringParams updated (l.head._1, l.head._2), 
+            p.listParams,
+            p.numParams,
+            p.stringParams updated(l.head._1, l.head._2),
             p.sigRespParams))
       // Check if *values needs to be updated
       else if (l.head._1 matches ".*Vals[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
             Parameters(
-              p.listParams, 
-              p.numParams, 
+              p.listParams,
+              p.numParams,
               p.stringParams,
-              p.sigRespParams updated 
-                ("responseValues", stringToValList(l.head._2, p.sigRespParams("responseValues")))))
+              p.sigRespParams updated
+                  ("responseValues", stringToValList(l.head._2, p.sigRespParams("responseValues")))))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
             Parameters(
-              p.listParams, 
-              p.numParams, 
+              p.listParams,
+              p.numParams,
               p.stringParams,
-              p.sigRespParams updated 
-                ("signalValues", stringToValList(l.head._2, p.sigRespParams("signalValues")))))
+              p.sigRespParams updated
+                  ("signalValues", stringToValList(l.head._2, p.sigRespParams("signalValues")))))
         else throw new Exception(s"illegal parameter: ${l.head._1}")
       // Check if *bins needs to be updated
       else if (l.head._1 matches ".*Bins[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
             Parameters(
-              p.listParams, 
-              p.numParams, 
+              p.listParams,
+              p.numParams,
               p.stringParams,
-              p.sigRespParams updated 
-                ("responseBins", stringToValList(l.head._2, p.sigRespParams("responseBins")))))
+              p.sigRespParams updated
+                  ("responseBins", stringToValList(l.head._2, p.sigRespParams("responseBins")))))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
             Parameters(
-              p.listParams, 
-              p.numParams, 
+              p.listParams,
+              p.numParams,
               p.stringParams,
-              p.sigRespParams updated 
-                ("signalBins", stringToValList(l.head._2, p.sigRespParams("signalBins")))))
-        else throw new Exception(s"illegal parameter: ${l.head._1}")
+              p.sigRespParams updated
+                  ("signalBins", stringToValList(l.head._2, p.sigRespParams("signalBins")))))
+        else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
       // The key was not found! Throw an exception
-      else throw new Exception(s"illegal parameter: ${l.head._1}")
+      else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
     }
   }
 }

@@ -53,10 +53,10 @@ object IOFile {
   }
 
   /**
-   *  Loads arbitrary numbers of columns into 2D vector
+   * Loads arbitrary numbers of columns into 2D vector
    *
-   *  Currently, the remainder of the program can only handle
-   *  4 columns or fewer correctly
+   * Currently, the remainder of the program can only handle
+   * 4 columns or fewer correctly
    *
    * @param f Name of file to load.
    * @param sigCols List of integers indicating which columns of the file to load for signal values.
@@ -64,10 +64,10 @@ object IOFile {
    * @return 2D vector of data from file
    */
   def loadList(
-    f: String,
-    sigCols: Vector[Int],
-    respCols: Vector[Int])(implicit calcConfig: CalcConfig): DRData = {
-    
+      f: String,
+      sigCols: Vector[Int],
+      respCols: Vector[Int])(implicit calcConfig: CalcConfig): DRData = {
+
     val d = importData(f)
     if (d.isEmpty) new DRData(calcConfig)(Vector(), Vector())
     else {
@@ -75,12 +75,12 @@ object IOFile {
       val resp = d map (x => respCols map (y => x(y)))
       new DRData(calcConfig)(sig, resp)
     }
-    
+
   }
 
   /**
    * Writes data to a whitespace-separated file.
-   * 
+   *
    * In the event of multiple signals or responses per data point,
    * values are separated by single spaces and signal/response data is 
    * separated by tabs 
@@ -104,18 +104,18 @@ object IOFile {
    *
    * Can be useful for debugging. The tuple d given as an argument contains
    * three entries:
-   *  - the list of inverse sample sizes
-   *  - the list of mutual information values calculated for the non-randomized
-   *    data
-   *  - the list of mutual information values calculated for one round of
-   *    randomization on the data.
+   * - the list of inverse sample sizes
+   * - the list of mutual information values calculated for the non-randomized
+   * data
+   * - the list of mutual information values calculated for one round of
+   * randomization on the data.
    *
    * @param d (inverse sample sizes, MI list, randomized MI list)
    * @param f Name of the file to write.
    */
   def regDataToFile(
-    d: (Seq[Double], Seq[Double], Seq[Double]),
-    f: String) = {
+      d: (Seq[Double], Seq[Double], Seq[Double]),
+      f: String) = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {
       writer.write(s"${d._1(i)} ${d._2(i)} ${d._3(i)}")
@@ -130,19 +130,19 @@ object IOFile {
    *
    * It takes the mutual information data as a list of tuples; each tuple
    * contains:
-   *  - a pair of integers specifying a pair of row, column bin sizes;
-   *  - A list of tuples, each containing an MI estimate (intercept from the
-   *    linear regression) and its 95% confidence interval.
+   * - a pair of integers specifying a pair of row, column bin sizes;
+   * - A list of tuples, each containing an MI estimate (intercept from the
+   * linear regression) and its 95% confidence interval.
    *
    * @param d List of (bin sizes, list of (MI estimate, confidence interval),
-   * optional weight)
+   *          optional weight)
    * @param f Name of the file to write.
    */
   def estimatesToFileMult(d: Vector[EstTuple], f: String)(implicit calcConfig: CalcConfig): Unit = {
     val numRandTables = calcConfig.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map
-      (x => ("\tMIRand " + x + "\tSDRand " + x))
+        (x => ("\tMIRand " + x + "\tSDRand " + x))
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
     writer.newLine()
     val wtString = d.head.weight match {
@@ -151,11 +151,11 @@ object IOFile {
     }
     writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
-    
+
     val lines =
       for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +
-        s"${x.estimates.head._1} ${x.estimates.head._2} " + (x.estimates.tail map (
-            y => s"${y._1} ${y._2}")).mkString(" ")
+          s"${x.estimates.dataEstimate._1} ${x.estimates.dataEstimate._2} " + (x.estimates.randDataEstimate map (
+          y => s"${y._1} ${y._2}")).mkString(" ")
     for (l <- lines) {
       writer.write(l)
       writer.newLine()
@@ -163,44 +163,44 @@ object IOFile {
     writer.flush()
     writer.close()
   }
-  
+
   /**
    * Writes relevant estimate information to file
-   * 
+   *
    * @param c Map of value names and their estimate and error
    * @param s file name
    */
   def optInfoToFile(c: Map[String, Pair[Double]], s: String): Unit = {
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
-    val data = c.keys map { x => 
+    val data = c.keys map { x =>
       writer.write(s"${x}\t${c(x)}")
       writer.newLine()
     }
     writer.flush()
     writer.close()
   }
-  
+
   /**
    * Writes relevant delimiter information to file
-   * 
+   *
    * @param dPair Pair of delimiters as [[NTuple]] of type [[TreeDef.Tree]]
    * @param kPair Pair of mappings from n-dim data indices to 1-dim indices
    * @param s file name
    */
   def delimInfoToFile(
-      dPair: Pair[NTuple[Tree]], 
-      kPair: Pair[Map[NTuple[Int],Int]],
+      dPair: Pair[NTuple[Tree]],
+      kPair: Pair[Map[NTuple[Int], Int]],
       s: String): Unit = {
-    
+
     val dLPair = (dPair._1 map (_.toList.toVector), dPair._2 map (_.toList.toVector))
-    val sIndices = CTBuild.keyFromDimLengths(dLPair._1 map (_.length),Vector(Vector()))
-    val rIndices = CTBuild.keyFromDimLengths(dLPair._2 map (_.length),Vector(Vector()))
-    
+    val sIndices = CTBuild.keyFromDimLengths(dLPair._1 map (_.length), Vector(Vector()))
+    val rIndices = CTBuild.keyFromDimLengths(dLPair._2 map (_.length), Vector(Vector()))
+
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_delims.dat")))
-    
+
     writer.write("# Signal Delimiters")
     writer.newLine()
-    for (x <- sIndices) { 
+    for (x <- sIndices) {
       val delim = (0 until x.length) map (y => dLPair._1(y)(x(y)))
       val dString = delim.mkString("\\s")
       writer.write(s"${dString}\t${kPair._1(x)}")

@@ -22,8 +22,10 @@ object TreeDef {
   trait Tree {
     /** Returns whether the tree or subtree is empty. */
     def isEmpty: Boolean
+
     /** Converts the tree to a list. */
     def toList: List[Double]
+
     /** The number of nodes in this tree or subtree. */
     val entries: Int
     /** The index of this node. */
@@ -34,6 +36,7 @@ object TreeDef {
     val right: Tree
     /** The value associated with this node. */
     val value: Option[Double]
+
     /** The index of the node containing the maximum value within the subtree. */
     def maxValIndex: Int
   }
@@ -48,8 +51,11 @@ object TreeDef {
       val left: Tree,
       val right: Tree) extends Tree {
     def isEmpty: Boolean = false
+
     val entries: Int = 1 + left.entries + right.entries
+
     def maxValIndex: Int = if (right.isEmpty) index else right.maxValIndex
+
     def toList: List[Double] = left.toList ++ List(value.get) ++ right.toList
   }
 
@@ -60,8 +66,11 @@ object TreeDef {
     val left = EmptyTree
     val right = left
     val value = None
+
     def maxValIndex = index
+
     def isEmpty: Boolean = true
+
     def toList: List[Double] = List()
   }
 
@@ -94,7 +103,7 @@ object TreeDef {
   def buildOrderedNodeList(l: List[Double]): List[Node] = {
     val s = l.sorted
     (0 until s.length).toList map
-      (x => Node(x, Some(s(x)), EmptyTree, EmptyTree))
+        (x => Node(x, Some(s(x)), EmptyTree, EmptyTree))
   }
 
   /** Recursively constructs a binary tree from an ordered list of nodes.

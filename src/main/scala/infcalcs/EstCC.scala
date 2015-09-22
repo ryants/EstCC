@@ -1,29 +1,27 @@
 package infcalcs
 
-import infcalcs.OtherFuncs._
+import OtherFuncs._
 import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{
-  getResultsMult,
-  calcWithWeightsMult,
-  verboseResults
+estimateCC,
+estimateCCVerbose
 }
-import IOFile.{ loadList, importParameters }
-import EstimateMI.genBins
-import akka.actor.{ ActorSystem, Props }
-import Actors._
-import Containers.EstTuple
+import IOFile.{loadList, importParameters}
+import akka.actor.{ActorSystem, Props}
+import infcalcs.actors.{AdaptiveDistributor, Init, Calculator, FixedDistributor}
 
 /**
  * Top-level main function for channel capacity calculation.
  *
- *  - Collects command-line arguments;
- *  - Loads the data;
- *  - Sets configuration parameters;
- *  - Generates unimodal and bimodal weights;
- *  - Calculates channel capacity for each weighting scheme.
+ * - Collects command-line arguments;
+ * - Loads the data;
+ * - Sets configuration parameters;
+ * - Generates unimodal and bimodal weights;
+ * - Calculates channel capacity for each weighting scheme.
  */
 object EstCC extends App with CLOpts {
 
+  //TODO implement logging whose verbosity is controlled by the -v flag
   val appConfig = parser.parse(args, Config()) getOrElse {
     System.exit(0)
     new Config()
@@ -42,65 +40,26 @@ object EstCC extends App with CLOpts {
     println("\nVerbose mode\n")
   }
 
+  //TODO inject appConfig into calcConfig for use in actors (avoid global variable)
   implicit val calcConfig = CalcConfig(parameters, engine)
-  val sb = calcConfig.signalBins
-  val rb = calcConfig.responseBins
-  val b = calcConfig.bins
   val p = loadList(dataFile, calcConfig.sigCols, calcConfig.respCols)
-  val aw = calcConfig getAllWeights p
-
-  calcConfig checkBinConfig p
 
   if (appConfig.verbose) {
     calcConfig.parameters.print
-    println("List of bin tuples\n")
-    calcConfig.bins map (x => println(s"${x._1}, ${x._2}"))
     println("\nResults:\n")
   }
 
-  // Calculate and output estimated mutual information values given calculated
-  // weights
-  // Parallel mode
+  // Calculate and output estimated mutual information values given calculated weights
   if (appConfig.cores > 1) {
-    val system = ActorSystem(s"EstCC")
-    val dist = system.actorOf(Props(new Distributor(aw)), "dist")
-    val calcList = (0 until appConfig.cores - 1).toList map (x =>
-      system.actorOf(Props(new Calculator), s"calc_${x}"))
-
-    dist ! Init(calcList)
-
+    val system = ActorSystem("EstCC")
+    val numActors = appConfig.cores - 1
+    val distributor =
+      if (calcConfig.srParameters("signalValues").isDefined)
+        system actorOf (Props(new FixedDistributor(p)), "dist")
+      else
+        system actorOf (Props(new AdaptiveDistributor(p)), "dist")
+    distributor ! Init(numActors)
     system.awaitTermination()
-  } // Verbose sequential mode
-  else if (appConfig.verbose) {
-    var estList: Array[EstTuple] = Array()
-    (0 until aw.length) foreach { i =>
-      val validBins = genBins(Vector(sb(i)), rb)
-      val res = verboseResults(aw(i), validBins, i, p, calcConfig.outF)
-      estList = estList :+ res
-    }
-    val maxOpt = EstimateMI.optMIMult(calcConfig)(estList.toVector)
-    EstimateMI.finalEstimation(maxOpt.pairBinTuples,p,genSeed(calcConfig.rEngine),maxOpt.weight)
-    println(maxOpt.estimates.head._1)
-  } // Silent sequential mode
-  else {
-    val weightIndices = (0 until aw.length).toVector
-    val binIndices = weightIndices map (x => b.unzip._1.distinct(x))
-
-    val res: Vector[EstTuple] = weightIndices map (n => getResultsMult(
-      calcWithWeightsMult(calcConfig)(
-        aw(n),
-        genBins(Vector(sb(n)), rb), p).toVector,
-      addLabel(calcConfig.outF, "_" + n)))
-
-    val maxOpt = EstimateMI.optMIMult(calcConfig)(Vector(res) map
-      (EstimateMI.optMIMult(calcConfig)))
-    EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, genSeed(calcConfig.rEngine), maxOpt.weight)
-    // Print estimated channel capacity to stdout
-    println(maxOpt.estimates.head._1)
-  }
-
-  // Function to add string to an original string
-  def addLabel(s: Option[String], l: String): Option[String] =
-    s flatMap (x => Some(x ++ l))
-
+  } else if (appConfig.verbose) estimateCCVerbose(p, calcConfig.outF, 0)
+  else estimateCC(p, calcConfig.initSignalBins, calcConfig.outF)
 }

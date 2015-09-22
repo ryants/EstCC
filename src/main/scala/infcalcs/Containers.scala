@@ -48,8 +48,17 @@ object Containers {
    */
   case class EstTuple(
       pairBinTuples: Pair[NTuple[Int]],
-      estimates: List[Pair[Double]],
+      estimates: Estimates,
       weight: Option[Weight])
+
+  /**
+   *
+   * @param dataEstimate
+   * @param randDataEstimate
+   */
+  case class Estimates(
+      dataEstimate: Pair[Double],
+      randDataEstimate: List[Pair[Double]])
 
   /**
    *
@@ -62,19 +71,19 @@ object Containers {
       listParams: Map[String, List[Double]],
       numParams: Map[String, Double],
       stringParams: Map[String, String],
-      sigRespParams: Map[String, Option[Vector[NTuple[Double]]]]){
+      sigRespParams: Map[String, Option[Vector[NTuple[Double]]]]) {
 
     def updateListParams(k: String, v: List[Double]) =
-      Parameters(listParams updated (k, v), numParams, stringParams, sigRespParams)
+      Parameters(listParams updated(k, v), numParams, stringParams, sigRespParams)
 
     def updateNumParams(k: String, v: Double) =
-      Parameters(listParams, numParams updated (k, v), stringParams, sigRespParams)
+      Parameters(listParams, numParams updated(k, v), stringParams, sigRespParams)
 
     def updateStringParams(k: String, v: String) =
-      Parameters(listParams, numParams, stringParams updated (k, v), sigRespParams)
+      Parameters(listParams, numParams, stringParams updated(k, v), sigRespParams)
 
     def updateSigRespParams(k: String, v: Option[Vector[NTuple[Double]]]) =
-      Parameters(listParams, numParams, stringParams, sigRespParams updated (k, v))
+      Parameters(listParams, numParams, stringParams, sigRespParams updated(k, v))
 
     def reset() = InfConfig.defaultParameters
 
@@ -97,7 +106,7 @@ object Containers {
       }
       println()
     }
-    
+
   }
 
 }

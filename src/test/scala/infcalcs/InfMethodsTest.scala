@@ -162,6 +162,17 @@ class EstimateMITest extends FlatSpec with Matchers {
     isUniform(ct2.table) shouldBe false
   }
 
+  "isNotBiased" should "detect biased estimates" in {
+
+    val testParams = OtherFuncs.updateParameters(List(("cutoffValue","0.0"),("numForCutoff","1")),InfConfig.defaultParameters)
+    val thisTestConfig = CalcConfig(testParams, new MersenneTwister(12345))
+    val randEstimates1 = List((0.54,0.53))
+    val randEstimates2 = List((0.3,0.4),(0.0,0.3),(-0.4,0.1))
+
+    isNotBiased(thisTestConfig)(randEstimates1) shouldBe false
+    isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
+  }
+
   "makeUniform" should "leave a uniform contingency table unchanged" in {
     // See tests above for the underlying contingency tables for these examples.
     val uni = makeUniform(ct.table)
@@ -221,24 +232,24 @@ class EstimateMITest extends FlatSpec with Matchers {
     regs._2.length shouldBe testConfig.numParameters("numRandom").toInt
   }
 
-  "genEstimatesMult" should
-    "get a list of MI results for a small sample dataset" in {
-      val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
-      val regs = calcMultRegs(testConfig)(rdm)
-      val intercepts = multIntercepts(regs)
-      val binSizes = Vector((Vector(2), Vector(4)))
-      val genResult = genEstimatesMult(testConfig)(pl, binSizes, 1234567)
-      // We should get one result back because we only gave one bin size
-      genResult.length shouldBe 1
-      // The first tuple in the list
-      val firstResult = genResult(0)
-      // The first entry in the tuple should be the bin size we provided
-      firstResult.pairBinTuples shouldBe binSizes(0)
-      // The second entry should be the same length as the list of intercepts
-      // we calculated; we can't explicitly compare them because they have been
-      // randomized differently
-      firstResult.estimates.length shouldBe intercepts.length
-    }
+//  "genEstimatesMult" should
+//    "get a list of MI results for a small sample dataset" in {
+//      val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
+//      val regs = calcMultRegs(testConfig)(rdm)
+//      val intercepts = multIntercepts(regs)
+//      val binSizes = Vector((Vector(2), Vector(4)))
+//      val genResult = genEstimatesMult(testConfig)(pl, binSizes, 1234567)
+//      // We should get one result back because we only gave one bin size
+//      genResult.length shouldBe 1
+//      // The first tuple in the list
+//      val firstResult = genResult(0)
+//      // The first entry in the tuple should be the bin size we provided
+//      firstResult.pairBinTuples shouldBe binSizes(0)
+//      // The second entry should be the same length as the list of intercepts
+//      // we calculated; we can't explicitly compare them because they have been
+//      // randomized differently
+//      firstResult.estimates.length shouldBe intercepts.length
+//    }
 
 }
 
@@ -257,16 +268,16 @@ class EstimateCCTest extends FlatSpec with Matchers {
 
   "EstimateCC" should "generate unimodal Gaussian weights" in {
     val rd = pl sigDelims numBins._1
-    val uniWts = genWeights(rd, pl.sig, uniWeight(testConfig))
-    uniWts.length shouldBe
+    val uniWts = genWeights(pl.sig, uniWeight(testConfig))
+    uniWts(rd).length shouldBe
       (testConfig.numParameters("uniMuNumber").toInt) *
         testConfig.numParameters("uniSigmaNumber").toInt
   }
   
   it should "generate bimodel Gaussian weights" in {
     val rd = pl sigDelims numBins._1
-    val biWts = genWeights(rd, pl.sig, biWeight(testConfig))
-    biWts.length > 1
+    val biWts = genWeights(pl.sig, biWeight(testConfig))
+    biWts(rd).length > 1
   }
 }
 

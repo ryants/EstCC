@@ -3,12 +3,12 @@ package infcalcs
 /**
  * Case class whose fields comprise the required and optional
  * command line options for channel capacity calculation.  
- * 
+ *
  * For more details see the usage text with the flag "--help"
  */
 case class Config(
-    verbose: Boolean = false, 
-    dataFile: String = "", 
+    verbose: Boolean = false,
+    dataFile: String = "",
     paramFile: String = "",
     seed: Int = -1,
     cores: Int = 1)
@@ -22,7 +22,7 @@ trait CLOpts {
     opt[Unit]('v', "verbose") action { (_, c) =>
       c.copy(verbose = true)
     } text ("periodically print calculation status to stdout")
-    opt[String]('d', "data") required () valueName ("<file>") action {
+    opt[String]('d', "data") required() valueName ("<file>") action {
       (x, c) => c.copy(dataFile = x)
     } text ("input data for calculation")
     opt[String]('p', "parameters") valueName ("<file>") action {

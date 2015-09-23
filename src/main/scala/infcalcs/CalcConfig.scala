@@ -1,26 +1,62 @@
 package infcalcs
 
 import java.util.Date
-
-import Containers.{Parameters, Weight}
-import EstimateCC._
-import EstimateMI._
-import TreeDef.Tree
 import cern.jet.random.engine.MersenneTwister
 
 /**
  * Created by ryansuderman on 9/9/15.
  */
+
+/** Companion object for [[CalcConfig]]*/
 object CalcConfig {
+
+  /**
+   * Constructor
+   *
+   * @param p [[Parameters]]
+   * @param r Mersenne Twister
+   * @return
+   */
   def apply(p: Parameters, r: MersenneTwister) = new CalcConfig(p, r)
 
+  /**
+   * Alternate constructor
+   *
+   * Uses default [[Parameters]] defined in [[InfConfig]]
+   *
+   * @param r Mersenne Twister
+   * @return
+   */
   def apply(r: MersenneTwister) = new CalcConfig(InfConfig.defaultParameters, r)
 
+  /**
+   * Alternate constructor
+   *
+   * Uses date as a seed for instantiating a new Mersenne Twister
+   *
+   * @param p [[Parameters]]
+   * @return
+   */
   def apply(p: Parameters) = new CalcConfig(p, new MersenneTwister(new Date))
 
+  /**
+   * Default constructor
+   *
+   * Uses default [[Parameters]] and date as a seed for instantiating
+   * a new Mersenne Twister
+   *
+   * @return
+   */
   def apply() = new CalcConfig(InfConfig.defaultParameters, new MersenneTwister(new Date))
 }
 
+/**
+ * Class passed to numerous functions and methods that contains configuration
+ * information for channel capacity estimation
+ *
+ * @param parameters
+ * @param rEngine
+ */
 class CalcConfig(val parameters: Parameters, val rEngine: MersenneTwister) {
 
   def this(r: MersenneTwister) = this(InfConfig.defaultParameters, r)
@@ -29,9 +65,10 @@ class CalcConfig(val parameters: Parameters, val rEngine: MersenneTwister) {
 
   def this() = this(InfConfig.defaultParameters, new MersenneTwister(new Date))
 
-  //produces new CalcConfig with fresh MT instance (for actors)
+  /** Produces new CalcConfig with fresh Mersenne Twister instance (for actors)*/
   def resetMtEngine(seed: Int) = CalcConfig(parameters, new MersenneTwister(seed))
 
+  /** Produces new CalcConfig with fresh Mersenne Twister instance (for actors)*/
   def resetMtEngine() = CalcConfig(parameters, new MersenneTwister(new Date))
 
   // These parameters are set as variables not values (val not val) so that

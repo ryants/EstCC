@@ -1,7 +1,5 @@
 package infcalcs.actors
 
-import akka.actor.ActorRef
-import infcalcs.Containers.{EstTuple, Weight}
 import infcalcs._
 
 /**

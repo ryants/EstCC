@@ -1,6 +1,5 @@
 package infcalcs
 
-import infcalcs.Containers.Weight
 import org.scalatest._
 import cern.jet.random.engine.MersenneTwister
 
@@ -125,17 +124,6 @@ class EstimateMITest extends FlatSpec with Matchers {
   val pl = new DRData(testConfig)(doses1, responses)
   val numBins = Tuple2(Vector(2), Vector(4))
   val ct = buildTable(None)(pl, numBins)
-
-  // Mock up the global parameters in EstCC
-
-  "genBins" should "generate all (row, col) bin number tuples" in {
-    val binList = Vector(1, 2, 3) map (x => Vector(x))
-    val otherBinList = Vector(11, 12, 13) map (x => Vector(x))
-    val bins = genBins(binList, otherBinList)
-    bins shouldBe (Vector((1, 11), (1, 12), (1, 13),
-      (2, 11), (2, 12), (2, 13),
-      (3, 11), (3, 12), (3, 13)) map (x => (Vector(x._1),Vector(x._2))))
-  }
 
   "isUniform" should "identify a uniform contingency table as uniform" in {
     // Divides rows into bins (0, 1, 2, 2) and (3, 3, 3, 3)

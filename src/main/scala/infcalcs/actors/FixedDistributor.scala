@@ -7,6 +7,14 @@ import infcalcs.{EstCC, CalcConfig, DRData}
 /**
  * Created by ryansuderman on 9/18/15.
  */
+
+/**
+ * Class that manages a set of [[Calculator]] actors if signal values
+ * are defined in the [[infcalcs.Parameters]]
+ *
+ * @param p
+ * @param calcConfig
+ */
 class FixedDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distributor(p)(calcConfig) {
 
   val sb = signalBins

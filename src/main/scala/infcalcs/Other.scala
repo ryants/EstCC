@@ -2,7 +2,6 @@ package infcalcs
 
 import cern.jet.stat.Probability.{errorFunction => erf}
 import cern.jet.random.engine.MersenneTwister
-import Containers.Parameters
 import exceptions._
 import annotation.tailrec
 
@@ -132,13 +131,14 @@ object OtherFuncs {
    * list values. Strings may specify a list of whitespace-separated numbers
    * (eg., "5 10 15"), comma-separated numbers specifying the start, stop, and
    * step size for numerical ranges (e.g., "0, 10, 1"), or simply "None".  If
-   * there are more than three comma-separated arguments, an Exception is
+   * there are more than three comma-separated arguments, an [[exceptions.IllegalParameterException]] is
    * thrown.
    *
    * @param s The string to parse.
    * @return List of Doubles specified by the string.
-   * @throws Exception
+   * @throws exceptions.IllegalParameterException if comma separated values are incorrectly written
    */
+  @throws(classOf[exceptions.IllegalParameterException])
   def stringToSList(s: String): Option[List[Double]] = {
     val csv = s.split(',')
     // Three elements: "start, stop, interval"
@@ -158,7 +158,7 @@ object OtherFuncs {
       Some((csv(0).toInt to csv(1).toInt by 1).toList map (_.toDouble))
     // Too many arguments, throw an exception.
     else if (csv.length > 3)
-      throw new Exception(s"Illegal number of arguments: ${csv.length}")
+      throw new IllegalParameterException(s"Illegal number of arguments: ${csv.length}")
     // "None", return None
     else if (csv.length == 1 && csv(0) == "None")
       None
@@ -201,14 +201,15 @@ object OtherFuncs {
    *
    * Used to update the default parameter values with parameter values loaded
    * from a file. If the key/value list contains a key that is not found in the
-   * parameter list, an Exception is thrown.
+   * parameter list, an [[exceptions.IllegalParameterException]] is thrown.
    *
    * @param l The list of key, value pairs to use for updating.
    * @param p The configuration parameters to be updated.
    * @return The updated parameters.
-   * @throws Exception
+   * @throws exceptions.IllegalParameterException if the string does not match any known parameter
    */
   @tailrec
+  @throws(classOf[exceptions.IllegalParameterException])
   def updateParameters(l: List[Pair[String]], p: Parameters): Parameters = {
     if (l.isEmpty) p
     else {
@@ -254,7 +255,7 @@ object OtherFuncs {
               p.stringParams,
               p.sigRespParams updated
                   ("signalValues", stringToValList(l.head._2, p.sigRespParams("signalValues")))))
-        else throw new Exception(s"illegal parameter: ${l.head._1}")
+        else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
       // Check if *bins needs to be updated
       else if (l.head._1 matches ".*Bins[0-9]*")
         if (l.head._1 matches "^resp.*")

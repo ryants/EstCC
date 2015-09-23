@@ -1,8 +1,5 @@
 package infcalcs
 
-import infcalcs.Containers.EstTuple
-import infcalcs.tables.ImportedTable
-
 /**
  * This object contains methods for writing and reading various types of
  * data to and from files.
@@ -21,7 +18,7 @@ object IOFile {
    * Each line of the file is expected to contain a whitespace-separated list
    * of numbers that can be cast as Doubles. Used as a helper function for
    * loading dose-response datasets (by [[loadList]]) or loading
-   * contingency tables from a file (by [[ImportedTable]]).
+   * contingency tables from a file (by [[tables.ImportedTable]]).
    *
    * @param f Name of file to load.
    * @return The data, as a matrix of doubles.

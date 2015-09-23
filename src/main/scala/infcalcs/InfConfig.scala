@@ -1,12 +1,6 @@
 package infcalcs
 
-import infcalcs.Containers.Parameters
-
-/**
- * Defines default values for the channel capacity calculation parameters.
- *
- * For more detailed descriptions of these parameters, see the README file.
- */
+/** Defines default values for the channel capacity calculation parameters. */
 object InfConfig {
 
   /** Parameters that have list/tuple values. */

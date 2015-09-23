@@ -11,25 +11,26 @@ import infcalcs.tables.ContTable
   *
   * The steps in the channel capacity calculation are outlined below. For more
   * details on the theory underlying the approach taken, see the supplementary
-  * information for Suderman, Bachman et al. (2014).
+  * information for Suderman, Bachman et al. (2015).
   *
   * - In the top-level main function, [[infcalcs.EstCC]], command-line arguments are
-  * parsed and the data and configuration parameters are loaded.
+  * parsed and the data and configuration parameters are loaded into a [[infcalcs.CalcConfig]]
+  * object.
   *
   * - Because the channel capacity depends on the input distribution, various
   * input weights are generated to determine which input weightings yield the
   * highest mutual information between input and output. Input weights are
   * generated using the functions [[infcalcs.EstimateCC.uniWeight]] and
   * [[infcalcs.EstimateCC.biWeight]], which allow weighting of the input distribution
-  * according to unimodal and bimodal Gaussian distributions, respectively.
+  * according to unimodal and bimodal Gaussian distributions, respectively,
+  * as well as discrete piecewise distributions with uniform probability using
+  * the [[infcalcs.EstimateCC.pwWeight]].
   *
   * - Mutual information is calculated for each proposed input weighting
-  * by the function [[infcalcs.EstimateCC.calcWithWeightsMult]].
+  * by the function [[infcalcs.EstimateMI.genEstimatesMult]].
   *
   * - For each weighting, the algorithm tries a wide variety of bin
   * numbers/sizes to arrive at an estimate that is not biased by the bin size.
-  * The ranges of input and output bins are specified by configuration
-  * parameters.
   *
   * - For each unique combination of input/output bin sizes, the algorithm
   * builds the contingency tables for the raw data as well as for randomly
@@ -37,7 +38,7 @@ import infcalcs.tables.ContTable
   * by [[infcalcs.EstimateMI.buildRegData]].
   *
   * - After calculating the mutual information for each contingency table
-  * (implemented in [[ContTable.mutualInformation]]) the unbiased mutual
+  * (implemented in [[infcalcs.tables.ContTable.mutualInformation]]) the unbiased mutual
   * information is estimated by performing a linear regression of the mutual
   * information of each subsampled dataset against the inverse sample size;
   * the intercept of the linear regression is the unbiased mutual
@@ -51,7 +52,7 @@ import infcalcs.tables.ContTable
   * the MI estimate for randomized data below the cutoff specified in the
   * configuration.
   *
-  * - [[infcalcs.EstimateCC.getResultsMult]] then reports the channel capacity estimate
+  * - [[infcalcs.EstimateCC.estimateCC]] then reports the channel capacity estimate
   * as the maximum mutual information estimate obtained for all of the input
   * weightings tested.
   */

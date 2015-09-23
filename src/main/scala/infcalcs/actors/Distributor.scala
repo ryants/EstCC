@@ -1,7 +1,7 @@
 package infcalcs.actors
 
 import akka.actor.Actor
-import infcalcs.Containers.{Weight, EstTuple}
+import infcalcs.EstTuple
 import infcalcs.EstimateCC.getWeights
 import infcalcs.OtherFuncs._
 import infcalcs._
@@ -9,6 +9,15 @@ import infcalcs.exceptions.ExcessActorException
 
 /**
  * Created by ryansuderman on 9/18/15.
+ */
+
+/**
+ * Abstract class inherited by [[FixedDistributor]] and [[AdaptiveDistributor]]
+ * that holds a number of methods and variables for managing a parallel
+ * implementation of channel capacity estimation
+ *
+ * @param p
+ * @param calcConfig
  */
 abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends Actor {
 

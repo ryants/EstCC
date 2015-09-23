@@ -10,6 +10,14 @@ import scala.collection.mutable.{HashMap => MHashMap}
 /**
  * Created by ryansuderman on 9/18/15.
  */
+
+/**
+ * Class that manages a set of [[Calculator]] actors using adaptive bin control
+ * to determine the optimal number of bins for signal space
+ *
+ * @param p
+ * @param calcConfig
+ */
 class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distributor(p)(calcConfig) {
 
   var numCalculators = 0

@@ -1,6 +1,5 @@
 package infcalcs
 
-import Containers._
 import exceptions._
 import tables.{ContTable, ConstructedTable}
 
@@ -227,10 +226,10 @@ object CTBuild {
  * Contains methods for estimating mutual information.
  *
  * The principal methods used by top-level calling functions are:
- * - [[EstimateMI.genEstimatesMultAlt]], which takes a dataset and a set of bin sizes and
- * returns mutual information estimates for each bin size, and
+ * - [[EstimateMI.genEstimatesMult]], which takes a dataset and returns mutual information
+ * estimates for each attempted bin size, and
  * - [[EstimateMI.optMIMult]], which takes the mutual information estimates produced by
- * [[EstimateMI.genEstimatesMultAlt]] and finds the bin size and mutual information that
+ * [[EstimateMI.genEstimatesMult]] and finds the bin size and mutual information that
  * maximizes the mutual information for the real but not the randomized
  * datasets.
  *
@@ -245,16 +244,6 @@ object EstimateMI {
   import CTBuild.{buildTable, weightSignalData}
   import cern.jet.random.engine.MersenneTwister
   import OtherFuncs.genSeed
-
-  /**
-   * Generates all (row, col) bin tuple pairs.
-   */
-  def genBins(
-      binList: Vector[NTuple[Int]],
-      otherBinList: Vector[NTuple[Int]] = Vector(Vector())): Vector[Pair[NTuple[Int]]] = {
-    val cBinList = if (otherBinList.isEmpty) binList else otherBinList
-    for (r <- binList; c <- cBinList) yield (r, c)
-  }
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -287,9 +276,9 @@ object EstimateMI {
   }
 
   /**
-   * Updates a data structure tracking non-zero values in a [[ContTable]]
+   * Updates a data structure tracking non-zero values in a [[tables.ContTable]]
    *
-   * @param indices a Seq of [[ContTable]] coordinates and the associated value
+   * @param indices a Seq of [[tables.ContTable]] coordinates and the associated value
    * @param index corresponds to an element of indices whose value is to be 
    *              decreased by one or removed if less than 1
    * @return an updated Seq
@@ -400,6 +389,7 @@ object EstimateMI {
 
 
   /**
+   * Identical to [[moreSigBinsLeft]] but for response bin space
    *
    * @param calcConfig
    * @param p
@@ -450,7 +440,7 @@ object EstimateMI {
       binPair: Pair[NTuple[Int]],
       data: DRData,
       seed: Int,
-      wts: Option[Weight] = None): RegDataMult = {
+      wts: Option[Weight] = None): RegData = {
 
     val engine = new MersenneTwister(seed)
     val numRandTables = calcConfig.numParameters("numRandom").toInt
@@ -482,7 +472,7 @@ object EstimateMI {
         f % calcConfig.numParameters("repsPerFraction").toInt
       }"
 
-    RegDataMult(invFracs, subSamples, randSubSamples.transpose, tags :+
+    RegData(invFracs, subSamples, randSubSamples.transpose, tags :+
         s"${l}_r${binPair._1}_c${binPair._2}")
   }
 
@@ -492,20 +482,21 @@ object EstimateMI {
    * Note Option monad present to accommodate failed intercept calculations.
    *
    * @param r (inverse sample sizes, CTs, randomized CTs, labels)
-   * @param i integer ID denoting randomized table 
    * @return Regression line, None if regression failed.
    */
-  def calcRandRegs(r: RegData, i: Int): Option[SLR] = {
+  def calcRandRegs(r: RegData): List[Option[SLR]] = {
     val MIList = r.subContTables map (_.mutualInformation)
-    val MIListRand = r.randContTables map (_.mutualInformation)
-    val regLineRand = new SLR(r.iss, MIListRand, r.labels.last +
-        "_rand")
-    if (regLineRand.intercept.isNaN) {
-      IOFile.regDataToFile((r.iss, MIList, MIListRand), "regData_NaNint_" +
-          regLineRand.label + "_" + i.toString + ".dat")
-      // printCTData(r)
-      None
-    } else Some(regLineRand)
+
+    r.randContTableVect.indices.toList map { i =>
+      val MIListRand = r.randContTableVect(i) map (_.mutualInformation)
+      val regLineRand = new SLR(r.iss, MIListRand, r.labels.last +
+          "_rand")
+      if (regLineRand.intercept.isNaN) {
+        IOFile.regDataToFile((r.iss, MIList, MIListRand), "regData_NaNint_" +
+            regLineRand.label + "_" + i.toString + ".dat")
+        None
+      } else Some(regLineRand)
+    }
   }
 
   /**
@@ -525,27 +516,13 @@ object EstimateMI {
    * @return (regression on original data, list of regressions on random data)
    */
   def calcMultRegs(calcConfig: CalcConfig)
-      (r: RegDataMult): (SLR, List[Option[SLR]]) = {
+      (r: RegData): (SLR, List[Option[SLR]]) = {
     // Regression on original data
     val regLine = new SLR(r.iss, r.subContTables map (_.mutualInformation), r.labels.last)
-    // regLine.toFile(s"rd_${regLine.label}.dat")
     // Regression on randomized data
-    val regDataRand =
-      (0 until calcConfig.numParameters("numRandom").toInt).toList map (x =>
-        (RegData(r.iss, r.subContTables, r.randContTableVect(x), r.labels), x))
-    val regLinesRand = regDataRand map (x => calcRandRegs(x._1, x._2))
+    val regLinesRand = calcRandRegs(r)
     (regLine, regLinesRand)
   }
-
-  /**
-   * Prints out all contingency tables for a particular set of regression data.
-   * Useful for debugging purposes.
-   */
-  def printCTData(r: RegData): Unit =
-    for (i <- 0 until r.iss.length) yield {
-      r.subContTables(i).tableToFile("ct_" + r.labels(i) + ".dat")
-      r.randContTables(i).tableToFile("ct_" + r.labels(i) + "_rand.dat")
-    }
 
   /**
    * Returns intercepts and confidence intervals given multiple regression data.
@@ -569,9 +546,11 @@ object EstimateMI {
   }
 
   /**
-   * Gets mutual information estimates for range of bin sizes by regression.
+   * Gets mutual information estimates for range of response bin sizes by regression.
    *
-   * For each set of bin sizes given, this function:
+   * The range of bin sizes attempted depends on the calculation [[Parameters]]
+   * which define the response bin spacing and the number of biased calculations before
+   * reaching a stop criterion.  For each set of bin sizes given, this function:
    * - builds the randomized and resampled contingency tables by calling
    * [[buildRegData]]
    * - estimates the unbiased mutual information for the resampled and/or
@@ -588,7 +567,7 @@ object EstimateMI {
    * @return
    */
   @tailrec
-  def genEstimatesMultAlt(calcConfig: CalcConfig)(
+  def genEstimatesMult(calcConfig: CalcConfig)(
       pl: DRData,
       binPair: Pair[NTuple[Int]] = calcConfig.initBinTuples,
       wts: Option[Weight] = None,
@@ -614,13 +593,17 @@ object EstimateMI {
       val newRes = res :+ est
 
       if (isNotBiased(calcConfig)(est.estimates.randDataEstimate))
-        genEstimatesMultAlt(calcConfig)(pl, newBins, wts, 0, newRes)
+        genEstimatesMult(calcConfig)(pl, newBins, wts, 0, newRes)
       else
-        genEstimatesMultAlt(calcConfig)(pl, newBins, wts, numConsecRandPos + 1, newRes)
+        genEstimatesMult(calcConfig)(pl, newBins, wts, numConsecRandPos + 1, newRes)
     }
   }
 
   /**
+   * An imperative equivalent to [[genEstimatesMult]]
+   *
+   * Not currently used in code, but could be useful for outputting information
+   * on the fly in verbose mode
    *
    * @param calcConfig
    * @param pl
@@ -628,7 +611,7 @@ object EstimateMI {
    * @param wts
    * @return
    */
-  def genEstimatesMultAltImp(calcConfig: CalcConfig)(
+  def genEstimatesMultImp(calcConfig: CalcConfig)(
       pl: DRData,
       signalBins: NTuple[Int],
       wts: Option[Weight] = None): Vector[EstTuple] = {
@@ -640,18 +623,12 @@ object EstimateMI {
     while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
         moreRespBinsLeft(calcConfig)(pl, responseBins)) {
 
-//      println(s"Total response bins: ${responseBins.product}\tbin tuple: ${responseBins}")
-//      println(s"Consecutive biased estimates: ${numConsecRandPos}")
-//      println(s"Length of results array: ${res.length}")
-
       val binPair = (signalBins, responseBins)
       val seed = genSeed(calcConfig.rEngine)
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
       val est = EstTuple(binPair, intercepts, wts)
-
-//      println(s"Estimates: ${est.estimates}\n")
-
+      
       res = res :+ est
 
       if (isNotBiased(calcConfig)(est.estimates.randDataEstimate)) numConsecRandPos = 0
@@ -674,7 +651,8 @@ object EstimateMI {
    */
   def updateRespBinNumbers(calcConfig: CalcConfig)(respBinTuple: NTuple[Int]): NTuple[Int] =
     calcConfig.srParameters("responseValues") match {
-      case None => respBinTuple.indices.toVector map (x => respBinTuple(x) + calcConfig.listParameters("respBinSpacing")(x).toInt)
+      case None => respBinTuple.indices.toVector map (x => 
+        respBinTuple(x) + calcConfig.listParameters("respBinSpacing")(x).toInt)
       case _ => throw new BinConfigurationException("cannot update bin number when values are present")
     }
 
@@ -687,7 +665,8 @@ object EstimateMI {
    */
   def updateSigBinNumbers(calcConfig: CalcConfig)(sigBinTuple: NTuple[Int]): NTuple[Int] =
     calcConfig.srParameters("signalValues") match {
-      case None => sigBinTuple.indices.toVector map (x => sigBinTuple(x) + calcConfig.listParameters("sigBinSpacing")(x).toInt)
+      case None => sigBinTuple.indices.toVector map (x => 
+        sigBinTuple(x) + calcConfig.listParameters("sigBinSpacing")(x).toInt)
       case _ => throw new BinConfigurationException("cannot update bin number when values are present")
     }
 
@@ -720,7 +699,7 @@ object EstimateMI {
    *
    * Takes a list of MI estimates for a range of bin sizes, extracted by
    * linear regression for both real and randomized data (eg, as provided by
-   * [[genEstimatesMultAlt]]) and finds the bin size/MI combination that maximizes
+   * [[genEstimatesMult]]) and finds the bin size/MI combination that maximizes
    * the mutual information while still maintaining the estimated MI of the
    * randomized data below the cutoff specified by the "cutoffValue"
    * parameter.
@@ -753,12 +732,12 @@ object EstimateMI {
   /**
    * Takes the pair of n-dimensional bin number vectors resulting in maximal
    * mutual information in order to estimate all relevant quantities as defined
-   * in [[ContTable.ctVals]].  These data are outputted to an information file
+   * in [[tables.ContTable.ctVals]].  These data are outputted to an information file
    *
    * @param binPair pair of n-dimensional bin number vectors
    * @param data [[DRData]]
    * @param seed initializes PRNG
-   * @param wts optional [[Weight]] depending on which weight resulted in 
+   * @param wts optional [[Weight]] depending on which weight resulted in
    *            maximal mutual information
    */
   def finalEstimation(
@@ -790,7 +769,20 @@ object EstimateMI {
 
 }
 
-/** Contains functions for estimating the channel capacity. */
+/**
+ * Contains functions for generating signal weights and estimating the channel capacity.
+ *
+ * Most importantly are the [[EstimateCC.estimateCC]] and [[EstimateCC.estimateCCVerbose]]
+ * functions which are used in the [[EstCC]] main object to estimate the channel capacity.
+ *
+ * The weighting functions [[EstimateCC.uniWeight]] and [[EstimateCC.biWeight]] generate
+ * weights for unimodal and bimodal Gaussian-based probability density functions and
+ * [[EstimateCC.pwWeight]] produces discrete piecewise probability mass functions by
+ * iteratively selecting signal values to omit from the mutual information estimation.
+ * These values are then aggregated into a list of [[Weight]] by the
+ * [[EstimateCC.genWeights]] function used for channel capacity estimation.
+ *
+ */
 object EstimateCC {
 
   import OtherFuncs.genSeed
@@ -806,8 +798,9 @@ object EstimateCC {
    * @param wts The list of weights.
    * @param threshold The threshold to use to evaluate the weights.
    * @return The list of weights.
-   * @throws LowProbException
+   * @throws exceptions.LowProbException if the sum of weights is less than the threshold
    */
+  @throws(classOf[exceptions.LowProbException])
   def testWeights(
       msg: String,
       wts: List[Double],
@@ -1072,7 +1065,7 @@ object EstimateCC {
       var estimates: Array[Vector[EstTuple]] = Array()
       (0 until wts.length) foreach { w =>
 
-        val estimate = EstimateMI.genEstimatesMultAltImp(calcConfig)(p, binPair._1, wts(w))
+        val estimate = EstimateMI.genEstimatesMultImp(calcConfig)(p, binPair._1, wts(w))
         val opt = EstimateMI.optMIMult(calcConfig)(estimate)
 
         estimates = estimates :+ estimate
@@ -1144,12 +1137,15 @@ object EstimateCC {
   }
 
   /**
-   *
-   * @param calcConfig
+   * Estimates the channel capacity for a [[DRData]] given a [[CalcConfig]]
+   * 
    * @param p
+   * @param signalBins
+   * @param fp
+   * @param index
    * @param numConsecBiasedSigEst
    * @param optRes
-   * @param signalBins
+   * @param calcConfig
    * @return
    */
   @tailrec
@@ -1170,7 +1166,7 @@ object EstimateCC {
       val responseBins = calcConfig.initResponseBins
       val initBinTuple = (signalBins, responseBins)
       weights.indices.toVector map (w => {
-        val estimates = EstimateMI.genEstimatesMultAlt(calcConfig)(
+        val estimates = EstimateMI.genEstimatesMult(calcConfig)(
           p,
           initBinTuple,
           weights(w))

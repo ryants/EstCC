@@ -28,11 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../lib/object_big.png" />
+        <img alt="Object" src="../lib/object_big.png" />
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>EstCC</h1> <span class="permalink">
+        <h1>EstCC</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
+          </div></span></h3><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -47,8 +49,12 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Top-level main function for channel capacity calculation.</p><ul><li>Collects command-line arguments;</li><li>Loads the data;</li><li>Sets configuration parameters;</li><li>Generates unimodal and bimodal weights;</li><li>Calculates channel capacity for each weighting scheme.
-</li></ul></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Top-level main function for channel capacity calculation.</p><p>- Collects command-line arguments;
+- Loads the data;
+- Sets configuration parameters;
+- Generates unimodal and bimodal weights;
+- Calculates channel capacity for each weighting scheme.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="CLOpts.html" class="extype" name="infcalcs.CLOpts">CLOpts</a>, <span class="extype" name="scala.App">App</span>, <span class="extype" name="scala.DelayedInit">DelayedInit</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -76,7 +82,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -107,7 +112,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -124,7 +129,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@##():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -141,24 +146,24 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="infcalcs.EstCC#addLabel" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="addLabel(s:Option[String],l:String):Option[String]"></a>
-      <a id="addLabel(Option[String],String):Option[String]"></a>
+    </li><li name="infcalcs.EstCC#appConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="appConfig:infcalcs.Config"></a>
+      <a id="appConfig:Config"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">def</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">addLabel</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="l">l: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">appConfig</span><span class="result">: <a href="Config.html" class="extype" name="infcalcs.Config">Config</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@addLabel(s:Option[String],l:String):Option[String]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.EstCC$@appConfig:infcalcs.Config" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -175,7 +180,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@args:Array[String]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>App</dd><dt>Annotations</dt><dd>
@@ -201,41 +206,24 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.EstCC#aw" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="aw:List[List[Option[infcalcs.Weight]]]"></a>
-      <a id="aw:List[List[Option[Weight]]]"></a>
+    </li><li name="infcalcs.EstCC#calcConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="calcConfig:infcalcs.CalcConfig"></a>
+      <a id="calcConfig:CalcConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">implicit </span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">aw</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="package.html#Weight=(List[Double],String)" class="extmbr" name="infcalcs.Weight">Weight</a>]]]</span>
+        <span class="name">calcConfig</span><span class="result">: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@aw:List[List[Option[infcalcs.Weight]]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#bins" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="bins:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]]"></a>
-      <a id="bins:Vector[Pair[NTuple[Int]]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">bins</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@bins:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.EstCC$@calcConfig:infcalcs.CalcConfig" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -252,7 +240,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@clone():Object" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -262,23 +250,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstCC#config" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="config:infcalcs.Config"></a>
-      <a id="config:Config"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">config</span><span class="result">: <a href="Config.html" class="extype" name="infcalcs.Config">Config</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@config:infcalcs.Config" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="infcalcs.EstCC#dataFile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="dataFile:String"></a>
       <a id="dataFile:String"></a>
@@ -292,7 +263,24 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@dataFile:String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.EstCC#engine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="engine:cern.jet.random.engine.MersenneTwister"></a>
+      <a id="engine:MersenneTwister"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">engine</span><span class="result">: <span class="extype" name="cern.jet.random.engine.MersenneTwister">MersenneTwister</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstCC$@engine:cern.jet.random.engine.MersenneTwister" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -309,7 +297,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -326,7 +314,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -343,7 +331,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@executionStart:Long" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd></dl></div>
@@ -360,7 +348,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@finalize():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -370,23 +358,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstCC#fracList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fracList:Vector[Double]"></a>
-      <a id="fracList:Vector[Double]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fracList</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@fracList:Vector[Double]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -400,7 +371,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -417,7 +388,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@hashCode():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -434,27 +405,10 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.EstCC#listParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="listParameters:Map[String,List[Double]]"></a>
-      <a id="listParameters:Map[String,List[Double]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">listParameters</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@listParameters:Map[String,List[Double]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="scala.App#main" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="main(args:&lt;?&gt;):Unit"></a>
       <a id="main(Array[String]):Unit"></a>
@@ -468,7 +422,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@main(args:Array[String]):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App</dd><dt>Annotations</dt><dd>
@@ -494,7 +448,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -511,7 +465,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@notify():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -528,44 +482,10 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstCC#numParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="numParameters:Map[String,Double]"></a>
-      <a id="numParameters:Map[String,Double]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">numParameters</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@numParameters:Map[String,Double]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#outF" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="outF:Some[String]"></a>
-      <a id="outF:Some[String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">outF</span><span class="result">: <span class="extype" name="scala.Some">Some</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@outF:Some[String]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="infcalcs.EstCC#p" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="p:infcalcs.DRData"></a>
       <a id="p:DRData"></a>
@@ -579,7 +499,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@p:infcalcs.DRData" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -596,7 +516,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@paramFile:Option[String]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -606,14 +526,14 @@
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">var</span>
+        <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">parameters</span><span class="result">: <a href="package.html#Parameters=(Map[String,List[Double]],Map[String,Double],Map[String,String],Map[String,Option[Vector[infcalcs.package.NTuple[Double]]]])" class="extmbr" name="infcalcs.Parameters">Parameters</a></span>
+        <span class="name">parameters</span><span class="result">: <a href="Parameters.html" class="extype" name="infcalcs.Parameters">Parameters</a></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@parameters:infcalcs.Parameters" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -630,27 +550,10 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@parser:scopt.OptionParser[infcalcs.Config]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="CLOpts.html" class="extype" name="infcalcs.CLOpts">CLOpts</a></dd></dl></div>
-    </li><li name="infcalcs.EstCC#rEngine" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="rEngine:cern.jet.random.engine.MersenneTwister"></a>
-      <a id="rEngine:MersenneTwister"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">rEngine</span><span class="result">: <span class="extype" name="cern.jet.random.engine.MersenneTwister">MersenneTwister</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@rEngine:cern.jet.random.engine.MersenneTwister" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
     </li><li name="infcalcs.EstCC#rawParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="rawParameters:List[infcalcs.Pair[String]]"></a>
       <a id="rawParameters:List[Pair[String]]"></a>
@@ -664,160 +567,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@rawParameters:List[infcalcs.Pair[String]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#respCols" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="respCols:scala.collection.immutable.Vector[Int]"></a>
-      <a id="respCols:Vector[Int]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">respCols</span><span class="result">: <span class="extype" name="scala.collection.immutable.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@respCols:scala.collection.immutable.Vector[Int]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#respDim" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="respDim:Int"></a>
-      <a id="respDim:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">respDim</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@respDim:Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#responseBins" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="responseBins:Vector[infcalcs.NTuple[Int]]"></a>
-      <a id="responseBins:Vector[NTuple[Int]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">responseBins</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@responseBins:Vector[infcalcs.NTuple[Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#sigCols" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sigCols:scala.collection.immutable.Vector[Int]"></a>
-      <a id="sigCols:Vector[Int]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sigCols</span><span class="result">: <span class="extype" name="scala.collection.immutable.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@sigCols:scala.collection.immutable.Vector[Int]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#sigDim" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sigDim:Int"></a>
-      <a id="sigDim:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sigDim</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@sigDim:Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#signalBins" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="signalBins:Vector[infcalcs.NTuple[Int]]"></a>
-      <a id="signalBins:Vector[NTuple[Int]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">signalBins</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@signalBins:Vector[infcalcs.NTuple[Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#signalTrees" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="signalTrees:Vector[infcalcs.NTuple[infcalcs.TreeDef.Tree]]"></a>
-      <a id="signalTrees:Vector[NTuple[Tree]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">signalTrees</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@signalTrees:Vector[infcalcs.NTuple[infcalcs.TreeDef.Tree]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#srParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="srParameters:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]"></a>
-      <a id="srParameters:Map[String,Option[Vector[NTuple[Double]]]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">srParameters</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@srParameters:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.EstCC#stringParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stringParameters:Map[String,String]"></a>
-      <a id="stringParameters:Map[String,String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">stringParameters</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstCC$@stringParameters:Map[String,String]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -834,7 +584,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -851,7 +601,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@toString():String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -868,7 +618,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@wait():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -891,7 +641,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -914,7 +664,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -944,7 +694,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstCC$@delayedInit(body:=&gt;Unit):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>App → DelayedInit</dd><dt>Annotations</dt><dd>

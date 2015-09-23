@@ -28,11 +28,11 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../lib/package_big.png" />
+        <img alt="Package" src="../lib/package_big.png" />
         
-        <h1>infcalcs</h1> <span class="permalink">
+        <h1>infcalcs</h1><span class="permalink">
       <a href="../index.html#infcalcs.package" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -52,34 +52,35 @@ particular estimates of mutual information and channel capacity for
 continuous variables.</p><p>For information on building, testing, and using the code, see the README
 file.</p><p>The steps in the channel capacity calculation are outlined below. For more
 details on the theory underlying the approach taken, see the supplementary
-information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level main function, <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a>, command-line arguments are
-   parsed and the data and configuration parameters are loaded.</li><li>Because the channel capacity depends on the input distribution, various
-   input weights are generated to determine which input weightings yield the
-   highest mutual information between input and output. Input weights are
-   generated using the functions <a href="EstimateCC$.html#uniWeight(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and
-   <a href="EstimateCC$.html#biWeight(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a>, which allow weighting of the input distribution
-   according to unimodal and bimodal Gaussian distributions, respectively.</li><li>Mutual information is calculated for each proposed input weighting
-   by the function <a href="EstimateCC$.html#calcWithWeightsMult(weights:List[Option[infcalcs.Weight]],bins:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]],pl:infcalcs.DRData):List[Vector[infcalcs.EstTuple]]" class="extmbr" name="infcalcs.EstimateCC#calcWithWeightsMult">EstimateCC.calcWithWeightsMult</a>.</li><li>For each weighting, the algorithm tries a wide variety of bin
-   numbers/sizes to arrive at an estimate that is not biased by the bin size.
-   The ranges of input and output bins are specified by configuration
-   parameters.</li><li>For each unique combination of input/output bin sizes, the algorithm
-   builds the contingency tables for the raw data as well as for randomly
-   selected subsamples of the data. These contingency tables are generated
-   by <a href="EstimateMI$.html#buildDataMult(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegDataMult" class="extmbr" name="infcalcs.EstimateMI#buildDataMult">EstimateMI.buildDataMult</a>.</li><li>After calculating the mutual information for each contingency table
-   (implemented in <a href="ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.ContTable#mutualInformation">ContTable.mutualInformation</a>) the unbiased mutual
-   information is estimated by performing a linear regression of the mutual
-   information of each subsampled dataset against the inverse sample size;
-   the intercept of the linear regression is the unbiased mutual
-   information estimate. The regression calculation is performed by
-   <a href="EstimateMI$.html#calcMultRegs(r:infcalcs.RegDataMult):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>.</li><li>Because increasing the number of bins can artifactually inflate estimates
-   of MI, identical MI calculations are performed on shuffled datasets of
-   varying sizes. The function <a href="EstimateMI$.html#optMIMult(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">EstimateMI.optMIMult</a> then selects the MI
-   estimate that maximizes the MI estimate for real data while keeping the
-   the MI estimate for randomized data below the cutoff specified in the
-   configuration.</li><li><a href="EstimateCC$.html#getResultsMult(est:Vector[Vector[infcalcs.EstTuple]],filePrefix:Option[String]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateCC#getResultsMult">EstimateCC.getResultsMult</a> then reports the channel capacity estimate
-   as the maximum mutual information estimate obtained for all of the input
-   weightings tested.
-</li></ul></div><div class="toggleContainer block">
+information for Suderman, Bachman et al. (2015).</p><p>- In the top-level main function, <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">infcalcs.EstCC</a>, command-line arguments are
+parsed and the data and configuration parameters are loaded into a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">infcalcs.CalcConfig</a>
+object.</p><p>- Because the channel capacity depends on the input distribution, various
+input weights are generated to determine which input weightings yield the
+highest mutual information between input and output. Input weights are
+generated using the functions <a href="EstimateCC$.html#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">infcalcs.EstimateCC.uniWeight</a> and
+<a href="EstimateCC$.html#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">infcalcs.EstimateCC.biWeight</a>, which allow weighting of the input distribution
+according to unimodal and bimodal Gaussian distributions, respectively,
+as well as discrete piecewise distributions with uniform probability using
+the <a href="EstimateCC$.html#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">infcalcs.EstimateCC.pwWeight</a>.</p><p>- Mutual information is calculated for each proposed input weighting
+by the function <a href="EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">infcalcs.EstimateMI.genEstimatesMult</a>.</p><p>- For each weighting, the algorithm tries a wide variety of bin
+numbers/sizes to arrive at an estimate that is not biased by the bin size.</p><p>- For each unique combination of input/output bin sizes, the algorithm
+builds the contingency tables for the raw data as well as for randomly
+selected subsamples of the data. These contingency tables are generated
+by <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">infcalcs.EstimateMI.buildRegData</a>.</p><p>- After calculating the mutual information for each contingency table
+(implemented in <a href="tables/ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.tables.ContTable#mutualInformation">infcalcs.tables.ContTable.mutualInformation</a>) the unbiased mutual
+information is estimated by performing a linear regression of the mutual
+information of each subsampled dataset against the inverse sample size;
+the intercept of the linear regression is the unbiased mutual
+information estimate. The regression calculation is performed by
+<a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
+of MI, identical MI calculations are performed on shuffled datasets of
+varying sizes. The function <a href="EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">infcalcs.EstimateMI.optMIMult</a> then selects the MI
+estimate that maximizes the MI estimate for real data while keeping the
+the MI estimate for randomized data below the cutoff specified in the
+configuration.</p><p>- <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">infcalcs.EstimateCC.estimateCC</a> then reports the channel capacity estimate
+as the maximum mutual information estimate obtained for all of the input
+weightings tested.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -107,7 +108,6 @@ information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level mai
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -134,10 +134,29 @@ information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level mai
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@CLOptsextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Parser for command line options, inherited by <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a>
+</p>
+    </li><li name="infcalcs.CalcConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CalcConfigextendsAnyRef"></a>
+      <a id="CalcConfig:CalcConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="CalcConfig.html"><span class="name">CalcConfig</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@CalcConfigextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Class passed to numerous functions and methods that contains configuration
+information for channel capacity estimation
 </p>
     </li><li name="infcalcs.Config" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConfigextendsProductwithSerializable"></a>
@@ -152,47 +171,13 @@ information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level mai
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@ConfigextendsProductwithSerializable" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Case class whose fields comprise the required and optional
 command line options for channel capacity calculation.</p><div class="fullcomment"><div class="comment cmt"><p>Case class whose fields comprise the required and optional
 command line options for channel capacity calculation.</p><p>For more details see the usage text with the flag &quot;--help&quot;
 </p></div></div>
-    </li><li name="infcalcs.ConstructedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ConstructedTableextendsContTable"></a>
-      <a id="ConstructedTable:ConstructedTable"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="ConstructedTable.html"><span class="name">ConstructedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.ContTable">ContTable</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@ConstructedTableextendsContTable" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Class for building a contingency table from scratch.</p>
-    </li><li name="infcalcs.ContTable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ContTableextendsAnyRef"></a>
-      <a id="ContTable:ContTable"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ContTable.html"><span class="name">ContTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@ContTableextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A mixin for implementing contingency tables.</p>
     </li><li name="infcalcs.DRData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DRDataextendsAnyRef"></a>
       <a id="DRData:DRData"></a>
@@ -206,51 +191,54 @@ command line options for channel capacity calculation.</p><p>For more details se
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@DRDataextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Structure for input-output (dose-response) data.</p><div class="fullcomment"><div class="comment cmt"><p>Structure for input-output (dose-response) data.</p><p> Both the signal and response points are entered into Vectors whose
- elements are themselves Vectors of length N, where N is the number
- of distinct signal or response types of the system (i.e. given a
- channel which simultaneously takes signal A and signal B, the input
- Vector would have elements of length 2.)
+      <p class="shortcomment cmt">Structure for input-output (dose-response) data.</p><div class="fullcomment"><div class="comment cmt"><p>Structure for input-output (dose-response) data.</p><p>Both the signal and response points are entered into Vectors whose
+elements are themselves Vectors of length N, where N is the number
+of distinct signal or response types of the system (i.e. given a
+channel which simultaneously takes signal A and signal B, the input
+Vector would have elements of length 2.)
 </p></div></div>
-    </li><li name="infcalcs.EstTuple" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="EstTuple=(infcalcs.package.Pair[infcalcs.package.NTuple[Int]],List[infcalcs.package.Pair[Double]],Option[infcalcs.package.Weight])"></a>
+    </li><li name="infcalcs.EstTuple" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="EstTupleextendsProductwithSerializable"></a>
       <a id="EstTuple:EstTuple"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">EstTuple</span><span class="result"> = (<a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]], <span class="extype" name="scala.List">List</span>[<a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]], <span class="extype" name="scala.Option">Option</span>[<a href="#Weight=(List[Double],String)" class="extmbr" name="infcalcs.Weight">Weight</a>])</span>
+        <a href="EstTuple.html"><span class="name">EstTuple</span></a><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a></span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@EstTuple=(infcalcs.package.Pair[infcalcs.package.NTuple[Int]],List[infcalcs.package.Pair[Double]],Option[infcalcs.package.Weight])" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.package@EstTupleextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Data containing a pair of bin numbers, a corresponding list of (mean, 95conf)
-estimates and an optional weight
-</p>
-    </li><li name="infcalcs.ImportedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ImportedTableextendsContTable"></a>
-      <a id="ImportedTable:ImportedTable"></a>
+      <p class="shortcomment cmt">Case class that contains all mutual information estimates for a
+particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains all mutual information estimates for a
+particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
+</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd></dl></div>
+    </li><li name="infcalcs.Estimates" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EstimatesextendsProductwithSerializable"></a>
+      <a id="Estimates:Estimates"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ImportedTable.html"><span class="name">ImportedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.ContTable">ContTable</a></span>
+        <a href="Estimates.html"><span class="name">Estimates</span></a><span class="params">(<span name="dataEstimate">dataEstimate: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@ImportedTableextendsContTable" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.package@EstimatesextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Class for reading contingency tables from a file.</p>
+      <p class="shortcomment cmt">Case class denoting the actual mutual information estimate from the randomized estimates
+</p>
     </li><li name="infcalcs.NTuple" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NTuple[T]=Vector[T]"></a>
       <a id="NTuple[T]:NTuple[T]"></a>
@@ -264,7 +252,7 @@ estimates and an optional weight
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@NTuple[T]=Vector[T]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">An n-tuple (for clarity)</p>
@@ -281,69 +269,51 @@ estimates and an optional weight
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@Pair[T]=(T,T)" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">A two-tuple.</p>
     </li><li name="infcalcs.Parameters" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Parameters=(Map[String,List[Double]],Map[String,Double],Map[String,String],Map[String,Option[Vector[infcalcs.package.NTuple[Double]]]])"></a>
+      <a id="ParametersextendsProductwithSerializable"></a>
       <a id="Parameters:Parameters"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Parameters</span><span class="result"> = (<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]], <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>], <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]])</span>
+        <a href="Parameters.html"><span class="name">Parameters</span></a><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@Parameters=(Map[String,List[Double]],Map[String,Double],Map[String,String],Map[String,Option[Vector[infcalcs.package.NTuple[Double]]]])" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.package@ParametersextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Tuple containing configuration parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Tuple containing configuration parameters.</p><p>The first entry contains parameters that have list values; the second
-entry, parameters that have numerical values; the third entry, parameters
-that have string values.
-</p></div></div>
+      <p class="shortcomment cmt">Case class holding the calculation parameters as denoted by the <a href="InfConfig$.html" class="extype" name="infcalcs.InfConfig">InfConfig</a>
+object and optional paramter file.</p><div class="fullcomment"><div class="comment cmt"><p>Case class holding the calculation parameters as denoted by the <a href="InfConfig$.html" class="extype" name="infcalcs.InfConfig">InfConfig</a>
+object and optional paramter file.
+</p></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl></div>
     </li><li name="infcalcs.RegData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RegData=(Vector[Double],Vector[infcalcs.ConstructedTable],Vector[infcalcs.ConstructedTable],Vector[String])"></a>
+      <a id="RegDataextendsProductwithSerializable"></a>
       <a id="RegData:RegData"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">RegData</span><span class="result"> = (<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.Vector">Vector</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.Vector">Vector</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>])</span>
+        <a href="RegData.html"><span class="name">RegData</span></a><span class="params">(<span name="iss">iss: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="subContTables">subContTables: <span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]</span>, <span name="randContTableVect">randContTableVect: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]]</span>, <span name="labels">labels: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@RegData=(Vector[Double],Vector[infcalcs.ConstructedTable],Vector[infcalcs.ConstructedTable],Vector[String])" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.package@RegDataextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Data to be used for linear regression for a single randomization.</p><div class="fullcomment"><div class="comment cmt"><p>Data to be used for linear regression for a single randomization.</p><p>Entries in the tuple:</p><ul><li>inverse sample sizes</li><li>list of subsampled contingency tables</li><li>list of randomized contingency tables (a single randomization for each
-   subsample size)</li><li>a list of string labels for output and logging purposes, one for each
-   subsample size.
-</li></ul></div></div>
-    </li><li name="infcalcs.RegDataMult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="RegDataMult=(Vector[Double],Vector[infcalcs.ConstructedTable],Vector[Vector[infcalcs.ConstructedTable]],Vector[String])"></a>
-      <a id="RegDataMult:RegDataMult"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">type</span>
-      </span>
-      <span class="symbol">
-        <span class="name">RegDataMult</span><span class="result"> = (<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.Vector">Vector</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>], <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="ConstructedTable.html" class="extype" name="infcalcs.ConstructedTable">ConstructedTable</a>]], <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>])</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@RegDataMult=(Vector[Double],Vector[infcalcs.ConstructedTable],Vector[Vector[infcalcs.ConstructedTable]],Vector[String])" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Data to be used for linear regressions over all randomizations.</p><div class="fullcomment"><div class="comment cmt"><p>Data to be used for linear regressions over all randomizations.</p><p>Tuple containing entries as for <a href="#RegData=(Vector[Double],Vector[infcalcs.ConstructedTable],Vector[infcalcs.ConstructedTable],Vector[String])" class="extmbr" name="infcalcs.RegData">RegData</a>, but the third entry contains
-a list over all of the randomizations.
-</p></div></div>
+      <p class="shortcomment cmt">Case class holding all the necessary <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> data for performing the linear
+regression estimates with an arbitrary numbers of randomizations
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class holding all the necessary <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> data for performing the linear
+regression estimates with an arbitrary numbers of randomizations
+</p></div><dl class="paramcmts block"><dt class="param">iss</dt><dd class="cmt"><p>list of inverse sample sizes</p></dd><dt class="param">subContTables</dt><dd class="cmt"><p>subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vector</p></dd><dt class="param">randContTableVect</dt><dd class="cmt"><p>vector of randomized subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vectors</p></dd></dl></div>
     </li><li name="infcalcs.SLR" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SLRextendsAnyRef"></a>
       <a id="SLR:SLR"></a>
@@ -357,7 +327,7 @@ a list over all of the randomizations.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@SLRextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Implementation of simple least-squares (linear) regression.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation of simple least-squares (linear) regression.</p><p>Takes x and y values as input data and calculates the least-squares
@@ -365,25 +335,26 @@ regression line, along with estimates of the standard error and 95%
 confidence interval of both the slope and the intercept.
 </p></div></div>
     </li><li name="infcalcs.Weight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Weight=(List[Double],String)"></a>
+      <a id="WeightextendsProductwithSerializable"></a>
       <a id="Weight:Weight"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Weight</span><span class="result"> = (<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>], <span class="extype" name="scala.Predef.String">String</span>)</span>
+        <a href="Weight.html"><span class="name">Weight</span></a><span class="params">(<span name="weights">weights: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@Weight=(List[Double],String)" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.package@WeightextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Weight vector.</p><div class="fullcomment"><div class="comment cmt"><p>Weight vector. The first entry is a list of weights across all of the
-input bins. The second entry is a string that describes the type of
-weighting.
-</p></div></div>
+      <p class="shortcomment cmt">Case class that contains weights for modifying the signal distribution
+for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> data set
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains weights for modifying the signal distribution
+for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> data set
+</p></div><dl class="paramcmts block"><dt class="param">weights</dt><dd class="cmt"><p>list of weights for each input bin</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -391,24 +362,7 @@ weighting.
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="infcalcs.Actors" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Actors"></a>
-      <a id="Actors:Actors"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="Actors$.html"><span class="name">Actors</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@Actors" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.CTBuild" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="infcalcs.CTBuild" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CTBuild"></a>
       <a id="CTBuild:CTBuild"></a>
       <h4 class="signature">
@@ -421,10 +375,27 @@ weighting.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@CTBuild" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Contains methods for building contingency tables from data.</p>
+    </li><li name="infcalcs.CalcConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CalcConfig"></a>
+      <a id="CalcConfig:CalcConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="CalcConfig$.html"><span class="name">CalcConfig</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@CalcConfig" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Companion object for <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></p>
     </li><li name="infcalcs.EstCC" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstCC"></a>
       <a id="EstCC:EstCC"></a>
@@ -438,12 +409,16 @@ weighting.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@EstCC" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Top-level main function for channel capacity calculation.</p><div class="fullcomment"><div class="comment cmt"><p>Top-level main function for channel capacity calculation.</p><ul><li>Collects command-line arguments;</li><li>Loads the data;</li><li>Sets configuration parameters;</li><li>Generates unimodal and bimodal weights;</li><li>Calculates channel capacity for each weighting scheme.
-</li></ul></div></div>
-    </li><li name="infcalcs.EstimateCC" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Top-level main function for channel capacity calculation.</p><div class="fullcomment"><div class="comment cmt"><p>Top-level main function for channel capacity calculation.</p><p>- Collects command-line arguments;
+- Loads the data;
+- Sets configuration parameters;
+- Generates unimodal and bimodal weights;
+- Calculates channel capacity for each weighting scheme.
+</p></div></div>
+    </li><li name="infcalcs.EstimateCC" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstimateCC"></a>
       <a id="EstimateCC:EstimateCC"></a>
       <h4 class="signature">
@@ -456,10 +431,16 @@ weighting.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@EstimateCC" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Contains functions for estimating the channel capacity.</p>
+      <p class="shortcomment cmt">Contains functions for generating signal weights and estimating the channel capacity.</p><div class="fullcomment"><div class="comment cmt"><p>Contains functions for generating signal weights and estimating the channel capacity.</p><p>Most importantly are the <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">EstimateCC.estimateCC</a> and <a href="EstimateCC$.html#estimateCCVerbose(p:infcalcs.DRData,fp:Option[String],index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCCVerbose">EstimateCC.estimateCCVerbose</a>
+functions which are used in the <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a> main object to estimate the channel capacity.</p><p>The weighting functions <a href="EstimateCC$.html#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and <a href="EstimateCC$.html#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a> generate
+weights for unimodal and bimodal Gaussian-based probability density functions and
+<a href="EstimateCC$.html#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">EstimateCC.pwWeight</a> produces discrete piecewise probability mass functions by
+iteratively selecting signal values to omit from the mutual information estimation.
+These values are then aggregated into a list of <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> by the
+<a href="EstimateCC$.html#genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#genWeights">EstimateCC.genWeights</a> function used for channel capacity estimation.</p></div></div>
     </li><li name="infcalcs.EstimateMI" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstimateMI"></a>
       <a id="EstimateMI:EstimateMI"></a>
@@ -473,17 +454,21 @@ weighting.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@EstimateMI" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Contains methods for estimating mutual information.</p><div class="fullcomment"><div class="comment cmt"><p>Contains methods for estimating mutual information.</p><p>The principal methods used by top-level calling functions are:</p><ul><li><a href="EstimateMI$.html#genEstimatesMult(pl:infcalcs.DRData,binTupList:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]],seed:Int,wts:Option[infcalcs.Weight]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a>, which takes a dataset and a set of bin sizes and
-   returns mutual information estimates for each bin size, and</li><li><a href="EstimateMI$.html#optMIMult(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">optMIMult</a>, which takes the mutual information estimates produced by
-   <a href="EstimateMI$.html#genEstimatesMult(pl:infcalcs.DRData,binTupList:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]],seed:Int,wts:Option[infcalcs.Weight]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a> and finds the bin size and mutual information that
-   maximizes the mutual information for the real but not the randomized
-   datasets.</li></ul><p>Other important methods include:</p><ul><li><a href="EstimateMI$.html#buildRegData(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegDataMult" class="extmbr" name="infcalcs.EstimateMI#buildRegData">buildRegData</a>, which builds resampled and randomized contingency
-   tables</li><li><a href="EstimateMI$.html#calcMultRegs(r:infcalcs.RegDataMult):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">calcMultRegs</a>, which estimates the mutual information by linear
-   regression.
-</li></ul></div></div>
+      <p class="shortcomment cmt">Contains methods for estimating mutual information.</p><div class="fullcomment"><div class="comment cmt"><p>Contains methods for estimating mutual information.</p><p>The principal methods used by top-level calling functions are:
+- <a href="EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">EstimateMI.genEstimatesMult</a>, which takes a dataset and returns mutual information
+estimates for each attempted bin size, and
+- <a href="EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">EstimateMI.optMIMult</a>, which takes the mutual information estimates produced by
+<a href="EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">EstimateMI.genEstimatesMult</a> and finds the bin size and mutual information that
+maximizes the mutual information for the real but not the randomized
+datasets.</p><p>Other important methods include:
+- <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
+tables
+- <a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
+regression.
+</p></div></div>
     </li><li name="infcalcs.IOFile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IOFile"></a>
       <a id="IOFile:IOFile"></a>
@@ -497,12 +482,12 @@ weighting.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@IOFile" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">This object contains methods for writing and reading various types of
 data to and from files.</p>
-    </li><li name="infcalcs.InfConfig" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="infcalcs.InfConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="InfConfig"></a>
       <a id="InfConfig:InfConfig"></a>
       <h4 class="signature">
@@ -515,29 +500,10 @@ data to and from files.</p>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@InfConfig" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Defines default values for the channel capacity calculation parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Defines default values for the channel capacity calculation parameters.</p><p>For more detailed descriptions of these parameters, see the README file.
-</p></div></div>
-    </li><li name="infcalcs.LowProb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="LowProb"></a>
-      <a id="LowProb:LowProb"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="LowProb$.html"><span class="name">LowProb</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@LowProb" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Deals with instances where weights fail to adequately cover the relevant
-signal space.</p>
+      <p class="shortcomment cmt">Defines default values for the channel capacity calculation parameters.</p>
     </li><li name="infcalcs.MathFuncs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MathFuncs"></a>
       <a id="MathFuncs:MathFuncs"></a>
@@ -551,7 +517,7 @@ signal space.</p>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@MathFuncs" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Contains a handful of useful mathematical functions.</p>
@@ -568,7 +534,7 @@ signal space.</p>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@OtherFuncs" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Contains a handful of utility functions.</p>
@@ -585,18 +551,69 @@ signal space.</p>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@TreeDef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Implementation of binary trees containing Double values at each node.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation of binary trees containing Double values at each node.</p><p>The trait <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> defines the methods and properties of each node in the
-tree: regular nodes are implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a>, while empty
+      <p class="shortcomment cmt">Implementation of binary trees containing Double values at each node.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation of binary trees containing Double values at each node.</p><p>The trait <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> defines the methods and properties of each node in the
+tree: regular nodes are implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a>, while empty
 nodes (indicating that their parent is a terminal node) are implemented by
-the singleton object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">EmptyTree</a>.</p><p>A binary tree for a set of numbers (Doubles) is constructed by first
-obtaining an ordered (but unconnected) list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a> instances using the
-function <a href="TreeDef$.html#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">buildOrderedNodeList</a>. The ordered list of Nodes returned by
-this function can then be passed to the function <a href="TreeDef$.html#buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" class="extmbr" name="infcalcs.TreeDef#buildTree">buildTree</a> to return an
-instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> containing the binary tree.
+the singleton object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">TreeDef.EmptyTree</a>.</p><p>A binary tree for a set of numbers (Doubles) is constructed by first
+obtaining an ordered (but unconnected) list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a> instances using the
+function <a href="TreeDef$.html#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">TreeDef.buildOrderedNodeList</a>. The ordered list of Nodes returned by
+this function can then be passed to the function <a href="TreeDef$.html#buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" class="extmbr" name="infcalcs.TreeDef#buildTree">TreeDef.buildTree</a> to return an
+instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> containing the binary tree.
 </p></div></div>
+    </li><li name="infcalcs.actors" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="actors"></a>
+      <a id="actors:actors"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="actors/package.html"><span class="name">actors</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@actors" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.exceptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exceptions"></a>
+      <a id="exceptions:exceptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exceptions/package.html"><span class="name">exceptions</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@exceptions" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.tables" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tables"></a>
+      <a id="tables:tables"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="tables/package.html"><span class="name">tables</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@tables" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 

@@ -28,11 +28,13 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/class_big.png" />
+        <img alt="Class" src="../lib/class_big.png" />
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>DRData</h1> <span class="permalink">
+        <h1>DRData</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
+          </div></span></h3><span class="permalink">
       <a href="../index.html#infcalcs.DRData" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -47,11 +49,11 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Structure for input-output (dose-response) data.</p><p> Both the signal and response points are entered into Vectors whose
- elements are themselves Vectors of length N, where N is the number
- of distinct signal or response types of the system (i.e. given a
- channel which simultaneously takes signal A and signal B, the input
- Vector would have elements of length 2.)
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Structure for input-output (dose-response) data.</p><p>Both the signal and response points are entered into Vectors whose
+elements are themselves Vectors of length N, where N is the number
+of distinct signal or response types of the system (i.e. given a
+channel which simultaneously takes signal A and signal B, the input
+Vector would have elements of length 2.)
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -80,7 +82,6 @@
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -93,7 +94,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.DRData#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(sig:Vector[infcalcs.NTuple[Double]],resp:Vector[infcalcs.NTuple[Double]]):infcalcs.DRData"></a>
+      <a id="&lt;init&gt;(calcConfig:infcalcs.CalcConfig)(sig:Vector[infcalcs.NTuple[Double]],resp:Vector[infcalcs.NTuple[Double]]):infcalcs.DRData"></a>
       <a id="&lt;init&gt;:DRData"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -101,15 +102,14 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">DRData</span><span class="params">(<span name="sig">sig: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="resp">resp: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span>
+        <span class="name">DRData</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="sig">sig: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="resp">resp: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.DRData@&lt;init&gt;(sig:Vector[infcalcs.NTuple[Double]],resp:Vector[infcalcs.NTuple[Double]]):infcalcs.DRData" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+      <a href="../index.html#infcalcs.DRData@&lt;init&gt;(calcConfig:infcalcs.CalcConfig)(sig:Vector[infcalcs.NTuple[Double]],resp:Vector[infcalcs.NTuple[Double]]):infcalcs.DRData" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">sig</dt><dd class="cmt"><p>2D vector of signal values</p></dd><dt class="param">resp</dt><dd class="cmt"><p>2D vector of response values
-</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">sig</dt><dd class="cmt"><p>2D vector of signal values</p></dd><dt class="param">resp</dt><dd class="cmt"><p>2D vector of response values</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -132,7 +132,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -149,7 +149,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@##():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -166,7 +166,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -183,7 +183,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -200,7 +200,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@clone():Object" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -223,7 +223,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -240,7 +240,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -257,7 +257,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@exRespDelims:scala.collection.mutable.HashMap[infcalcs.NTuple[Int],infcalcs.NTuple[infcalcs.TreeDef.Tree]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -274,7 +274,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@exRespKeys:scala.collection.mutable.HashMap[infcalcs.NTuple[Int],Map[infcalcs.NTuple[Int],Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -291,7 +291,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@exSigDelims:scala.collection.mutable.HashMap[infcalcs.NTuple[Int],infcalcs.NTuple[infcalcs.TreeDef.Tree]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -308,7 +308,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@exSigKeys:scala.collection.mutable.HashMap[infcalcs.NTuple[Int],Map[infcalcs.NTuple[Int],Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -325,7 +325,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@finalize():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -348,7 +348,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -365,7 +365,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@hashCode():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -382,7 +382,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@isEmpty:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -399,7 +399,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -416,7 +416,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -433,7 +433,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@notify():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -450,7 +450,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -467,7 +467,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@numObs:Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -484,11 +484,10 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@resp:Vector[infcalcs.NTuple[Double]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">2D vector of response values
-</p>
+      <p class="shortcomment cmt">2D vector of response values</p>
     </li><li name="infcalcs.DRData#respDelims" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="respDelims(numBins:infcalcs.NTuple[Int]):infcalcs.NTuple[infcalcs.TreeDef.Tree]"></a>
       <a id="respDelims(NTuple[Int]):NTuple[Tree]"></a>
@@ -502,13 +501,12 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@respDelims(numBins:infcalcs.NTuple[Int]):infcalcs.NTuple[infcalcs.TreeDef.Tree]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Delimiters for response space
 </p><div class="fullcomment"><div class="comment cmt"><p>Delimiters for response space
-</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>n-dimensional vector of bin-delimiting <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a>s
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>n-dimensional vector of bin-delimiting <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a>s</p></dd></dl></div>
     </li><li name="infcalcs.DRData#respDim" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="respDim:Int"></a>
       <a id="respDim:Int"></a>
@@ -522,7 +520,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@respDim:Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -539,13 +537,12 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@respKey(numBins:infcalcs.NTuple[Int]):Map[infcalcs.NTuple[Int],Int]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Index key for response space
 </p><div class="fullcomment"><div class="comment cmt"><p>Index key for response space
-</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>mapping of n-dimensional indices to 1-dimensional indices
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>mapping of n-dimensional indices to 1-dimensional indices</p></dd></dl></div>
     </li><li name="infcalcs.DRData#respVals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="respVals:Boolean"></a>
       <a id="respVals:Boolean"></a>
@@ -559,7 +556,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@respVals:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -576,7 +573,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@sig:Vector[infcalcs.NTuple[Double]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">2D vector of signal values</p>
@@ -593,13 +590,12 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@sigDelims(numBins:infcalcs.NTuple[Int]):infcalcs.NTuple[infcalcs.TreeDef.Tree]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Delimiters for signal space
 </p><div class="fullcomment"><div class="comment cmt"><p>Delimiters for signal space
-</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>n-dimensional vector of bin-delimiting <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a>s
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>n-dimensional vector of bin-delimiting <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a>s</p></dd></dl></div>
     </li><li name="infcalcs.DRData#sigDim" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sigDim:Int"></a>
       <a id="sigDim:Int"></a>
@@ -613,7 +609,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@sigDim:Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -630,13 +626,12 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@sigKey(numBins:infcalcs.NTuple[Int]):Map[infcalcs.NTuple[Int],Int]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Index key for signal space
 </p><div class="fullcomment"><div class="comment cmt"><p>Index key for signal space
-</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>mapping of n-dimensional indices to 1-dimensional indices
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">numBins</dt><dd class="cmt"><p>n-dimensional vector of bin numbers</p></dd><dt>returns</dt><dd class="cmt"><p>mapping of n-dimensional indices to 1-dimensional indices</p></dd></dl></div>
     </li><li name="infcalcs.DRData#sigVals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sigVals:Boolean"></a>
       <a id="sigVals:Boolean"></a>
@@ -650,7 +645,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@sigVals:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
@@ -667,7 +662,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -684,13 +679,12 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@toFile(f:String):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Writes data to file
 </p><div class="fullcomment"><div class="comment cmt"><p>Writes data to file
-</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>file name
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>file name</p></dd></dl></div>
     </li><li name="infcalcs.DRData#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -704,7 +698,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@toString():String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Writes data to stdout
@@ -723,7 +717,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@wait():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -746,7 +740,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -769,7 +763,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -792,7 +786,7 @@
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.DRData@zippedVals:Seq[(infcalcs.NTuple[Double],infcalcs.NTuple[Double])]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       

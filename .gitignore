@@ -1,5 +1,6 @@
 .cache
 .worksheet/*
+.idea/*
 project/*
 src/*
 target/*

@@ -28,11 +28,13 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="../lib/object_big.png" />
+        <img alt="Object" src="../lib/object_big.png" />
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>TreeDef</h1> <span class="permalink">
+        <h1>TreeDef</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
+          </div></span></h3><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -47,14 +49,14 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implementation of binary trees containing Double values at each node.</p><p>The trait <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> defines the methods and properties of each node in the
-tree: regular nodes are implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a>, while empty
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implementation of binary trees containing Double values at each node.</p><p>The trait <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> defines the methods and properties of each node in the
+tree: regular nodes are implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a>, while empty
 nodes (indicating that their parent is a terminal node) are implemented by
-the singleton object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">EmptyTree</a>.</p><p>A binary tree for a set of numbers (Doubles) is constructed by first
-obtaining an ordered (but unconnected) list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a> instances using the
-function <a href="#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">buildOrderedNodeList</a>. The ordered list of Nodes returned by
-this function can then be passed to the function <a href="#buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" class="extmbr" name="infcalcs.TreeDef#buildTree">buildTree</a> to return an
-instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> containing the binary tree.
+the singleton object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">TreeDef.EmptyTree</a>.</p><p>A binary tree for a set of numbers (Doubles) is constructed by first
+obtaining an ordered (but unconnected) list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a> instances using the
+function <a href="#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">TreeDef.buildOrderedNodeList</a>. The ordered list of Nodes returned by
+this function can then be passed to the function <a href="#buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" class="extmbr" name="infcalcs.TreeDef#buildTree">TreeDef.buildTree</a> to return an
+instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> containing the binary tree.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -83,7 +85,6 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
               <li class="hideall out"><span>Hide All</span></li>
               <li class="showall in"><span>Show all</span></li>
             </ol>
-            <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#members" target="_blank">Learn more about member selection</a>
           </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
@@ -110,7 +111,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@NodeextendsTreeDef.TreewithProductwithSerializable" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">A node representing the head of a subtree in a binary tree.</p><div class="fullcomment"><div class="comment cmt"><p>A node representing the head of a subtree in a binary tree.</p><p>Each node contains both an index and a value.
@@ -128,7 +129,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@TreeextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Abstract binary tree definitions.</p><div class="fullcomment"><div class="comment cmt"><p>Abstract binary tree definitions.</p><p>Implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a> and the object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">EmptyTree</a>.
@@ -153,7 +154,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -170,7 +171,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@##():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -187,7 +188,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@==(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -204,7 +205,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@EmptyTree" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Singleton object representing a nonexistent child of a terminal node.</p>
@@ -221,7 +222,7 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -238,14 +239,13 @@ instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.T
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Builds a list of ordered but unconnected nodes from a list of Doubles.</p><div class="fullcomment"><div class="comment cmt"><p>Builds a list of ordered but unconnected nodes from a list of Doubles.</p><p>The nodes that are created from the provided list of numbers are sorted
 in order of increasing value; the index property of each Node instance is
 set to its position in the ordered list.
-</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>An (unordered) list of Doubles
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>An (unordered) list of Doubles</p></dd></dl></div>
     </li><li name="infcalcs.TreeDef#buildTree" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree"></a>
       <a id="buildTree(List[Node]):Tree"></a>
@@ -259,13 +259,12 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Recursively constructs a binary tree from an ordered list of nodes.</p><div class="fullcomment"><div class="comment cmt"><p>Recursively constructs a binary tree from an ordered list of nodes.</p><p>Given an ordered list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">Node</a>s, (e.g., created by
 <a href="#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">buildOrderedNodeList</a>, return the binary tree containing the nodes.
-</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>A list of nodes sorted by increasing value.</p></dd><dt>returns</dt><dd class="cmt"><p>An instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> containing the binary tree.
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>A list of nodes sorted by increasing value.</p></dd><dt>returns</dt><dd class="cmt"><p>An instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a> containing the binary tree.</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -279,7 +278,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@clone():Object" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -302,7 +301,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -319,7 +318,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -336,7 +335,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@finalize():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -359,7 +358,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@getClass():Class[_]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -376,7 +375,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@hashCode():Int" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -393,7 +392,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
@@ -410,7 +409,7 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@lOdd[T](l:List[T]):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Determines if a list has odd length.</p>
@@ -427,15 +426,14 @@ set to its position in the ordered list.
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@medSplit[T](l:List[T]):(Int,List[T],List[T])" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Given a list, finds the index of the middle value.</p><div class="fullcomment"><div class="comment cmt"><p>Given a list, finds the index of the middle value.</p><p>For even-length lists with two &quot;middle&quot; values, the left of these (with
 the lower index value) is returned. In addition to the index, also
 returns the left and right sublists, (neither of which includes the
 middle value).
-</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>The list to find the middle value of</p></dd><dt>returns</dt><dd class="cmt"><p>a tuple: (index of middle value, left sublist, right sublist)
-</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">l</dt><dd class="cmt"><p>The list to find the middle value of</p></dd><dt>returns</dt><dd class="cmt"><p>a tuple: (index of middle value, left sublist, right sublist)</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -449,7 +447,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -466,7 +464,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@notify():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -483,7 +481,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@notifyAll():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -500,7 +498,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
@@ -517,7 +515,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@toString():String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
@@ -534,7 +532,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@wait():Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -557,7 +555,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
@@ -580,7 +578,7 @@ middle value).
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.TreeDef$@wait(x$1:Long):Unit" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" />
+        <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>

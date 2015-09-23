@@ -28,11 +28,11 @@
         </head>
         <body class="value">
       <div id="definition">
-        <img src="lib/package_big.png" />
+        <img alt="Package" src="lib/package_big.png" />
         
-        <h1>root package</h1> <span class="permalink">
+        <h1>root package</h1><span class="permalink">
       <a href="index.html#package" title="Permalink" target="_top">
-        <img src="lib/permalink.png" />
+        <img src="lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       </div>
@@ -83,7 +83,7 @@
       </span>
       </h4><span class="permalink">
       <a href="index.html#package@infcalcs" title="Permalink" target="_top">
-        <img src="lib/permalink.png" />
+        <img src="lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Information theory calculations.</p><div class="fullcomment"><div class="comment cmt"><p>Information theory calculations.</p><p>This package implements calculation of information-theoretic quantities, in
@@ -91,34 +91,35 @@ particular estimates of mutual information and channel capacity for
 continuous variables.</p><p>For information on building, testing, and using the code, see the README
 file.</p><p>The steps in the channel capacity calculation are outlined below. For more
 details on the theory underlying the approach taken, see the supplementary
-information for Suderman, Bachman et al. (2014).</p><ul><li>In the top-level main function, <a href="infcalcs/EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a>, command-line arguments are
-   parsed and the data and configuration parameters are loaded.</li><li>Because the channel capacity depends on the input distribution, various
-   input weights are generated to determine which input weightings yield the
-   highest mutual information between input and output. Input weights are
-   generated using the functions <a href="infcalcs/EstimateCC$.html#uniWeight(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and
-   <a href="infcalcs/EstimateCC$.html#biWeight(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a>, which allow weighting of the input distribution
-   according to unimodal and bimodal Gaussian distributions, respectively.</li><li>Mutual information is calculated for each proposed input weighting
-   by the function <a href="infcalcs/EstimateCC$.html#calcWithWeightsMult(weights:List[Option[infcalcs.Weight]],bins:Vector[infcalcs.Pair[infcalcs.NTuple[Int]]],pl:infcalcs.DRData):List[Vector[infcalcs.EstTuple]]" class="extmbr" name="infcalcs.EstimateCC#calcWithWeightsMult">EstimateCC.calcWithWeightsMult</a>.</li><li>For each weighting, the algorithm tries a wide variety of bin
-   numbers/sizes to arrive at an estimate that is not biased by the bin size.
-   The ranges of input and output bins are specified by configuration
-   parameters.</li><li>For each unique combination of input/output bin sizes, the algorithm
-   builds the contingency tables for the raw data as well as for randomly
-   selected subsamples of the data. These contingency tables are generated
-   by <a href="infcalcs/EstimateMI$.html#buildDataMult(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegDataMult" class="extmbr" name="infcalcs.EstimateMI#buildDataMult">EstimateMI.buildDataMult</a>.</li><li>After calculating the mutual information for each contingency table
-   (implemented in <a href="infcalcs/ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.ContTable#mutualInformation">ContTable.mutualInformation</a>) the unbiased mutual
-   information is estimated by performing a linear regression of the mutual
-   information of each subsampled dataset against the inverse sample size;
-   the intercept of the linear regression is the unbiased mutual
-   information estimate. The regression calculation is performed by
-   <a href="infcalcs/EstimateMI$.html#calcMultRegs(r:infcalcs.RegDataMult):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>.</li><li>Because increasing the number of bins can artifactually inflate estimates
-   of MI, identical MI calculations are performed on shuffled datasets of
-   varying sizes. The function <a href="infcalcs/EstimateMI$.html#optMIMult(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">EstimateMI.optMIMult</a> then selects the MI
-   estimate that maximizes the MI estimate for real data while keeping the
-   the MI estimate for randomized data below the cutoff specified in the
-   configuration.</li><li><a href="infcalcs/EstimateCC$.html#getResultsMult(est:Vector[Vector[infcalcs.EstTuple]],filePrefix:Option[String]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateCC#getResultsMult">EstimateCC.getResultsMult</a> then reports the channel capacity estimate
-   as the maximum mutual information estimate obtained for all of the input
-   weightings tested.
-</li></ul></div></div>
+information for Suderman, Bachman et al. (2015).</p><p>- In the top-level main function, <a href="infcalcs/EstCC$.html" class="extype" name="infcalcs.EstCC">infcalcs.EstCC</a>, command-line arguments are
+parsed and the data and configuration parameters are loaded into a <a href="infcalcs/CalcConfig.html" class="extype" name="infcalcs.CalcConfig">infcalcs.CalcConfig</a>
+object.</p><p>- Because the channel capacity depends on the input distribution, various
+input weights are generated to determine which input weightings yield the
+highest mutual information between input and output. Input weights are
+generated using the functions <a href="infcalcs/EstimateCC$.html#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">infcalcs.EstimateCC.uniWeight</a> and
+<a href="infcalcs/EstimateCC$.html#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">infcalcs.EstimateCC.biWeight</a>, which allow weighting of the input distribution
+according to unimodal and bimodal Gaussian distributions, respectively,
+as well as discrete piecewise distributions with uniform probability using
+the <a href="infcalcs/EstimateCC$.html#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">infcalcs.EstimateCC.pwWeight</a>.</p><p>- Mutual information is calculated for each proposed input weighting
+by the function <a href="infcalcs/EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">infcalcs.EstimateMI.genEstimatesMult</a>.</p><p>- For each weighting, the algorithm tries a wide variety of bin
+numbers/sizes to arrive at an estimate that is not biased by the bin size.</p><p>- For each unique combination of input/output bin sizes, the algorithm
+builds the contingency tables for the raw data as well as for randomly
+selected subsamples of the data. These contingency tables are generated
+by <a href="infcalcs/EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">infcalcs.EstimateMI.buildRegData</a>.</p><p>- After calculating the mutual information for each contingency table
+(implemented in <a href="infcalcs/tables/ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.tables.ContTable#mutualInformation">infcalcs.tables.ContTable.mutualInformation</a>) the unbiased mutual
+information is estimated by performing a linear regression of the mutual
+information of each subsampled dataset against the inverse sample size;
+the intercept of the linear regression is the unbiased mutual
+information estimate. The regression calculation is performed by
+<a href="infcalcs/EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
+of MI, identical MI calculations are performed on shuffled datasets of
+varying sizes. The function <a href="infcalcs/EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">infcalcs.EstimateMI.optMIMult</a> then selects the MI
+estimate that maximizes the MI estimate for real data while keeping the
+the MI estimate for randomized data below the cutoff specified in the
+configuration.</p><p>- <a href="infcalcs/EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">infcalcs.EstimateCC.estimateCC</a> then reports the channel capacity estimate
+as the maximum mutual information estimate obtained for all of the input
+weightings tested.
+</p></div></div>
     </li></ol>
             </div>
 

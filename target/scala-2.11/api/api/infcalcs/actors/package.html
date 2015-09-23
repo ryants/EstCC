@@ -1,0 +1,253 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>actors - infcalcs.actors</title>
+          <meta name="description" content="actors - infcalcs.actors" />
+          <meta name="keywords" content="actors infcalcs.actors" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'infcalcs.actors.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="infcalcs">infcalcs</a></p>
+        <h1>actors</h1><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">actors</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="infcalcs.actors.AdaptiveDistributor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AdaptiveDistributorextendsDistributor"></a>
+      <a id="AdaptiveDistributor:AdaptiveDistributor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="AdaptiveDistributor.html"><span class="name">AdaptiveDistributor</span></a><span class="result"> extends <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@AdaptiveDistributorextendsDistributor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Class that manages a set of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> actors using adaptive bin control
+to determine the optimal number of bins for signal space
+</p>
+    </li><li name="infcalcs.actors.Calculator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CalculatorextendsActor"></a>
+      <a id="Calculator:Calculator"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Calculator.html"><span class="name">Calculator</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@CalculatorextendsActor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Actor responsible for executing mutual information estimations</p>
+    </li><li name="infcalcs.actors.Distributor" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DistributorextendsActor"></a>
+      <a id="Distributor:Distributor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Distributor.html"><span class="name">Distributor</span></a><span class="result"> extends <span class="extype" name="akka.actor.Actor">Actor</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@DistributorextendsActor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Abstract class inherited by <a href="FixedDistributor.html" class="extype" name="infcalcs.actors.FixedDistributor">FixedDistributor</a> and <a href="AdaptiveDistributor.html" class="extype" name="infcalcs.actors.AdaptiveDistributor">AdaptiveDistributor</a>
+that holds a number of methods and variables for managing a parallel
+implementation of channel capacity estimation
+</p>
+    </li><li name="infcalcs.actors.Estimate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="EstimateextendsProductwithSerializable"></a>
+      <a id="Estimate:Estimate"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Estimate.html"><span class="name">Estimate</span></a><span class="params">(<span name="wt">wt: <span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="sigBins">sigBins: <a href="../package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="p">p: <a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span></span>, <span name="wIndex">wIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="sIndex">sIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@EstimateextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class for weighted mutual information estimation
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class for weighted mutual information estimation
+</p></div><dl class="paramcmts block"><dt class="param">wt</dt><dd class="cmt"><p><a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a></p></dd><dt class="param">sigBins</dt><dd class="cmt"><p>relevant signal bins</p></dd><dt class="param">p</dt><dd class="cmt"><p><a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></p></dd></dl></div>
+    </li><li name="infcalcs.actors.FixedDistributor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="FixedDistributorextendsDistributor"></a>
+      <a id="FixedDistributor:FixedDistributor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="FixedDistributor.html"><span class="name">FixedDistributor</span></a><span class="result"> extends <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@FixedDistributorextendsDistributor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Class that manages a set of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> actors if signal values
+are defined in the <a href="../Parameters.html" class="extype" name="infcalcs.Parameters">infcalcs.Parameters</a>
+</p>
+    </li><li name="infcalcs.actors.Init" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InitextendsProductwithSerializable"></a>
+      <a id="Init:Init"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Init.html"><span class="name">Init</span></a><span class="params">(<span name="numActors">numActors: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@InitextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class for sending initial list of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> actors to <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a>
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class for sending initial list of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> actors to <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a>
+</p></div><dl class="paramcmts block"><dt class="param">numActors</dt><dd class="cmt"><p>number of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> actors to spawn</p></dd></dl></div>
+    </li><li name="infcalcs.actors.Result" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ResultextendsProductwithSerializable"></a>
+      <a id="Result:Result"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Result.html"><span class="name">Result</span></a><span class="params">(<span name="res">res: <a href="../EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a></span>, <span name="biased">biased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@ResultextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class for sending estimate back to <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a>
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class for sending estimate back to <a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a>
+</p></div><dl class="paramcmts block"><dt class="param">res</dt><dd class="cmt"><p>estimation results (<a href="../EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a>)</p></dd><dt class="param">biased</dt><dd class="cmt"><p>determines if only biased results were produced</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="infcalcs.actors.Calculator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Calculator"></a>
+      <a id="Calculator:Calculator"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Calculator$.html"><span class="name">Calculator</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.actors.package@Calculator" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> companion object</p>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

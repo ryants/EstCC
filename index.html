@@ -33,16 +33,14 @@
 <p>Code to estimate the channel capacity between a set of (signal, response)
 ordered pairs</p>
 
+<p><img src="https://travis-ci.org/ryants/EstCC.svg?branch=master" alt="Build status"></p>
+
 <h3>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>DEPENDENCIES</h3>
 
-<p>Built using scala v2.11.0, sbt v0.13.5, and java v1.7.0_51. In order to build
-an executable JAR file, run <code>sbt one-jar</code> in the project's root directory
-to generate the JAR file.  Additional information on this plugin can be found 
-at <a href="https://github.com/sbt/sbt-onejar">https://github.com/sbt/sbt-onejar</a></p>
-
-<p>This code also contains a number of methods from the <a href="http://acs.lbl.gov/software/colt/">Colt Project</a>.  This 
-dependency is included in the build.sbt file.</p>
+<p>Built using scala v2.11, sbt v0.13.5, and java v1.7.0_51. In order to build
+an executable JAR file, run <code>sbt one-jar</code> in the project's root directory. 
+Additional information on this plugin can be found at <a href="https://github.com/sbt/sbt-onejar">https://github.com/sbt/sbt-onejar</a></p>
 
 <h3>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>USAGE</h3>
@@ -52,10 +50,10 @@ target/scala-2.1x/ and can be copied/renamed to any other directory for use:</p>
 
 <p>i.e. <code>cp target/scala-2.1x/estcc_2.1x-0.1-SNAPSHOT-one-jar.jar /my/working/dir/MyEstCC.jar</code></p>
 
-<p>Given a plaintext file with data organized into whitespace-delimited columns,
-the channel capacity can be estimated using the following command:</p>
+<p>Given some data set, the channel capacity can be estimated using the following
+command:</p>
 
-<p><code>java -jar MyEstCC.jar -d datafile (-p paramfile)</code></p>
+<p><code>java -jar MyEstCC.jar -d datafile -p paramfile</code></p>
 
 <p>where the optional 'paramfile' contains calculation parameters modified from 
 their default values and 'datafile' contains the whitespace-delimited columns
@@ -68,14 +66,13 @@ of data</p>
 <h3>
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONFIGURATION</h3>
 
-<p>Default channel capacity calculation parameters are present in both the 
-<code>src/main/scala/infcalcs/InfConfig.scala</code> file and the example <code>params.txt</code> 
-file, which contains all possible parameters and their associated default 
-values formatted for input to the executable JAR file. As mentioned 
-previously, these values can be changed upon introduction of a parameter 
-file.  The parameter file is formatted with two tab-delimited columns,
-so that the parameter string is in the first column and the parameter value
-in one of 5 possible (parameter-dependent) formats is in the second column:</p>
+<p>All channel capacity calculation parameters are present in the 
+<code>src/main/scala/infcalcs/InfConfig.scala</code> file with default values
+and the sample parameter file.  The file <code>params.txt</code> contains a possible
+parameter configuration for input to the executable JAR file. The parameter 
+file is formatted with two tab-delimited columns, so that the parameter string
+is in the first column and the parameter value in one of 5 possible 
+(parameter-dependent) formats is in the second column.  Any other text is discarded.</p>
 
 <h5>
 <a id="list-parameters" class="anchor" href="#list-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>List parameters:</h5>
@@ -87,8 +84,6 @@ in one of 5 possible (parameter-dependent) formats is in the second column:</p>
 and 4,8 produces: List(4.0, 5.0, 6.0, 7.0, 8.0))</li>
 <li>a sequence of space-delimited numbers (i.e. 0 2 4 6 8 10 produces 
 List(0.0, 2.0, 4.0, 6.0, 8.0, 10.0)).</li>
-<li>"None" to indicate the absence of a list (only applicable for 
-response/signal value or bin parameters</li>
 </ul>
 
 <h5>
@@ -105,25 +100,52 @@ response/signal value or bin parameters</li>
 <li>a string with no whitespace characters</li>
 </ul>
 
-<p><strong>Note that for assigning bin numbers, "Values" take precedence over "Bins."</strong> This
-means that if <code>signalBins</code> is specified and <code>signalValues</code> is <em>not</em> set to <code>None</code> in 
-the parameter file, the calculation will use a single number of bins for the signal
-variable (since <code>signalValues</code> has a default value) instead of the various numbers of 
-bins defined with <code>signalBins</code>. Similarly, if both <code>responseValues</code> and <code>responseBins</code>
-are defined in the parameter file, <code>responseBins</code> will be disregarded in favor of 
-<code>responseValues</code>.</p>
+<h5>
+<a id="signalresponse-sr-parameters" class="anchor" href="#signalresponse-sr-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Signal/Response (SR) parameters:</h5>
+
+<p>Similar to List parameters are SR parameters which employ the same syntax
+and are used to define signal or response values that are known quantities.
+If the either signal or response distribution is multi-dimensional, enter the
+dimension-specific parameter values in the order that they are specified in the
+column List parameters:</p>
+
+<pre><code>signalVals1    0,10,2
+signalVals2    3 4 7
+...
+signalValsN    1,4
+</code></pre>
+
+<p><strong>Note that for assigning bin numbers, the presence of values take precedence over bin spacing</strong> 
+This means that if any <code>signalValsN</code> is specified, the calculation will use <code>signalValues</code> 
+instead of the tuning the number of signal bins defined with <code>sigBinSpacing</code>. The number of 
+parameters must match the number of dimensions specified by the <code>signalColumns</code>
+and <code>responseColumns</code> parameters, otherwise the program will either fail to 
+execute or produce incorrect results.  For example, if there are 4 signal
+columns in your data file, you must either specify <code>signalVals[1-4]</code> or <code>signalBins[1-4]</code></p>
 
 <h3>
 <a id="output" class="anchor" href="#output" aria-hidden="true"><span class="octicon octicon-link"></span></a>OUTPUT</h3>
 
 <p>The output is recorded in a series of files containing the estimated mutual
 information for a particular signal distribution. Each file is identified by 
-an index and the number of signal bins (e.g. <code>out_47_s19.dat</code>) with the 
-exception of the uniform signal distribution (<code>out_unif_s19.dat</code>). Contained
-in each space-delimited file is the number of signal bins, the number of 
+a weight index and a signal bin index, respectively (e.g. <code>out_47_19.dat</code>).
+Contained in each space-delimited file is the number of signal bins, the number of 
 response bins, the estimated mutual information, its 95% confidence interval 
 and the estimated mutual information and confidence interval for a series of 
 randomizations of the data set.</p>
+
+<p>An information file (<code>out_info.dat</code>) will also be generated, listing the 
+estimations for a range of values from the parameters producing the estimated
+channel capacity.  These include:</p>
+
+<ul>
+<li>Marginal entropy of the signal ("signalEntropy")</li>
+<li>Marginal entropy of the response ("responseEntropy")</li>
+<li>Conditional entropy of the signal given the response ("condSignalEntropy")</li>
+<li>Conditional entropy of the response given the signal ("condResponseEntropy")</li>
+<li>Mutual information ("mutualInformation")</li>
+<li>The ratio of mutual information to marginal entropy of the signal ("transferEfficiency")</li>
+</ul>
       </section>
     </div>
     <footer>

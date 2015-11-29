@@ -30,7 +30,9 @@ object InfConfig {
   val stringParams: Map[String, String] =
     Map("directory" -> "./",
       "filePrefix" -> "out",
-      "logSpace" -> "false")
+      "logSpace" -> "false",
+      "outputRegData" -> "false"
+    )
 
   /** (Optional) Parameters denoting specific signal or response values */
   val srParams: Map[String, Option[Vector[NTuple[Double]]]] =

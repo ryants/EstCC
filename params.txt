@@ -20,5 +20,6 @@ pwUnifWeights 1
 directory	./
 filePrefix	out
 logSpace	false
+outputRegData   false
 
 signalVals1	0,18,1 #signalVals[1-9]* and responseVals[1-9]* can also be specified

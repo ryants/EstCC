@@ -522,7 +522,8 @@ object EstimateMI {
       (r: RegData): (SLR, List[Option[SLR]]) = {
     // Regression on original data
     val regLine = new SLR(r.iss, r.subContTables map (_.mutualInformation), r.labels.last)
-    IOFile.regDataToFile(regLine,s"regData_${regLine.label}.dat")
+    if (calcConfig.outputRegData)
+      IOFile.regDataToFile(regLine,s"regData_${regLine.label}.dat")
     // Regression on randomized data
     val regLinesRand = calcRandRegs(r)
     (regLine, regLinesRand)

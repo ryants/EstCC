@@ -71,8 +71,6 @@ class CalcConfig(val parameters: Parameters, val rEngine: MersenneTwister) {
   /** Produces new CalcConfig with fresh Mersenne Twister instance (for actors)*/
   def resetMtEngine() = CalcConfig(parameters, new MersenneTwister(new Date))
 
-  // These parameters are set as variables not values (val not val) so that
-  // they can be set during test execution
   lazy val listParameters = parameters.listParams
   lazy val numParameters = parameters.numParams
   lazy val stringParameters = parameters.stringParams
@@ -125,5 +123,7 @@ class CalcConfig(val parameters: Parameters, val rEngine: MersenneTwister) {
   } :+ 1.0).toVector
 
   lazy val outF = if (stringParameters("filePrefix").trim.isEmpty) None else Some(stringParameters("filePrefix"))
+
+  lazy val outputRegData = stringParameters("outputRegData").toBoolean
 
 }

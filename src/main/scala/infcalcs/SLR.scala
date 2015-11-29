@@ -45,6 +45,13 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
   lazy val i95Conf = iError * studentTInverse(0.05, xList.length - 2)
   /** The 95% confidence interval of the slope estimate. */
   lazy val s95Conf = sError * studentTInverse(0.05, xList.length - 2)
+  /** The coefficient of determination (R^2) */
+  lazy val rSquared = {
+    val mean = sy / yList.length
+    val ssTot = (yList map (x => math.pow((x - mean),2))).sum
+    val ssRes = (yList.indices map (x => math.pow((yList(x) - regLine(xList(x))),2))).sum
+    1-(ssRes/ssTot)
+  }
 
   /** Alternative constructor: takes x and y data but applies an empty label. */
   def this(xList: Seq[Double], yList: Seq[Double]) = this(xList, yList, "")
@@ -53,15 +60,18 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
    * Writes the regression data to a file.
    *
    * Each datapoint is written to the file on its own line, with the x
-   * and y values separated by a space.
+   * and y values separated by a space. The third column contains the
+   * fitted values
    *
    * @param f The name of the file to write.
    */
-  def toFile(f: String) = {
+  def toFile(f: String, header: String = "") = {
     val writer =
       new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
+    writer write header
+    writer.newLine()
     for (i <- (0 until xList.length).toList) {
-      writer.write(s"${xList(i)} ${yList(i)}")
+      writer write s"${xList(i)} ${yList(i)} ${regLine(xList(i))}"
       writer.newLine()
     }
     writer.flush()

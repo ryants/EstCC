@@ -97,7 +97,7 @@ object IOFile {
   }
 
   /**
-   * Writes mutual information regression data to a file.
+   * Writes mutual information regression data to a file, with randomization data.
    *
    * Can be useful for debugging. The tuple d given as an argument contains
    * three entries:
@@ -116,6 +116,23 @@ object IOFile {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {
       writer.write(s"${d._1(i)} ${d._2(i)} ${d._3(i)}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+
+  /**
+   * Writes mutual information regression data to a file.  Similar to above, but uses an
+   * instance of the [[SLR]] class to extract the data
+   *
+   * @param d
+   * @param f
+   */
+  def regDataToFile(d: SLR, f: String) = {
+    val writer = new BufferedWriter(new FileWriter(new File(f)))
+    for (i <- (0 until d.xList.length).toList) {
+      writer.write(s"${d.xList(i)} ${d.yList(i)}")
       writer.newLine()
     }
     writer.flush()

@@ -463,17 +463,20 @@ object EstimateMI {
       case Some(Weight(wtList, tag)) => tag
     }
 
+    val rBinPair = binPair._1 mkString ","
+    val cBinPair = binPair._2 mkString ","
+
     val tags = for {
-      f <- (0 until calcConfig.fracList.length).toVector
+      f <- calcConfig.fracList.indices.toVector
       if (calcConfig.fracList(f) < 1.0)
-    } yield s"${l}_r${binPair._1}_c${binPair._2}_${
+    } yield s"${l}_r${rBinPair}_c${cBinPair}_${
         MathFuncs.roundFrac(calcConfig.fracList(f))
       }_${
         f % calcConfig.numParameters("repsPerFraction").toInt
       }"
 
     RegData(invFracs, subSamples, randSubSamples.transpose, tags :+
-        s"${l}_r${binPair._1}_c${binPair._2}")
+        s"${l}_r${rBinPair}_c${cBinPair}")
   }
 
   /**
@@ -519,6 +522,7 @@ object EstimateMI {
       (r: RegData): (SLR, List[Option[SLR]]) = {
     // Regression on original data
     val regLine = new SLR(r.iss, r.subContTables map (_.mutualInformation), r.labels.last)
+    IOFile.regDataToFile(regLine,s"regData_${regLine.label}.dat")
     // Regression on randomized data
     val regLinesRand = calcRandRegs(r)
     (regLine, regLinesRand)
@@ -884,7 +888,7 @@ object EstimateCC {
         i <- uSigFracList
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
 
-      def genWeightString(p: Pair[Double]): String = "G(%1.2f, %1.2f)" format(
+      def genWeightString(p: Pair[Double]): String = "G(%1.2f,%1.2f)" format(
           p._1, p._2)
 
       // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
@@ -952,9 +956,9 @@ object EstimateCC {
 
       // Constructs a string label for each weight
       def genWeightLabel(t: (Pair[Double], Pair[Double], Pair[Double])) = {
-        val gauss1 = "G1(%1.2f, %1.2f)" format(t._1._1, t._2._1)
-        val gauss2 = "G2(%1.2f, %1.2f)" format(t._1._2, t._2._2)
-        s"${t._3._1} * ${gauss1}, ${t._3._2} * ${gauss2}"
+        val gauss1 = "G1(%1.2f,%1.2f)" format(t._1._1, t._2._1)
+        val gauss2 = "G2(%1.2f,%1.2f)" format(t._1._2, t._2._2)
+        s"${t._3._1}*${gauss1},${t._3._2}*${gauss2}"
       }
 
       // Calculates and tests weights. Takes a tuple containing parameters for a

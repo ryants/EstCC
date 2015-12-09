@@ -18,22 +18,22 @@ case class Config(
  */
 trait CLOpts {
   val parser = new scopt.OptionParser[Config]("EstCC.jar") {
-    head("EstCC", "1.0")
+    head("EstCC","with adaptive bin control")
     opt[Unit]('v', "verbose") action { (_, c) =>
       c.copy(verbose = true)
-    } text ("periodically print calculation status to stdout")
-    opt[String]('d', "data") required() valueName ("<file>") action {
+    } text "periodically print calculation status to stdout"
+    opt[String]('d', "data") required() valueName "<file>" action {
       (x, c) => c.copy(dataFile = x)
-    } text ("input data for calculation")
-    opt[String]('p', "parameters") valueName ("<file>") action {
+    } text "input data for calculation"
+    opt[String]('p', "parameters") valueName "<file>" action {
       (x, c) => c.copy(paramFile = x)
-    } text ("modify default parameters with optional file")
+    } text "modify default parameters with optional file"
     opt[Int]('s', "seed") action {
       (x, c) => c.copy(seed = x)
-    } text ("seed for random number generator")
+    } text "seed for random number generator"
     opt[Int]('c', "cores") action {
       (x, c) => c.copy(cores = x)
-    } text ("specify positive integer for available number of CPU cores")
-    help("help") text ("prints this usage text")
+    } text "specify positive integer for available number of CPU cores"
+    help("help") text "prints this usage text"
   }
 }

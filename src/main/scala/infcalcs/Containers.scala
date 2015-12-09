@@ -44,14 +44,17 @@ case class EstTuple(
     weight: Option[Weight])
 
 /**
- * Case class denoting the actual mutual information estimate from the randomized estimates
+ * Case class with the actual and randomized mutual information estimates.
+ * Also includes the coefficient of determination for the actual linear fit
  *
  * @param dataEstimate
  * @param randDataEstimate
+ * @param coeffOfDetermination
  */
 case class Estimates(
     dataEstimate: Pair[Double],
-    randDataEstimate: List[Pair[Double]])
+    randDataEstimate: List[Pair[Double]],
+    coeffOfDetermination: Double)
 
 /**
  * Case class holding the calculation parameters as denoted by the [[InfConfig]]

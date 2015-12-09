@@ -123,23 +123,6 @@ object IOFile {
   }
 
   /**
-   * Writes mutual information regression data to a file.  Similar to above, but uses an
-   * instance of the [[SLR]] class to extract the data
-   *
-   * @param d
-   * @param f
-   */
-  def regDataToFile(d: SLR, f: String) = {
-    val writer = new BufferedWriter(new FileWriter(new File(f)))
-    for (i <- (0 until d.xList.length).toList) {
-      writer.write(s"${d.xList(i)} ${d.yList(i)}")
-      writer.newLine()
-    }
-    writer.flush()
-    writer.close()
-  }
-
-  /**
    * Writes list of mutual information estimates to file.
    *
    * It takes the mutual information data as a list of tuples; each tuple
@@ -157,7 +140,7 @@ object IOFile {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     val rands = (0 until numRandTables).toList map
         (x => ("\tMIRand " + x + "\tSDRand " + x))
-    writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString)
+    writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString + "\tCoD")
     writer.newLine()
     val wtString = d.head.weight match {
       case None => "None"
@@ -169,7 +152,7 @@ object IOFile {
     val lines =
       for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +
           s"${x.estimates.dataEstimate._1} ${x.estimates.dataEstimate._2} " + (x.estimates.randDataEstimate map (
-          y => s"${y._1} ${y._2}")).mkString(" ")
+          y => s"${y._1} ${y._2}")).mkString(" ") + s" ${x.estimates.coeffOfDetermination}"
     for (l <- lines) {
       writer.write(l)
       writer.newLine()

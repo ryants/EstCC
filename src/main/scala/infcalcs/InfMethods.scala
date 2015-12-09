@@ -523,7 +523,7 @@ object EstimateMI {
     // Regression on original data
     val regLine = new SLR(r.iss, r.subContTables map (_.mutualInformation), r.labels.last)
     if (calcConfig.outputRegData)
-      IOFile.regDataToFile(regLine,s"regData_${regLine.label}.dat")
+      regLine.toFile(s"regData_${regLine.label}.dat")
     // Regression on randomized data
     val regLinesRand = calcRandRegs(r)
     (regLine, regLinesRand)
@@ -547,7 +547,7 @@ object EstimateMI {
         case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.i95Conf))
         case None => getStats(ls.tail, acc)
       }
-    Estimates((regs._1.intercept, regs._1.i95Conf), getStats(regs._2, List()))
+    Estimates((regs._1.intercept, regs._1.i95Conf), getStats(regs._2, List()), regs._1.rSquared)
   }
 
   /**
@@ -724,7 +724,7 @@ object EstimateMI {
 
     val baseTuple = (d.head.pairBinTuples._1 map (x => 0), d.head.pairBinTuples._2 map (x => 0))
     val baseRandEstimates = (0 until calcConfig.numParameters("numRandom").toInt).toList map (x => (0.0, 0.0))
-    val baseEstimates = Estimates((0.0, 0.0), baseRandEstimates)
+    val baseEstimates = Estimates((0.0, 0.0), baseRandEstimates, 0.0) //placeholder (null estimate) for opt
     val base =
       EstTuple(
         baseTuple,
@@ -753,13 +753,26 @@ object EstimateMI {
     val engine = new MersenneTwister(seed)
     val tupleInit = (Vector[Double](), Vector[ConstructedTable]())
     val table = buildTable(None)(data, binPair, wts)
-    val (invFracs, tables) =
-      (calcConfig.fracList map { x =>
-        val inv = 1.0 / (x * data.sig.length)
-        val subTable = subSample(calcConfig)(x, table, wts)
-        subTable.tableToFile(s"ct_fe_${x}.dat")
+
+
+    val (invFracs, tables) = {
+      val fracTuples: List[(Double, Int)] = for {
+        f <- calcConfig.listParameters("sampleFractions") :+ 1.0
+        n <- 0 until calcConfig.numParameters("repsPerFraction").toInt
+      } yield (f, n)
+
+      (fracTuples map { x =>
+        val inv = invSS(x._1, data.sig)
+        val subTable = subSample(calcConfig)(x._1,table,wts)
+        println(x)
+        subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
       }).unzip
+    }
+
+    val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
+    val CoD = regData.rSquared
+    regData.toFile("final_est_regr.dat",s"coeff. of determination: ${CoD}")
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)

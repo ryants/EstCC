@@ -772,7 +772,8 @@ object EstimateMI {
 
     val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
     val CoD = regData.rSquared
-    regData.toFile("final_est_regr.dat",s"# coeff. of determination: ${CoD}")
+    val CoDMean = regData.rSquaredMeanData
+    regData.toFile("final_est_regr.dat",s"# CoD (all): ${CoD}\tCoD (means): ${CoDMean}")
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)

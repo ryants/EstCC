@@ -1,6 +1,7 @@
 package infcalcs
 
 import cern.jet.stat.Probability.{studentTInverse}
+import MathFuncs.avg
 
 /**
  * Implementation of simple least-squares (linear) regression.
@@ -13,6 +14,9 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
 
   /** The number of datapoints. */
   val n: Double = xList.length.toDouble
+
+  private val meanData =
+    (xList zip yList) groupBy (x => x._1) map (x => x._1 -> avg(x._2 map (_._2)))
 
   private val (sx, sy, sxx, syy, sxy) =
     (xList, yList).zipped.foldLeft((0.0, 0.0, 0.0, 0.0, 0.0)) { (acc, z) =>
@@ -50,6 +54,14 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
     val mean = sy / yList.length
     val ssTot = (yList map (x => math.pow((x - mean),2))).sum
     val ssRes = (yList.indices map (x => math.pow((yList(x) - regLine(xList(x))),2))).sum
+    1-(ssRes/ssTot)
+  }
+  lazy val rSquaredMeanData = {
+    val means = meanData.values.toSeq
+    val xVals = meanData.keys.toSeq
+    val mean = avg(means)
+    val ssTot = (means map (x => math.pow((x - mean),2))).sum
+    val ssRes = (means.indices map (x => math.pow((means(x) - regLine(xVals(x))),2))).sum
     1-(ssRes/ssTot)
   }
 

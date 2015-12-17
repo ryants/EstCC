@@ -26,6 +26,7 @@ object MathFuncs {
       if (s != 0) l map (x => (x / s).toDouble) else l map (x => 0.0)
     }
 
+  def avg(t: Seq[Double]): Double = t.sum / t.length.toDouble
 
   /**
    * Given a list of doubles, returns the mean and 95% confidence interval

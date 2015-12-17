@@ -1,7 +1,6 @@
 package infcalcs
 
 import TreeDef._
-import annotation.tailrec
 import scala.collection.mutable.HashMap
 
 /**
@@ -24,8 +23,8 @@ class DRData(calcConfig: CalcConfig)
 
   lazy val zippedVals = (sig, resp).zipped.toSeq
 
-  lazy val sigVals = calcConfig.srParameters("signalValues") != None
-  lazy val respVals = calcConfig.srParameters("responseValues") != None
+  lazy val sigVals = calcConfig.srParameters("signalValues")
+  lazy val respVals = calcConfig.srParameters("responseValues")
 
   val sigDim = dim(sig)
   val respDim = dim(resp)
@@ -63,19 +62,19 @@ class DRData(calcConfig: CalcConfig)
    *       data results in delimiter calculation from the set of values, not the
    *       provided bin number
    *
-   * @param valuesPresent determines if explicit value sets are present for data
+   * @param values determines if explicit value sets are present for data
    * @param data data points
    * @param numBins number of bins per dimension
    * @return Vector of trees ([[TreeDef.Tree]])
    */
   private def getDelims(
-      valuesPresent: Boolean,
+      values: Option[Vector[NTuple[Double]]],
       data: Vector[NTuple[Double]],
       numBins: NTuple[Int]): NTuple[Tree] =
 
-    if (valuesPresent)
-      (calcConfig.srParameters("signalValues").get.transpose map (_.toSet.toList) map
-          (x => TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))).toVector
+    if (values.isDefined)
+      values.get.transpose map (_.toSet.toList) map
+          (x => TreeDef.buildTree(TreeDef.buildOrderedNodeList(x)))
     else {
       val dt = data.transpose
       ((0 until dim(data)) map (x => CTBuild.getBinDelims(dt(x), numBins(x)))).toVector
@@ -102,7 +101,7 @@ class DRData(calcConfig: CalcConfig)
    * Determines the delimiters for a particular set of data points given a 
    * specified number of bins
    *
-   * @param v boolean to check if values are specified (overrides bin-based 
+   * @param v optional values specified for bin delimiting (overrides bin-based
    *          delimiting)
    * @param data Vector of n-dimensional data points
    * @param h HashMap of previously calculated delimiters for efficiency
@@ -110,7 +109,7 @@ class DRData(calcConfig: CalcConfig)
    * @return n-dimensional vector of bin-delimiters (Vector of [[TreeDef.Tree]])
    */
   private def delims(
-      v: Boolean,
+      v: Option[Vector[NTuple[Double]]],
       data: Vector[NTuple[Double]],
       h: HashMap[NTuple[Int], NTuple[Tree]],
       nb: NTuple[Int]): NTuple[Tree] =

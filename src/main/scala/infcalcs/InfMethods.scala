@@ -607,9 +607,6 @@ object EstimateMI {
   /**
    * An imperative equivalent to [[genEstimatesMult]]
    *
-   * Not currently used in code, but could be useful for outputting information
-   * on the fly in verbose mode
-   *
    * @param calcConfig
    * @param pl
    * @param signalBins
@@ -621,30 +618,37 @@ object EstimateMI {
       signalBins: NTuple[Int],
       wts: Option[Weight] = None): Vector[EstTuple] = {
 
-    var numConsecRandPos = 0
-    var res: Array[EstTuple] = Array()
-    var responseBins = calcConfig.initResponseBins
-
-    while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
-        moreRespBinsLeft(calcConfig)(pl, responseBins)) {
-
-      val binPair = (signalBins, responseBins)
+    if (calcConfig.srParameters("responseValues").isDefined){
+      val binPair = (signalBins, calcConfig.initResponseBins)
       val seed = genSeed(calcConfig.rEngine)
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      val est = EstTuple(binPair, intercepts, wts)
-      
-      res = res :+ est
+      Vector(EstTuple(binPair, intercepts, wts))
+    } else {
+      var numConsecRandPos = 0
+      var res: Array[EstTuple] = Array()
+      var responseBins = calcConfig.initResponseBins
 
-      if (isNotBiased(calcConfig)(est.estimates.randDataEstimate)) numConsecRandPos = 0
-      else numConsecRandPos += 1
+      while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
+          moreRespBinsLeft(calcConfig)(pl, responseBins)) {
 
-      responseBins = updateRespBinNumbers(calcConfig)(responseBins)
+        val binPair = (signalBins, responseBins)
+        val seed = genSeed(calcConfig.rEngine)
+        val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
+        val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+        val est = EstTuple(binPair, intercepts, wts)
 
+        res = res :+ est
+
+        if (isNotBiased(calcConfig)(est.estimates.randDataEstimate)) numConsecRandPos = 0
+        else numConsecRandPos += 1
+
+        responseBins = updateRespBinNumbers(calcConfig)(responseBins)
+
+      }
+
+      res.toVector
     }
-
-    res.toVector
-
   }
 
   /**

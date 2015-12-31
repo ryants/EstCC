@@ -20,10 +20,10 @@ object MathFuncs {
    * Converts frequencies to probabilities by normalizing each count by the
    * vector sum.
    */
-  def freqToProb: TraversableOnce[Int] => TraversableOnce[Double] =
+  def freqToProb: TraversableOnce[Double] => TraversableOnce[Double] =
     l => {
-      val s = l.sum.toDouble
-      if (s != 0) l map (x => (x / s).toDouble) else l map (x => 0.0)
+      val s = l.sum
+      if (s != 0) l map (x => x / s) else l map (x => 0.0)
     }
 
   def avg(t: Seq[Double]): Double = t.sum / t.length.toDouble

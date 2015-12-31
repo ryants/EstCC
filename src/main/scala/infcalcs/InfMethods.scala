@@ -91,12 +91,12 @@ object CTBuild {
    * @return The weighted contingency table, as a matrix of integers.
    */
   def weightSignalData(
-      t: Vector[Vector[Int]],
-      wts: List[Double]): Vector[Vector[Int]] = {
+      t: Vector[Vector[Double]],
+      wts: List[Double]): Vector[Vector[Double]] = {
 
     require(t.length == wts.length, "number of rows must equal number of weights")
-    t.indices.toVector map (v => (t(v) map (x =>
-      (x * wts(v)).round.toInt)).toVector)
+    t.indices.toVector map (v => t(v) map (x =>
+      x * wts(v)))
   }
 
   /**
@@ -185,13 +185,13 @@ object CTBuild {
     val table = {
       for {
         r <- Range(0, tDimR)
-      } yield Range(0, tDimC).map(x => 0).toVector
+      } yield Range(0, tDimC).map(x => 0.0).toVector
     }.toVector
 
     @tailrec
     def addValues(
-        acc: Vector[Vector[Int]],
-        p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
+        acc: Vector[Vector[Double]],
+        p: List[Pair[NTuple[Double]]]): Vector[Vector[Double]] = {
       if (p.isEmpty) acc
       else {
         val rIndex = findVectIndex(p.head._1, rd, sigKey)
@@ -251,7 +251,7 @@ object EstimateMI {
    * Used for testing contingency tables to see if every input (row) value has
    * the same number of observations associated with it.
    */
-  def isUniform(t: Vector[Vector[Int]]): Boolean = {
+  def isUniform(t: Vector[Vector[Double]]): Boolean = {
     val rsums = t map (_.sum)
     !(rsums exists (_ != rsums.head))
   }
@@ -261,16 +261,16 @@ object EstimateMI {
    *
    * Empty rows with no observations (sums of 0) remain empty after weighting.
    *
-   * @param t A 2D matrix of Ints (e.g., a contingency table)
+   * @param t A 2D matrix of Doubles (e.g., a contingency table)
    * @return A re-weighted matrix.
    */
-  def makeUniform(t: Vector[Vector[Int]]): Vector[Vector[Int]] = {
+  def makeUniform(t: Vector[Vector[Double]]): Vector[Vector[Double]] = {
     if (isUniform(t)) t
     else {
-      val rsums: Vector[Int] = t map (_.sum)
-      val total = rsums.sum.toDouble
+      val rsums: Vector[Double] = t map (_.sum)
+      val total = rsums.sum
       val uRow = total / t.length.toDouble
-      val uWts: List[Double] = (rsums map (x => uRow / x.toDouble)).toList
+      val uWts: List[Double] = (rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList
       weightSignalData(t, uWts)
     }
   }
@@ -284,8 +284,8 @@ object EstimateMI {
    * @return an updated Seq
    */
   def updateIndices(
-      indices: IndexedSeq[(Pair[Int], Int)],
-      index: Int): IndexedSeq[(Pair[Int], Int)] = {
+      indices: IndexedSeq[(Pair[Int], Double)],
+      index: Int): IndexedSeq[(Pair[Int], Double)] = {
     if (indices(index)._2 == 1) (indices take index) ++ (indices drop (index + 1))
     else {
       val element = indices(index)
@@ -332,22 +332,22 @@ object EstimateMI {
     @tailrec
     def shrinkTable(
         counter: Int,
-        validIndices: IndexedSeq[(Pair[Int], Int)],
-        numPossible: Int,
-        st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
+        validIndices: IndexedSeq[(Pair[Int], Double)],
+        numPossible: Double,
+        st: Vector[Vector[Double]]): Vector[Vector[Double]] = {
       if (counter == 0) st
       else {
         val randSample = calcConfig.rEngine.raw() * numPossible
 
         @tailrec
-        def findIndex(r: Double, curIndex: Int, cumuVal: Int): Int =
+        def findIndex(r: Double, curIndex: Int, cumuVal: Double): Int =
           if (cumuVal + validIndices(curIndex)._2 > r) curIndex
           else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
 
         val chosenIndex = findIndex(randSample, 0, 0)
 
         val (row, col) = validIndices(chosenIndex)._1
-        val newTable: Vector[Vector[Int]] =
+        val newTable: Vector[Vector[Double]] =
           st updated(row, st(row) updated(col, st(row)(col) - 1))
         val updatedVal = ((row, col), validIndices(chosenIndex)._2 - 1)
         val updatedIndices = updateIndices(validIndices, chosenIndex)
@@ -451,7 +451,8 @@ object EstimateMI {
     val (invFracs, subSamples, randSubSamples) = {
       val tuples = calcConfig.fracList map { x =>
         val inv = invSS(x, data.sig)
-        val subTable = subSample(calcConfig)(x, table, wts)
+        val subTable =
+          subSample(calcConfig)(x, table, wts)
         val randSubTables = randTables map (y => subSample(calcConfig)(x, y, wts))
         (inv, subTable, randSubTables)
       }
@@ -618,7 +619,7 @@ object EstimateMI {
       signalBins: NTuple[Int],
       wts: Option[Weight] = None): Vector[EstTuple] = {
 
-    if (calcConfig.srParameters("responseValues").isDefined){
+    if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
       val seed = genSeed(calcConfig.rEngine)
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
@@ -660,7 +661,7 @@ object EstimateMI {
    */
   def updateRespBinNumbers(calcConfig: CalcConfig)(respBinTuple: NTuple[Int]): NTuple[Int] =
     calcConfig.srParameters("responseValues") match {
-      case None => respBinTuple.indices.toVector map (x => 
+      case None => respBinTuple.indices.toVector map (x =>
         respBinTuple(x) + calcConfig.listParameters("respBinSpacing")(x).toInt)
       case _ => throw new BinConfigurationException("cannot update bin number when values are present")
     }
@@ -674,7 +675,7 @@ object EstimateMI {
    */
   def updateSigBinNumbers(calcConfig: CalcConfig)(sigBinTuple: NTuple[Int]): NTuple[Int] =
     calcConfig.srParameters("signalValues") match {
-      case None => sigBinTuple.indices.toVector map (x => 
+      case None => sigBinTuple.indices.toVector map (x =>
         sigBinTuple(x) + calcConfig.listParameters("sigBinSpacing")(x).toInt)
       case _ => throw new BinConfigurationException("cannot update bin number when values are present")
     }
@@ -767,7 +768,7 @@ object EstimateMI {
 
       (fracTuples map { x =>
         val inv = invSS(x._1, data.sig)
-        val subTable = subSample(calcConfig)(x._1,table,wts)
+        val subTable = subSample(calcConfig)(x._1, table, wts)
         println(x)
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
@@ -777,7 +778,7 @@ object EstimateMI {
     val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
     val CoD = regData.rSquared
     val CoDMean = regData.rSquaredMeanData
-    regData.toFile("final_est_regr.dat",s"# CoD (all): ${CoD}\tCoD (means): ${CoDMean}")
+    regData.toFile("final_est_regr.dat", s"# CoD (all): ${CoD}\tCoD (means): ${CoDMean}")
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)
@@ -1100,9 +1101,9 @@ object EstimateCC {
         }
 
         wts(w) match {
-          case Some(Weight(v, l)) => println(s"  ${1+w}) Weight: ${l}, " +
+          case Some(Weight(v, l)) => println(s"  ${1 + w}) Weight: ${l}, " +
               s"Est. MI: ${opt.estimates.dataEstimate._1} ${0xB1.toChar} ${opt.estimates.dataEstimate._2}")
-          case None => println(s"  ${1+w}) Weight: Uniform, " +
+          case None => println(s"  ${1 + w}) Weight: Uniform, " +
               s"Est. MI: ${opt.estimates.dataEstimate._1} ${0xB1.toChar} ${opt.estimates.dataEstimate._2}")
         }
       }
@@ -1134,7 +1135,7 @@ object EstimateCC {
 
           weights = getWeights(calcConfig)(p, signalBins)
           val estimates = calcEstimates((signalBins, calcConfig.initResponseBins), weights, index)
-          val incrCriterion = estimates.foldLeft(true)((b,x) => b && (x.length > calcConfig.numParameters("numConsecRandPos")))
+          val incrCriterion = estimates.foldLeft(true)((b, x) => b && (x.length > calcConfig.numParameters("numConsecRandPos")))
           val opt = EstimateMI.optMIMult(calcConfig)(
             estimates map EstimateMI.optMIMult(calcConfig))
 
@@ -1161,7 +1162,7 @@ object EstimateCC {
 
   /**
    * Estimates the channel capacity for a [[DRData]] given a [[CalcConfig]]
-   * 
+   *
    * @param p
    * @param signalBins
    * @param fp

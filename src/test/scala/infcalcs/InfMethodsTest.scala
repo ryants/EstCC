@@ -80,10 +80,10 @@ class CTBuildTest extends FlatSpec with Matchers {
   }
 
   it should "multiply rows in a contingency table by corresponding weights" in {
-    val ct = Vector(Vector(1, 1), Vector(2, 2))
+    val ct = Vector(Vector(1.0, 1.0), Vector(2.0, 2.0))
     val wts = List(0.4, 1.5)
     val weightedTable = weightSignalData(ct, wts)
-    weightedTable shouldBe Vector(Vector(0, 0), Vector(3, 3))
+    weightedTable shouldBe Vector(Vector(0.4, 0.4), Vector(3.0, 3.0))
   }
 
   it should "build a contingency table" in {
@@ -175,7 +175,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     // These two rows should have the same sum after weighting
     uni2(0).sum shouldBe uni2(1).sum
     // The zero row should remain 0
-    uni2(2).sum shouldBe 0
+    uni2(2).sum shouldBe 0.0
   }
 
   "subSample" should
@@ -184,6 +184,20 @@ class EstimateMITest extends FlatSpec with Matchers {
       ct.numSamples shouldBe 8
       sample.numSamples shouldBe 4
     }
+
+  it should "keep the number of contingency table entries constant" in {
+    val fracs = List(0.6, 0.7, 0.8, 0.9, 1.0)
+    val doseRand = (0 until 1000).toVector map (x => Vector(testConfig.rEngine.raw()*10.0))
+    val respRand = (0 until 1000).toVector map (x => Vector(testConfig.rEngine.raw()*10.0))
+    val plRand = new DRData(testConfig)(doseRand, respRand)
+
+    val ct = buildTable(None)(plRand, (Vector(10),Vector(10)))
+    val wts = Weight(List(0.1, 0.05, 0.05, 0.2, 0.1, 0.1, 0.05, 0.05, 0.2, 0.1), "test")
+    assert(wts.weights.sum === 1.0 +- 0.001)
+
+    val subs = fracs map (f => subSample(testConfig)(f, ct, Some(wts)))
+    subs.indices forall (y => (subs(y).numSamples / 1000.0) === fracs(y) +- 0.1)
+  }
 
   "buildDataMultAlt" should "return an appropriate RegDataMult data structure" in {
     // Get the RegDataMult result
@@ -243,8 +257,6 @@ class EstimateMITest extends FlatSpec with Matchers {
 
 class EstimateCCTest extends FlatSpec with Matchers {
 
-  import OtherFuncs.updateParameters
-  
   val testConfig = CalcConfig(new MersenneTwister(12345))
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x => Vector(x))
@@ -267,6 +279,7 @@ class EstimateCCTest extends FlatSpec with Matchers {
     val biWts = genWeights(pl.sig, biWeight(testConfig))
     biWts(rd).length > 1
   }
+
 }
 
 class MultiVarTest extends FlatSpec with Matchers {

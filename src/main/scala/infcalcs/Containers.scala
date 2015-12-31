@@ -1,6 +1,6 @@
 package infcalcs
 
-import infcalcs.tables.{ConstructedTable, ContTable}
+import infcalcs.tables.ConstructedTable
 
 /**
  * Created by ryansuderman on 8/25/15.

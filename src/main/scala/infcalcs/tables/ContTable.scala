@@ -18,9 +18,9 @@ trait ContTable {
   lazy val numSamples: Double = (table map (x => x.sum)).sum
 
   /** The table of counts, as a matrix of integers. */
-  val table: Vector[Vector[Int]]
+  val table: Vector[Vector[Double]]
   /** The table of counts, transposed. */
-  lazy val ttable: Vector[Vector[Int]] = table.transpose
+  lazy val ttable: Vector[Vector[Double]] = table.transpose
 
   /**
    * Converts a vector of counts to a marginal probability.
@@ -29,7 +29,7 @@ trait ContTable {
    * of samples in the table to give the probability of observing any of the
    * events tabulated in that vector.
    */
-  private def probVect: Vector[Int] => Double = l => l.sum / numSamples
+  def probVect: Vector[Double] => Double = l => l.sum / numSamples
 
   /**
    * Calculates an entropy term from a probability.
@@ -39,14 +39,14 @@ trait ContTable {
    * the negative of sums of entropies calculated using this function, as the
    * definition of entropy is E[-log(P(X)].
    */
-  private def eTerm(prob: Double): Double =
+  def eTerm(prob: Double): Double =
     if (prob == 0) 0
     else prob * MathFuncs.logb(2)(prob)
 
   /**
    * Composition to produce marginal entropy function
    */
-  private def margEntFunc: Vector[Int] => Double = probVect andThen eTerm
+  def margEntFunc: Vector[Double] => Double = probVect andThen eTerm
 
   /**
    * Higher order function that returns a function for calculating the negated
@@ -56,7 +56,7 @@ trait ContTable {
    * @return function which applies f to a data set and calculates the
    *         negation of the resulting sum
    */
-  private def mapNegSum[A, B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
+  def mapNegSum[A, B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
     import n.mkNumericOps
     s => -(s map f).sum
   }
@@ -80,7 +80,7 @@ trait ContTable {
    * @param t 2-dimensional vector of integer vectors
    * @return marginal entropy
    */
-  private def margEntropy(t: Vector[Vector[Int]]): Double = mapNegSum(margEntFunc) apply t
+  def margEntropy(t: Vector[Vector[Double]]): Double = mapNegSum(margEntFunc) apply t
 
   /**
    * Returns the conditional entropy of a 2D table (rows conditioned on cols).
@@ -102,7 +102,7 @@ trait ContTable {
    * @param t 2-dimensional vector of integer vectors
    * @return conditional entropy
    */
-  private def condEntropy(t: Vector[Vector[Int]]): Double = {
+  def condEntropy(t: Vector[Vector[Double]]): Double = {
     val trans = t.transpose
     val probs = trans map probVect
     val entList: Seq[Double] =

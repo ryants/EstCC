@@ -5,7 +5,7 @@ import org.scalatest._
 
 class ContTableTest extends FlatSpec with Matchers {
   // Vector and table that we'll use in a lot of the following tests
-  val r1 = Vector(1, 1)
+  val r1 = Vector(1.0, 1.0)
   val table1 = Vector(r1, r1, r1, r1)
 
   "A contingency table" should "be empty if created from an empty vector" in {
@@ -55,19 +55,19 @@ class ContTableTest extends FlatSpec with Matchers {
     val ct2 = new ConstructedTable(table1.transpose)
     ct2.mutualInformation shouldBe 0
     // Let's try another table
-    val table2 = Vector(Vector(1, 0, 0, 0),
-                        Vector(0, 1, 0, 0),
-                        Vector(0, 0, 1, 0),
-                        Vector(0, 0, 0, 1))
+    val table2 = Vector(Vector(1.0, 0.0, 0.0, 0.0),
+                        Vector(0.0, 1.0, 0.0, 0.0),
+                        Vector(0.0, 0.0, 1.0, 0.0),
+                        Vector(0.0, 0.0, 0.0, 1.0))
     val ct3 = new ConstructedTable(table2)
     ct3.mutualInformation shouldBe 2
     val ct4 = new ConstructedTable(table2.transpose)
     ct4.mutualInformation shouldBe 2
     // And another one
-    val table3 = Vector(Vector(1, 1, 0, 0),
-                        Vector(1, 1, 0, 0),
-                        Vector(0, 0, 1, 1),
-                        Vector(0, 0, 1, 1))
+    val table3 = Vector(Vector(1.0, 1.0, 0.0, 0.0),
+                        Vector(1.0, 1.0, 0.0, 0.0),
+                        Vector(0.0, 0.0, 1.0, 1.0),
+                        Vector(0.0, 0.0, 1.0, 1.0))
     val ct5 = new ConstructedTable(table3)
     ct5.mutualInformation shouldBe 1
     val ct6 = new ConstructedTable(table3.transpose)

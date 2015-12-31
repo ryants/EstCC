@@ -5,7 +5,7 @@ scalaVersion := "2.11.7"
 scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
 libraryDependencies ++= Seq("colt" % "colt" % "1.2.0", 
-"org.scalatest" % "scalatest_2.11" % "2.1.5" % "test",
+"org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
 "com.github.scopt" %% "scopt" % "3.2.0",
 "com.typesafe.akka" %% "akka-actor" % "2.3.3")
 

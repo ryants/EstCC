@@ -11,6 +11,7 @@ import TreeDef._
 object CTBuild {
 
   import cern.jet.random.engine.MersenneTwister
+  import language.implicitConversions
 
   /**
    * Divides list into sublists with approximately equal numbers of elements.
@@ -185,13 +186,13 @@ object CTBuild {
     val table = {
       for {
         r <- Range(0, tDimR)
-      } yield Range(0, tDimC).map(x => 0.0).toVector
+      } yield Range(0, tDimC).map(x => 0).toVector
     }.toVector
 
     @tailrec
     def addValues(
-        acc: Vector[Vector[Double]],
-        p: List[Pair[NTuple[Double]]]): Vector[Vector[Double]] = {
+        acc: Vector[Vector[Int]],
+        p: List[Pair[NTuple[Double]]]): Vector[Vector[Int]] = {
       if (p.isEmpty) acc
       else {
         val rIndex = findVectIndex(p.head._1, rd, sigKey)
@@ -207,6 +208,10 @@ object CTBuild {
             (cIndex, acc(rIndex)(cIndex) + 1)), p.tail)
       }
     }
+
+    // Converts table (built using integers) to use Doubles instead for weighting purposes
+    implicit def tabToDoubles(t: Vector[Vector[Int]]): Vector[Vector[Double]] =
+      t map (x => x map (y => y.toDouble))
 
     val ct = eng match {
       case Some(e) => addValues(table,
@@ -257,25 +262,6 @@ object EstimateMI {
   }
 
   /**
-   * Re-weights rows in a matrix to have approximately equal sums across rows.
-   *
-   * Empty rows with no observations (sums of 0) remain empty after weighting.
-   *
-   * @param t A 2D matrix of Doubles (e.g., a contingency table)
-   * @return A re-weighted matrix.
-   */
-  def makeUniform(t: Vector[Vector[Double]]): Vector[Vector[Double]] = {
-    if (isUniform(t)) t
-    else {
-      val rsums: Vector[Double] = t map (_.sum)
-      val total = rsums.sum
-      val uRow = total / t.length.toDouble
-      val uWts: List[Double] = (rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList
-      weightSignalData(t, uWts)
-    }
-  }
-
-  /**
    * Updates a data structure tracking non-zero values in a [[tables.ContTable]]
    *
    * @param indices a Seq of [[tables.ContTable]] coordinates and the associated value
@@ -294,12 +280,11 @@ object EstimateMI {
   }
 
   /**
-   * Resample a fraction of data by modifying the contingency table.
+   * Resample a fraction of data by modifying a uniform contingency table.
    *
    * Resamples the data by decrementing (nonzero) counts in the contingency table at
-   * randomly chosen indices. After shrinking the number of observations, the
-   * rows are re-weighted to be uniform using [[EstimateMI.makeUniform]].
-   * Finally, an optional weights vector is applied to the rows.
+   * randomly chosen indices. Finally, an optional weights vector is applied to the rows.
+   * Note: this function will not work unless the table is unweighted (i.e. uniform)
    *
    * @param frac Fraction of the observations to keep in the resampled table.
    * @param t The contingency table to be resampled.
@@ -311,57 +296,60 @@ object EstimateMI {
       t: ContTable,
       weights: Option[Weight] = None): ConstructedTable = {
 
-    // The fraction of observations to remove from the dataset
-    val numToRemove = ((1 - frac) * t.numSamples).toInt
+    if (frac == 1.0) new ConstructedTable(t.table)
+    else {
+      // The fraction of observations to remove from the dataset
+      val numToRemove = ((1 - frac) * t.numSamples).toInt
 
-    // All (row, column) index pairs
-    val allIndices: IndexedSeq[Pair[Int]] = for {
-      r <- (0 until t.rows)
-      c <- (0 until t.cols)
-    } yield (r, c)
+      // All (row, column) index pairs
+      val allIndices: IndexedSeq[Pair[Int]] = for {
+        r <- (0 until t.rows)
+        c <- (0 until t.cols)
+      } yield (r, c)
 
-    // Constructs list of (row, col) indices with shrinkable (nonzero) values,
-    // sorted in decreasing order of the number of observations
-    val nonzeroIndices = (allIndices filter (x => t.table(x._1)(x._2) > 0) map
-        (x => (x, t.table(x._1)(x._2))) sortBy (x => x._2)).reverse
+      // Constructs list of (row, col) indices with shrinkable values (values >= 1.0),
+      // sorted in decreasing order of the number of observations
+      val nonzeroIndices = (allIndices filter (x => t.table(x._1)(x._2) >= 1.0) map
+          (x => (x, t.table(x._1)(x._2))) sortBy (x => x._2)).reverse
 
-    val numPossible = (nonzeroIndices map (x => x._2)).sum
+      val numPossible = (nonzeroIndices map (x => x._2)).sum
 
-    // Randomly samples values to be removed from a contingency table and
-    // returns the updated table
-    @tailrec
-    def shrinkTable(
-        counter: Int,
-        validIndices: IndexedSeq[(Pair[Int], Double)],
-        numPossible: Double,
-        st: Vector[Vector[Double]]): Vector[Vector[Double]] = {
-      if (counter == 0) st
-      else {
-        val randSample = calcConfig.rEngine.raw() * numPossible
+      // Randomly samples values to be removed from a contingency table and
+      // returns the updated table
+      @tailrec
+      def shrinkTable(
+          counter: Int,
+          validIndices: IndexedSeq[(Pair[Int], Double)],
+          numPossible: Double,
+          st: Vector[Vector[Double]]): Vector[Vector[Double]] = {
+        if (counter == 0) st
+        else {
+          val randSample = calcConfig.rEngine.raw() * numPossible
 
-        @tailrec
-        def findIndex(r: Double, curIndex: Int, cumuVal: Double): Int =
-          if (cumuVal + validIndices(curIndex)._2 > r) curIndex
-          else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
+          @tailrec
+          def findIndex(r: Double, curIndex: Int, cumuVal: Double): Int =
+            if (cumuVal + validIndices(curIndex)._2 > r) curIndex
+            else findIndex(r, curIndex + 1, cumuVal + validIndices(curIndex)._2)
 
-        val chosenIndex = findIndex(randSample, 0, 0)
+          val chosenIndex = findIndex(randSample, 0, 0)
 
-        val (row, col) = validIndices(chosenIndex)._1
-        val newTable: Vector[Vector[Double]] =
-          st updated(row, st(row) updated(col, st(row)(col) - 1))
-        val updatedVal = ((row, col), validIndices(chosenIndex)._2 - 1)
-        val updatedIndices = updateIndices(validIndices, chosenIndex)
-        shrinkTable(counter - 1, updatedIndices, numPossible - 1, newTable)
+          val (row, col) = validIndices(chosenIndex)._1
+          val newTable: Vector[Vector[Double]] =
+            st updated(row, st(row) updated(col, st(row)(col) - 1))
+          val updatedVal = ((row, col), validIndices(chosenIndex)._2 - 1)
+          val updatedIndices = updateIndices(validIndices, chosenIndex)
+          shrinkTable(counter - 1, updatedIndices, numPossible - 1, newTable)
+        }
       }
-    }
-    // Shrink the table and then make it uniform
-    val sTable = makeUniform(
-      shrinkTable(numToRemove, nonzeroIndices, numPossible, t.table))
+      // Shrink the uniform table
+      val sTable =
+        shrinkTable(numToRemove, nonzeroIndices, numPossible, t.table)
 
-    // Apply weights, if any
-    weights match {
-      case None => new ConstructedTable(sTable)
-      case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
+      // Reapply weights, if any
+      weights match {
+        case None => new ConstructedTable(sTable)
+        case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
+      }
     }
   }
 
@@ -446,14 +434,15 @@ object EstimateMI {
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
     // generates data with subSample method
-    val table = buildTable(None)(data, binPair, wts)
-    val randTables = (0 until numRandTables) map (y => buildTable(Some(engine))(data, binPair, wts))
+    val unifTable = buildTable(None)(data, binPair)
+    val randUnifTables = (0 until numRandTables) map (y => buildTable(Some(engine))(data, binPair))
+
     val (invFracs, subSamples, randSubSamples) = {
       val tuples = calcConfig.fracList map { x =>
         val inv = invSS(x, data.sig)
         val subTable =
-          subSample(calcConfig)(x, table, wts)
-        val randSubTables = randTables map (y => subSample(calcConfig)(x, y, wts))
+          subSample(calcConfig)(x, unifTable, wts)
+        val randSubTables = randUnifTables map (y => subSample(calcConfig)(x, y, wts))
         (inv, subTable, randSubTables)
       }
       tuples.unzip3
@@ -516,7 +505,7 @@ object EstimateMI {
    * Because linear regression may fail on the randomized data, some entries in
    * the list may be None.
    *
-   * @param r RegDataMult structure, eg as returned by [[buildRegData]].
+   * @param r RegData structure as returned by [[buildRegData]].
    * @return (regression on original data, list of regressions on random data)
    */
   def calcMultRegs(calcConfig: CalcConfig)
@@ -545,8 +534,8 @@ object EstimateMI {
     def getStats(ls: List[Option[SLR]], acc: List[Pair[Double]]): List[Pair[Double]] =
       if (ls.isEmpty) acc
       else ls.head match {
-        case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.i95Conf))
-        case None => getStats(ls.tail, acc)
+        case Some(x) => getStats(ls.tail, acc :+ (x.intercept, x.i95Conf))
+        case None => getStats(ls.tail, acc :+ (Double.NaN, Double.NaN))
       }
     Estimates((regs._1.intercept, regs._1.i95Conf), getStats(regs._2, List()), regs._1.rSquared)
   }
@@ -769,16 +758,13 @@ object EstimateMI {
       (fracTuples map { x =>
         val inv = invSS(x._1, data.sig)
         val subTable = subSample(calcConfig)(x._1, table, wts)
-        println(x)
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
       }).unzip
     }
 
     val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
-    val CoD = regData.rSquared
-    val CoDMean = regData.rSquaredMeanData
-    regData.toFile("final_est_regr.dat", s"# CoD (all): ${CoD}\tCoD (means): ${CoDMean}")
+    regData toFile "final_est_regr.dat"
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)

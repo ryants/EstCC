@@ -1,5 +1,6 @@
 package infcalcs
 
+import infcalcs.tables.ConstructedTable
 import org.scalatest._
 import cern.jet.random.engine.MersenneTwister
 
@@ -108,6 +109,21 @@ class CTBuildTest extends FlatSpec with Matchers {
     val ct2 = buildTable(None)(data, numBins, wts)
     ct2.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 8, 0))
   }
+
+  it should "build a randomized contingency table" in {
+    val doses = Vector(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0) map (x =>
+      Vector(x))
+    val responses = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
+      Vector(x))
+    val data = new DRData(testConfig)(doses, responses)
+    val numBins = Tuple2(Vector(2), Vector(4))
+    // Call with no weighting but with randomization
+    val ctRand = buildTable(Some(testConfig.rEngine))(data,numBins)
+    ctRand.rows shouldBe 2
+    ctRand.cols shouldBe 4
+    ctRand.numSamples shouldBe 8
+  }
+
 }
 
 class EstimateMITest extends FlatSpec with Matchers {
@@ -124,31 +140,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   val pl = new DRData(testConfig)(doses1, responses)
   val numBins = Tuple2(Vector(2), Vector(4))
   val ct = buildTable(None)(pl, numBins)
-
-  "isUniform" should "identify a uniform contingency table as uniform" in {
-    // Divides rows into bins (0, 1, 2, 2) and (3, 3, 3, 3)
-    // Divides columns into bins (1, 2), (3, 4), (5, 6), (7, 8)
-    // Contingency table is
-    //    c1  c2  c3  c4
-    // r1  2   2   0   0
-    // r2  0   0   2   2
-    // i.e., it's uniform
-    isUniform(ct.table) shouldBe true
-  }
-
-  it should "identify a non-uniform contingency table as non-uniform" in {
-    // Divides rows into bins (0, 1), (2, 2, 3) and (3, 3, 3)
-    // Divides columns into bins (1, 2), (3, 4), (5, 6), (7, 8)
-    // Contingency table is
-    //     c1  c2  c3  c4
-    // r1   2   0   0   0
-    // r2   0   2   2   2
-    // r3   0   0   0   0
-    // i.e., it's not uniform
-    val numBins2 = Tuple2(Vector(3), Vector(4))
-    val ct2 = buildTable(None)(pl, numBins2)
-    isUniform(ct2.table) shouldBe false
-  }
+  val ctRand = buildTable(Some(testConfig.rEngine))(pl, numBins)
 
   "isNotBiased" should "detect biased estimates" in {
 
@@ -161,28 +153,14 @@ class EstimateMITest extends FlatSpec with Matchers {
     isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
   }
 
-  "makeUniform" should "leave a uniform contingency table unchanged" in {
-    // See tests above for the underlying contingency tables for these examples.
-    val uni = makeUniform(ct.table)
-    uni shouldBe ct.table
-  }
-
-  it should "reweight a nonuniform contingency table to be uniform" in {
-    // See tests above for the underlying contingency tables for these examples.
-    val numBins2 = Tuple2(Vector(3), Vector(4))
-    val ct2 = buildTable(None)(pl, numBins2)
-    val uni2 = makeUniform(ct2.table)
-    // These two rows should have the same sum after weighting
-    uni2(0).sum shouldBe uni2(1).sum
-    // The zero row should remain 0
-    uni2(2).sum shouldBe 0.0
-  }
-
   "subSample" should
     "shrink the number of observations in a contingency table" in {
       val sample = subSample(testConfig)(0.5, ct)
       ct.numSamples shouldBe 8
       sample.numSamples shouldBe 4
+
+      val sampleRand = subSample(testConfig)(0.75, ct)
+      sampleRand.numSamples shouldBe 6
     }
 
   it should "keep the number of contingency table entries constant" in {
@@ -199,7 +177,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     subs.indices forall (y => (subs(y).numSamples / 1000.0) === fracs(y) +- 0.1)
   }
 
-  "buildDataMultAlt" should "return an appropriate RegDataMult data structure" in {
+  "buildRegData" should "return an appropriate RegData data structure" in {
     // Get the RegDataMult result
     val numReps = testConfig.numParameters("repsPerFraction").toInt
     // Seeded with some integer

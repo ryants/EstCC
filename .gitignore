@@ -4,3 +4,5 @@ src/main/scala/infcalcs/test.sc
 .cache
 *.swp
 .idea/
+.project
+.classpath

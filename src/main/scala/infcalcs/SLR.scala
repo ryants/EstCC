@@ -82,6 +82,12 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
       new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
     writer write header
     writer.newLine()
+
+    writer write s"# CoD (all): ${rSquared}\tCoD (means): ${rSquaredMeanData}"
+    writer.newLine()
+
+    writer write s"# intercept: ${intercept}\tslope: ${slope}"
+    writer.newLine()
     for (i <- (0 until xList.length).toList) {
       writer write s"${xList(i)} ${yList(i)} ${regLine(xList(i))}"
       writer.newLine()

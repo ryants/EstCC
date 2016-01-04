@@ -6,6 +6,8 @@ class ConstructedTable(v: Vector[Vector[Double]]) extends ContTable {
   lazy val cols = if (table.isEmpty) 0 else table(0).length
   lazy val table = v
 
+  Predef.assert(table forall (x => x forall (_ >= 0.0)))
+
   /** Pretty-prints contingency table to stdout. */
   override def toString = (for (x <- v) yield (x mkString " ")).mkString("\n")
 }

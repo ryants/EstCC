@@ -80,4 +80,11 @@ class ContTableTest extends FlatSpec with Matchers {
     val ct2 = new ConstructedTable(Vector(Vector(1, 0), Vector(0, 1)))
     ct1.equals(ct2) shouldBe true
   }
+
+  it should "throw an AssertionError if it has negative entries" in {
+    val table = Vector(Vector(0.0,1.0,-1.0),Vector(2.0,3.0,4.0))
+    a [AssertionError] should be thrownBy {
+      new ConstructedTable(table)
+    }
+  }
 }

@@ -16,6 +16,18 @@ import infcalcs.tables.ConstructedTable
 case class Weight(weights: List[Double], label: String)
 
 /**
+ * Case class describing an entry in a [[tables.ContTable]] by pairing its
+ * coordinates in the table with the value
+ *
+ * @param coord
+ * @param value
+ */
+case class CtEntry(coord: Pair[Int], value: Double){
+  def decrement(v: Double = 1.0): CtEntry = CtEntry(coord, value - 1)
+  lazy val isShrinkable = value >= 1.0
+}
+
+/**
  * Case class holding all the necessary [[tables.ContTable]] data for performing the linear
  * regression estimates with an arbitrary numbers of randomizations
  *

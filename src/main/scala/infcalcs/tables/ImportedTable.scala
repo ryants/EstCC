@@ -11,6 +11,4 @@ class ImportedTable(fileName: String) extends ContTable {
   lazy val rows: Int = table.length
   lazy val cols: Int = if (table.isEmpty) 0 else table(0).length
 
-  /** Pretty-prints contingency table to stdout. */
-  override def toString = (for (x <- table) yield (x mkString " ")).mkString("\n")
 }

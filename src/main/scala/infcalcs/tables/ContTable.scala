@@ -162,6 +162,9 @@ trait ContTable {
     case _ => false
   }
 
+  /** Pretty-prints contingency table to string */
+  override def toString = (for (x <- table) yield (x mkString " ")).mkString("\n") + "]\n"
+
   /** Writes a contingency table to a file (with space-delimited columns). */
   def tableToFile(f: String) = {
     val writer =

@@ -104,10 +104,6 @@ class CTBuildTest extends FlatSpec with Matchers {
     // entries:
     ct.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 4, 0))
 
-    // Now try building a table with weights
-    val wts = Option(Weight(List(1.0, 2.0), "testWeight"))
-    val ct2 = buildTable(None)(data, numBins, wts)
-    ct2.table shouldBe Vector(Vector(2, 2, 0, 0), Vector(0, 0, 8, 0))
   }
 
   it should "build a randomized contingency table" in {
@@ -122,6 +118,22 @@ class CTBuildTest extends FlatSpec with Matchers {
     ctRand.rows shouldBe 2
     ctRand.cols shouldBe 4
     ctRand.numSamples shouldBe 8
+  }
+
+  "makeUniform" should "leave a uniform contingency table unchanged" in {
+    val ct = Vector(Vector(1.0,2.0,1.0),Vector(0.0, 4.0, 0.0),Vector(0.0, 2.0, 2.0))
+    // See tests above for the underlying contingency tables for these examples.
+    val uni = makeUniform(ct)
+    uni shouldBe ct
+  }
+
+  it should "reweight a nonuniform contingency table to be uniform" in {
+    val ct = Vector(Vector(0.0,1.0,1.0),Vector(0.0, 3.0, 0.0),Vector(0.0, 0.0, 0.0))
+    val uni = makeUniform(ct)
+    // These two rows should have the same sum after weighting
+    uni(0).sum shouldBe uni(1).sum
+    // The zero row should remain 0
+    uni(2).sum shouldBe 0.0
   }
 
 }

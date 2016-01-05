@@ -143,7 +143,7 @@ object IOFile {
     writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString + "\tCoD")
     writer.newLine()
     val wtString = d.head.weight match {
-      case None => "None"
+      case None => "Uniform"
       case Some(x) => x.label
     }
     writer.write(s"# Weight String: ${wtString}")

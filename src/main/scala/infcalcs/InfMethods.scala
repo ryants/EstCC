@@ -164,18 +164,17 @@ object CTBuild {
   }
 
   /**
-   * Method for constructing contingency table from a set of n-dim data points
+   * Method for constructing contingency table with a uniform weighting on
+   * the rows from a set of n-dim data points.
    *
    * @param data container for dose-response data
    * @param nb one-dimensional bin numbers for row and column values resp.
-   * @param weights pair of weights for varying signal distribution
    *
    * @return contingency table for ordered pair data points
    */
   def buildTable(eng: Option[MersenneTwister])(
       data: DRData,
-      nb: Pair[NTuple[Int]],
-      weights: Option[Weight] = None): ConstructedTable = {
+      nb: Pair[NTuple[Int]]): ConstructedTable = {
 
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
@@ -219,12 +218,10 @@ object CTBuild {
       case None => addValues(table, (data.zippedVals).toList)
     }
 
-    weights match {
-      case None => new ConstructedTable(ct)
-      case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(ct, x))
-    }
+    new ConstructedTable(EstimateMI.makeUniform(ct))
 
   }
+
 }
 
 /**
@@ -259,6 +256,25 @@ object EstimateMI {
   def isUniform(t: Vector[Vector[Double]]): Boolean = {
     val rsums = t map (_.sum)
     !(rsums exists (_ != rsums.head))
+  }
+
+  /**
+   * Re-weights rows in a matrix to have approximately equal sums across rows.
+   *
+   * Empty rows with no observations (sums of 0) remain empty after weighting.
+   *
+   * @param t A 2D matrix of Doubles (e.g., a contingency table)
+   * @return A re-weighted matrix.
+   */
+  def makeUniform(t: Vector[Vector[Double]]): Vector[Vector[Double]] = {
+    if (isUniform(t)) t
+    else {
+      val rsums: Vector[Double] = t map (_.sum)
+      val total = rsums.sum
+      val uRow = total / t.length.toDouble
+      val uWts: List[Double] = (rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList
+      weightSignalData(t, uWts)
+    }
   }
 
   /**
@@ -341,9 +357,9 @@ object EstimateMI {
           shrinkTable(counter - 1, updatedIndices, numPossible - 1, newTable)
         }
       }
-      // Shrink the uniform table
+      // Shrink the uniform table and make uniform
       val sTable =
-        shrinkTable(numToRemove, nonzeroIndices, numPossible, t.table)
+        makeUniform(shrinkTable(numToRemove, nonzeroIndices, numPossible, t.table))
 
       // Reapply weights, if any
       weights match {
@@ -746,7 +762,7 @@ object EstimateMI {
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
     val engine = new MersenneTwister(seed)
     val tupleInit = (Vector[Double](), Vector[ConstructedTable]())
-    val table = buildTable(None)(data, binPair, wts)
+    val unifTable = buildTable(None)(data, binPair)
 
 
     val (invFracs, tables) = {
@@ -757,7 +773,7 @@ object EstimateMI {
 
       (fracTuples map { x =>
         val inv = invSS(x._1, data.sig)
-        val subTable = subSample(calcConfig)(x._1, table, wts)
+        val subTable = subSample(calcConfig)(x._1, unifTable, wts)
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
       }).unzip

@@ -3,7 +3,9 @@ package infcalcs.tables
 import infcalcs.MathFuncs
 
 /** A mixin for implementing contingency tables. */
-trait ContTable {
+abstract class ContTable[A](implicit n: Numeric[A]) {
+  import n.mkNumericOps
+
   /** The number of rows in the table. */
   val rows: Int
   /** The number of columns in the table. */
@@ -15,12 +17,19 @@ trait ContTable {
    * Note: depending on the weighting scheme being used, this number may be 0,
    * leading to NaN in output.
    */
-  lazy val numSamples: Double = (table map (x => x.sum)).sum
+  lazy val numSamples: A = (table map (x => x.sum)).sum
 
   /** The table of counts, as a matrix of integers. */
-  val table: Vector[Vector[Double]]
+  val table: Vector[Vector[A]]
   /** The table of counts, transposed. */
-  lazy val ttable: Vector[Vector[Double]] = table.transpose
+  lazy val ttable: Vector[Vector[A]] = table.transpose
+
+  /**
+   * Converts the current table to use Doubles
+   * @return
+   */
+  def tableWithDoubles: Vector[Vector[Double]] =
+    table map (x => x map (y => n toDouble y))
 
   /**
    * Converts a vector of counts to a marginal probability.
@@ -29,7 +38,7 @@ trait ContTable {
    * of samples in the table to give the probability of observing any of the
    * events tabulated in that vector.
    */
-  def probVect: Vector[Double] => Double = l => l.sum / numSamples
+  def probVect: Vector[A] => Double = l => l.sum.toDouble / numSamples.toDouble
 
   /**
    * Calculates an entropy term from a probability.
@@ -40,13 +49,13 @@ trait ContTable {
    * definition of entropy is E[-log(P(X)].
    */
   def eTerm(prob: Double): Double =
-    if (prob == 0) 0
-    else prob * MathFuncs.logb(2)(prob)
+    if (prob == 0.0) 0.0
+    else prob.toDouble * (math.log(prob.toDouble) / math.log(2))
 
   /**
    * Composition to produce marginal entropy function
    */
-  def margEntFunc: Vector[Double] => Double = probVect andThen eTerm
+  def margEntFunc: Vector[A] => Double = probVect andThen eTerm
 
   /**
    * Higher order function that returns a function for calculating the negated
@@ -56,10 +65,9 @@ trait ContTable {
    * @return function which applies f to a data set and calculates the
    *         negation of the resulting sum
    */
-  def mapNegSum[A, B](f: A => B)(implicit n: Numeric[B]): TraversableOnce[A] => B = {
-    import n.mkNumericOps
+  def mapNegSum[T](f: T => Double): TraversableOnce[T] => Double =
     s => -(s map f).sum
-  }
+
 
   /**
    * Returns the marginal entropy (marginalized across columns) of a 2D table.
@@ -80,7 +88,7 @@ trait ContTable {
    * @param t 2-dimensional vector of integer vectors
    * @return marginal entropy
    */
-  def margEntropy(t: Vector[Vector[Double]]): Double = mapNegSum(margEntFunc) apply t
+  def margEntropy(t: Vector[Vector[A]]): Double = mapNegSum(margEntFunc) apply t
 
   /**
    * Returns the conditional entropy of a 2D table (rows conditioned on cols).
@@ -102,11 +110,11 @@ trait ContTable {
    * @param t 2-dimensional vector of integer vectors
    * @return conditional entropy
    */
-  def condEntropy(t: Vector[Vector[Double]]): Double = {
+  def condEntropy(t: Vector[Vector[A]]): Double = {
     val trans = t.transpose
-    val probs = trans map probVect
-    val entList: Seq[Double] =
-      (trans.view map MathFuncs.freqToProb map mapNegSum(eTerm)).force
+    val probs: Vector[Double] = trans map probVect
+    val entList: Vector[Double] =
+      trans map MathFuncs.freqToProb map mapNegSum(eTerm)
     (for (p <- 0 until probs.length) yield probs(p) * entList(p)).sum
   }
 
@@ -158,18 +166,18 @@ trait ContTable {
 
   /** Checks two contingency tables for equality. */
   override def equals(ct: Any): Boolean = ct match {
-    case that: ContTable => this.table == that.table
+    case that: ContTable[A] => this.table == that.table
     case _ => false
   }
 
   /** Pretty-prints contingency table to string */
-  override def toString = (for (x <- table) yield (x mkString " ")).mkString("\n") + "]\n"
+  override def toString = (for (x <- table) yield x mkString " ").mkString("\n") + "]\n"
 
   /** Writes a contingency table to a file (with space-delimited columns). */
   def tableToFile(f: String) = {
     val writer =
       new java.io.BufferedWriter(new java.io.FileWriter(new java.io.File(f)))
-    val lines = for (r <- table) yield (r map (x => x + " "))
+    val lines = for (r <- table) yield r map (x => x.toString + " ")
     for (l <- lines) {
       writer.write(l.mkString(" ").trim())
       writer.newLine()

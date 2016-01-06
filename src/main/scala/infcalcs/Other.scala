@@ -8,10 +8,7 @@ import annotation.tailrec
 /** Contains a handful of useful mathematical functions. */
 object MathFuncs {
 
-  import math.{log, sqrt}
-
-  /** Returns the base b logarithm of a number. */
-  def logb(b: Int): Double => Double = (a: Double) => log(a) / log(b)
+  import math.sqrt
 
   /** Returns double truncated to nearest hundredth */
   def roundFrac(d: Double) = "%.2f" format d
@@ -20,11 +17,13 @@ object MathFuncs {
    * Converts frequencies to probabilities by normalizing each count by the
    * vector sum.
    */
-  def freqToProb: TraversableOnce[Double] => TraversableOnce[Double] =
+  def freqToProb[A](implicit n: Numeric[A]): TraversableOnce[A] => TraversableOnce[Double] = {
+    import n.mkNumericOps
     l => {
-      val s = l.sum
-      if (s != 0) l map (x => x / s) else l map (x => 0.0)
+      val s = l.sum.toDouble
+      if (s != 0) l map (_.toDouble / s) else l map (x => 0.0)
     }
+  }
 
   def avg(t: Seq[Double]): Double = t.sum / t.length.toDouble
 
@@ -89,6 +88,7 @@ object MathFuncs {
     val sig2 = sigmaTuple._2
     p1 * intUniG(mu1, sig1)(x) + p2 * intUniG(mu2, sig2)(x)
   }
+
 }
 
 /** Contains a handful of utility functions. */

@@ -154,7 +154,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   val ct = buildTable(None)(pl, numBins)
   val ctRand = buildTable(Some(testConfig.rEngine))(pl, numBins)
 
-  val ct2 = new ConstructedTable(Vector(Vector(1.0, 2.0),Vector(0.0, 3.0)))
+  val ct2 = new ConstructedTable[Int](Vector(Vector(1, 2),Vector(0, 3)))
 
   "isNotBiased" should "detect biased estimates" in {
 
@@ -169,15 +169,15 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "CtEntries" should "be built correctly from a ContTable" in {
     val entries = buildCtEntries(ct2)
-    entries shouldBe IndexedSeq(CtEntry((0,0),1.0),CtEntry((0,1),2.0),CtEntry((1,0),0.0),CtEntry((1,1),3.0))
+    entries shouldBe IndexedSeq(CtEntry((0,0),1),CtEntry((0,1),2),CtEntry((1,0),0),CtEntry((1,1),3))
   }
 
   it should "be updated correctly" in {
     val entries = buildCtEntries(ct2)
     val newEntries = decrementEntry(entries,1)
-    newEntries shouldBe IndexedSeq(CtEntry((0,0),1.0),CtEntry((0,1),1.0),CtEntry((1,0),0.0),CtEntry((1,1),3.0))
+    newEntries shouldBe IndexedSeq(CtEntry((0,0),1),CtEntry((0,1),1),CtEntry((1,0),0),CtEntry((1,1),3))
     val newEntries2 = decrementEntry(entries,0)
-    newEntries2 shouldBe IndexedSeq(CtEntry((0,1),2.0),CtEntry((1,0),0.0),CtEntry((1,1),3.0))
+    newEntries2 shouldBe IndexedSeq(CtEntry((0,1),2),CtEntry((1,0),0),CtEntry((1,1),3))
   }
 
   "subSample" should

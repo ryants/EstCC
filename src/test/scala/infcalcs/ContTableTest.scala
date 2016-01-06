@@ -10,13 +10,13 @@ class ContTableTest extends FlatSpec with Matchers {
 
   "A contingency table" should "be empty if created from an empty vector" in {
     val emptyTable = Vector()
-    val et = new ConstructedTable(emptyTable)
+    val et = new ConstructedTable[Double](emptyTable)
     et.rows shouldBe 0
     et.cols shouldBe 0
   }
 
   it should "be able to be created from a 2-D matrix of integers" in {
-    val ct1 = new ConstructedTable(table1)
+    val ct1 = new ConstructedTable[Double](table1)
     ct1.rows shouldBe 4
     ct1.cols shouldBe 2
     ct1.numSamples shouldBe 8

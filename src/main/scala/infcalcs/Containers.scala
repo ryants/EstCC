@@ -17,14 +17,16 @@ case class Weight(weights: List[Double], label: String)
 
 /**
  * Case class describing an entry in a [[tables.ContTable]] by pairing its
- * coordinates in the table with the value
+ * coordinates in the table with the value.  Note: Must be used with
+ * unweighted data since values are integers (weighting converts Ints to
+ * Doubles)
  *
  * @param coord
  * @param value
  */
-case class CtEntry(coord: Pair[Int], value: Double){
-  def decrement(v: Double = 1.0): CtEntry = CtEntry(coord, value - 1)
-  lazy val isShrinkable = value >= 1.0
+case class CtEntry(coord: Pair[Int], value: Int){
+  def decrement(v: Int = 1): CtEntry = CtEntry(coord, value - 1)
+  lazy val isShrinkable = value > 0
 }
 
 /**
@@ -38,8 +40,8 @@ case class CtEntry(coord: Pair[Int], value: Double){
  */
 case class RegData(
     iss: Vector[Double],
-    subContTables: Vector[ConstructedTable],
-    randContTableVect: Vector[Vector[ConstructedTable]],
+    subContTables: Vector[ConstructedTable[Double]],
+    randContTableVect: Vector[Vector[ConstructedTable[Double]]],
     labels: Vector[String])
 
 /**

@@ -3,7 +3,7 @@ package infcalcs.tables
 import infcalcs.IOFile._
 
 /** Class for reading contingency tables from a file. */
-class ImportedTable(fileName: String) extends ContTable {
+class ImportedTable(fileName: String) extends ContTable[Double] {
   val table: Vector[Vector[Double]] = importData(fileName)
 
   Predef.assert(table forall (x => x forall (_ >= 0.0)))

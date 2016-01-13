@@ -30,6 +30,23 @@ case class CtEntry(coord: Pair[Int], value: Int){
 }
 
 /**
+ *
+ * @param entries sequence of [[CtEntry]] instances
+ * @param total sum of [[CtEntry]] values
+ */
+case class CtEntrySeq(entries: IndexedSeq[CtEntry], total: Int){
+  def decrementEntry(index: Int): CtEntrySeq = {
+    val decEntry = entries(index).decrement()
+    val decSeq =
+      if (decEntry.isShrinkable) entries updated(index, decEntry)
+      else (entries take index) ++ (entries drop (index + 1))
+    CtEntrySeq(decSeq, total - 1)
+  }
+  def sort: CtEntrySeq = CtEntrySeq(entries sortBy (-_.value), total)
+  def apply(index: Int): CtEntry = entries(index)
+}
+
+/**
  * Case class holding all the necessary [[tables.ContTable]] data for performing the linear
  * regression estimates with an arbitrary numbers of randomizations
  *

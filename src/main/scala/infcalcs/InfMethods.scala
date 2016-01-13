@@ -285,34 +285,18 @@ object EstimateMI {
   }
 
   /**
-   * Builds a sequence of [[CtEntry]] instances.
+   * Builds a sequence of nonzero [[CtEntry]] instances inverse-sorted by value.
    *
    * @param t
    * @return
    */
-  def buildCtEntries(t: ContTable[Int]): IndexedSeq[CtEntry] =
-    for {
+  def buildCtEntries(t: ContTable[Int]): CtEntrySeq = {
+    val entries = for {
       r <- 0 until t.rows
       c <- 0 until t.cols
+      if (t.table(r)(c) > 0)
     } yield CtEntry((r, c), t.table(r)(c))
-
-  /**
-   * Updates a data structure tracking non-zero values in a [[tables.ContTable]]
-   *
-   * @param entries a Seq of [[tables.ContTable]] coordinates and the associated value
-   * @param index corresponds to an element of indices whose value is to be 
-   *              decreased by one or removed if less than 1
-   * @return an updated Seq
-   */
-  def decrementEntry(
-      entries: IndexedSeq[CtEntry],
-      index: Int): IndexedSeq[CtEntry] = {
-
-    val element = entries(index)
-    val newIndices = entries updated(index, element.decrement())
-
-    if (!newIndices(index).isShrinkable) (newIndices take index) ++ (newIndices drop (index + 1))
-    else newIndices
+    CtEntrySeq(entries, t.numSamples).sort
   }
 
   /**
@@ -338,27 +322,22 @@ object EstimateMI {
       // The fraction of observations to remove from the dataset
       val numToRemove = ((1 - frac) * t.numSamples).toInt
 
-      // All (row, column) index pairs
-      val allEntries = buildCtEntries(t)
-
       // Constructs list of (row, col) indices with shrinkable values (values >= 1.0),
       // sorted in decreasing order of the number of observations
-      val shrinkableEntries =
-        (allEntries filter (_.isShrinkable) sortBy (_.value)).reverse
+      val ctEntries = buildCtEntries(t)
 
-      val numPossible = (shrinkableEntries map (_.value)).sum
+      val numPossible = ctEntries.total
 
       // Randomly samples values to be removed from a contingency table and
       // returns the updated table
       @tailrec
       def shrinkTable(
           counter: Int,
-          validEntries: IndexedSeq[CtEntry],
-          numPossible: Double,
+          validEntries: CtEntrySeq,
           st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
         if (counter == 0) st
         else {
-          val randSample = calcConfig.rEngine.raw() * numPossible
+          val randSample = calcConfig.rEngine.raw() * validEntries.total
 
           @tailrec
           def findIndex(r: Double, curIndex: Int, cumuVal: Double): Int =
@@ -370,14 +349,13 @@ object EstimateMI {
           val (row, col) = validEntries(chosenIndex).coord
           val updatedTable: Vector[Vector[Int]] =
             st updated(row, st(row) updated(col, st(row)(col) - 1))
-          val updatedEntries = decrementEntry(validEntries, chosenIndex)
-          val updatedNumPossible = (updatedEntries map (_.value)).sum
-          shrinkTable(counter - 1, updatedEntries, updatedNumPossible, updatedTable)
+          val updatedEntries = validEntries decrementEntry chosenIndex
+          shrinkTable(counter - 1, updatedEntries, updatedTable)
         }
       }
       // Shrink the uniform table and make uniform
       val sTable =
-        makeUniform(shrinkTable(numToRemove, shrinkableEntries, numPossible, t.table))
+        makeUniform(shrinkTable(numToRemove, ctEntries, t.table))
 
       // Reapply weights, if any
       weights match {

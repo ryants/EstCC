@@ -167,17 +167,17 @@ class EstimateMITest extends FlatSpec with Matchers {
     isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
   }
 
-  "CtEntries" should "be built correctly from a ContTable" in {
+  "CtEntrySeq" should "be built correctly from a ContTable" in {
     val entries = buildCtEntries(ct2)
-    entries shouldBe IndexedSeq(CtEntry((0,0),1),CtEntry((0,1),2),CtEntry((1,0),0),CtEntry((1,1),3))
+    entries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),2),CtEntry((0,0),1)),6)
   }
 
   it should "be updated correctly" in {
     val entries = buildCtEntries(ct2)
-    val newEntries = decrementEntry(entries,1)
-    newEntries shouldBe IndexedSeq(CtEntry((0,0),1),CtEntry((0,1),1),CtEntry((1,0),0),CtEntry((1,1),3))
-    val newEntries2 = decrementEntry(entries,0)
-    newEntries2 shouldBe IndexedSeq(CtEntry((0,1),2),CtEntry((1,0),0),CtEntry((1,1),3))
+    val newEntries = entries decrementEntry 1
+    newEntries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),1),CtEntry((0,0),1)), 5)
+    val newEntries2 = entries decrementEntry 2
+    newEntries2 shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),2)), 5)
   }
 
   "subSample" should

@@ -10,7 +10,6 @@ object IOFile {
   import java.io.FileWriter
   import java.io.File
   import scala.io.Source.fromFile
-  import TreeDef.Tree
 
   /**
    * Loads a 2D data table from a file as a matrix of Doubles.
@@ -180,12 +179,12 @@ object IOFile {
   /**
    * Writes relevant delimiter information to file
    *
-   * @param dPair Pair of delimiters as [[NTuple]] of type [[TreeDef.Tree]]
+   * @param dPair Pair of delimiters as [[NTuple]] of type [[Tree]]
    * @param kPair Pair of mappings from n-dim data indices to 1-dim indices
    * @param s file name
    */
   def delimInfoToFile(
-      dPair: Pair[NTuple[Tree]],
+      dPair: Pair[NTuple[Tree[Double]]],
       kPair: Pair[Map[NTuple[Int], Int]],
       s: String): Unit = {
 

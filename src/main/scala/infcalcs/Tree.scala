@@ -1,78 +1,77 @@
 package infcalcs
 
-/** Implementation of binary trees containing Double values at each node.
-  *
-  * The trait [[TreeDef.Tree]] defines the methods and properties of each node in the
-  * tree: regular nodes are implemented by the class [[TreeDef.Node]], while empty
+/** Abstract binary tree definition that defines the methods and properties of each node in the
+  * tree: regular nodes are implemented by the class [[Node]], while empty
   * nodes (indicating that their parent is a terminal node) are implemented by
-  * the singleton object [[TreeDef.EmptyTree]].
+  * the singleton object [[EmptyTree]].
   *
+  * Implemented by the class [[Node]] and the object [[EmptyTree]].
   * A binary tree for a set of numbers (Doubles) is constructed by first
-  * obtaining an ordered (but unconnected) list of [[TreeDef.Node]] instances using the
-  * function [[TreeDef.buildOrderedNodeList]]. The ordered list of Nodes returned by
-  * this function can then be passed to the function [[TreeDef.buildTree]] to return an
-  * instance of [[TreeDef.Tree]] containing the binary tree.
+  * obtaining an ordered (but unconnected) list of [[Node]] instances using the
+  * function [[Tree.buildOrderedNodeList]]. The ordered list of Nodes returned by
+  * this function can then be passed to the function [[Tree.buildTree]] to return an
+  * instance of [[Tree]] containing the binary tree.
   */
-object TreeDef {
+trait Tree[+T] {
+  /** Returns whether the tree or subtree is empty. */
+  def isEmpty: Boolean
 
-  /** Abstract binary tree definitions.
-    *
-    * Implemented by the class [[Node]] and the object [[EmptyTree]].
-    */
-  trait Tree {
-    /** Returns whether the tree or subtree is empty. */
-    def isEmpty: Boolean
+  /** Converts the tree to a list. */
+  def toList: List[T]
 
-    /** Converts the tree to a list. */
-    def toList: List[Double]
+  /** The number of nodes in this tree or subtree. */
+  val entries: Int
+  /** The index of this node. */
+  val index: Int
+  /** The "left" subtree. */
+  val left: Tree[T]
+  /** The "right" subtree. */
+  val right: Tree[T]
+  /** The value associated with this node. */
+  val value: Option[T]
 
-    /** The number of nodes in this tree or subtree. */
-    val entries: Int
-    /** The index of this node. */
-    val index: Int
-    /** The "left" subtree. */
-    val left: Tree
-    /** The "right" subtree. */
-    val right: Tree
-    /** The value associated with this node. */
-    val value: Option[Double]
+  /** The index of the node containing the maximum value within the subtree. */
+  def maxValIndex: Int
+  /** The value of the node containing the maximum value */
+  def maxVal: T
+}
 
-    /** The index of the node containing the maximum value within the subtree. */
-    def maxValIndex: Int
-  }
+/** A node representing the head of a subtree in a binary tree.
+  *
+  * Each node contains both an index and a value.
+  */
+case class Node[T](
+    val index: Int,
+    val value: Some[T],
+    val left: Tree[T],
+    val right: Tree[T]) extends Tree[T] {
+  def isEmpty: Boolean = false
 
-  /** A node representing the head of a subtree in a binary tree.
-    *
-    * Each node contains both an index and a value.
-    */
-  case class Node(
-      val index: Int,
-      val value: Some[Double],
-      val left: Tree,
-      val right: Tree) extends Tree {
-    def isEmpty: Boolean = false
+  val entries: Int = 1 + left.entries + right.entries
 
-    val entries: Int = 1 + left.entries + right.entries
+  def maxVal: T = if (right.isEmpty) value.get else right.maxVal
+  def maxValIndex: Int = if (right.isEmpty) index else right.maxValIndex
 
-    def maxValIndex: Int = if (right.isEmpty) index else right.maxValIndex
+  def toList: List[T] = left.toList ++ List(value.get) ++ right.toList
+}
 
-    def toList: List[Double] = left.toList ++ List(value.get) ++ right.toList
-  }
+/** Singleton object representing a nonexistent child of a terminal node. */
+case object EmptyTree extends Tree[Nothing] {
+  val entries = 0
+  val index = -1
+  val left = EmptyTree
+  val right = left
+  val value = None
 
-  /** Singleton object representing a nonexistent child of a terminal node. */
-  case object EmptyTree extends Tree {
-    val entries = 0
-    val index = -1
-    val left = EmptyTree
-    val right = left
-    val value = None
+  def maxValIndex = index
+  def maxVal: Nothing = ???
 
-    def maxValIndex = index
+  def isEmpty: Boolean = true
 
-    def isEmpty: Boolean = true
+  def toList = Nil
+}
 
-    def toList: List[Double] = List()
-  }
+object Tree {
 
   /** Given a list, finds the index of the middle value.
     *
@@ -100,25 +99,17 @@ object TreeDef {
     *
     * @param l An (unordered) list of Doubles
     */
-  def buildOrderedNodeList(l: List[Double]): List[Node] = {
+  def buildOrderedNodeList[A](l: List[A])(implicit o: Ordering[A]): List[Node[A]] = {
     val s = l.sorted
     (0 until s.length).toList map
         (x => Node(x, Some(s(x)), EmptyTree, EmptyTree))
   }
 
-  /** Recursively constructs a binary tree from an ordered list of nodes.
-    *
-    * Given an ordered list of [[Node]]s, (e.g., created by
-    * [[buildOrderedNodeList]], return the binary tree containing the nodes.
-    *
-    * @param l A list of nodes sorted by increasing value.
-    * @return An instance of [[Tree]] containing the binary tree.
-    */
-  def buildTree(l: List[Node]): Tree = {
+  def buildTree[A](l: List[Node[A]]): Tree[A] =
     if (l.isEmpty) EmptyTree
     else {
       val m = medSplit(l)
       new Node(l(m._1).index, l(m._1).value, buildTree(m._2), buildTree(m._3))
     }
-  }
+
 }

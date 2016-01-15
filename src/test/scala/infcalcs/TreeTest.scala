@@ -1,7 +1,10 @@
 package infcalcs
 
+import infcalcs.tables.ConstructedTable
 import org.scalatest._
-import TreeDef._
+import Tree._
+import EstimateMI.buildCtEntries
+import CTBuild.findIndex
 
 class TreeTest extends FlatSpec with Matchers {
 
@@ -55,4 +58,19 @@ class TreeTest extends FlatSpec with Matchers {
     val bt = buildTree(l)
     bt.isEmpty shouldBe true
   }
+
+  it should "work for trees with CtEntry instances" in {
+    val table = Vector(Vector(1,2),Vector(0,3))
+    val ct = new ConstructedTable[Int](table)
+    val entries = buildCtEntries(ct)
+    val entry1 = CtEntry((1,1),3)
+    val entry2 = CtEntry((0,1),2)
+    val entry3 = CtEntry((0,0),1)
+    entries shouldBe CtEntrySeq(Vector(entry1,entry2,entry3),6)
+    val e = EmptyTree
+    val entryTree = buildTree(buildOrderedNodeList(entries.toList))
+    entryTree shouldBe Node(1,Some(entry2),Node(0,Some(entry1),e,e),Node(2,Some(entry3),e,e))
+    findIndex(entry1,entryTree) shouldBe 0
+  }
+
 }

@@ -19,12 +19,13 @@ case class Weight(weights: List[Double], label: String)
  * Case class describing an entry in a [[tables.ContTable]] by pairing its
  * coordinates in the table with the value.  Note: Must be used with
  * unweighted data since values are integers (weighting converts Ints to
- * Doubles)
+ * Doubles).  Ordered is specified to sort from largest to smallest
  *
  * @param coord
  * @param value
  */
-case class CtEntry(coord: Pair[Int], value: Int){
+case class CtEntry(coord: Pair[Int], value: Int) extends Ordered[CtEntry] {
+  def compare(that: CtEntry) = that.value compare this.value
   def decrement(v: Int = 1): CtEntry = CtEntry(coord, value - 1)
   lazy val isShrinkable = value > 0
 }
@@ -42,7 +43,8 @@ case class CtEntrySeq(entries: IndexedSeq[CtEntry], total: Int){
       else (entries take index) ++ (entries drop (index + 1))
     CtEntrySeq(decSeq, total - 1)
   }
-  def sort: CtEntrySeq = CtEntrySeq(entries sortBy (-_.value), total)
+  def sort: CtEntrySeq = CtEntrySeq(entries.sorted, total)
+  def toList: List[CtEntry] = entries.toList
   def apply(index: Int): CtEntry = entries(index)
 }
 

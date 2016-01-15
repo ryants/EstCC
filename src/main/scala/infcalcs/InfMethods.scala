@@ -5,7 +5,7 @@ import tables.{ContTable, ConstructedTable}
 
 import annotation.tailrec
 import math._
-import TreeDef._
+import Tree._
 
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
@@ -70,15 +70,17 @@ object CTBuild {
    * @param dim The binary tree specifying the bounds of each bin.
    * @return The index of the bin that should contain the value.
    */
-  def findIndex(value: Double, dim: Tree): Int = {
-    @tailrec
-    def trace(curIndex: Int, curNode: Tree): Int = {
-      if (curNode.isEmpty) curIndex
-      else if (value <= curNode.value.get) trace(curNode.index, curNode.left)
-      else trace(curIndex, curNode.right)
+  def findIndex[A](value: A, dim: Tree[A])(implicit ev: Ordering[A]): Int =
+    if (ev.gt(value, dim.maxVal)) dim.maxValIndex
+    else {
+      @tailrec
+      def trace(curIndex: Int, curNode: Tree[A]): Int = {
+        if (curNode.isEmpty) curIndex
+        else if (ev.lteq(value, curNode.value.get)) trace(curNode.index, curNode.left)
+        else trace(curIndex, curNode.right)
+      }
+      trace(dim.index, dim)
     }
-    trace(dim.maxValIndex, dim)
-  }
 
   /**
    * Multiplies the values in each row of a contingency table by a weight.
@@ -111,7 +113,7 @@ object CTBuild {
    * @param numBins The number of bins to divide the list into.
    * @return Binary tree containing the maximum value in each bin.
    */
-  def getBinDelims(v: Vector[Double], numBins: Int): Tree = {
+  def getBinDelims(v: Vector[Double], numBins: Int): Tree[Double] = {
     val delimList = partitionList(v, numBins) map (_.max)
     buildTree(buildOrderedNodeList(delimList))
   }
@@ -153,7 +155,7 @@ object CTBuild {
    */
   def findVectIndex(
       tuple: NTuple[Double],
-      binDelims: NTuple[Tree],
+      binDelims: NTuple[Tree[Double]],
       m: Map[NTuple[Int], Int]): Int = {
 
     val indices: Vector[Int] = (Range(0, tuple.length) map (x =>
@@ -296,7 +298,7 @@ object EstimateMI {
       c <- 0 until t.cols
       if (t.table(r)(c) > 0)
     } yield CtEntry((r, c), t.table(r)(c))
-    CtEntrySeq(entries, t.numSamples).sort
+    CtEntrySeq(entries.sorted, t.numSamples)
   }
 
   /**
@@ -873,7 +875,7 @@ object EstimateCC {
    * table (a sort of 'unweighting' of the uniformly weighted data prior to
    * its uni/bi-modal weighting)
    */
-  def normWeight(bounds: Tree)(p: Double): Double =
+  def normWeight(bounds: Tree[Double])(p: Double): Double =
     p / (1.0 / bounds.toList.length.toDouble)
 
   /**
@@ -883,7 +885,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
+  def uniWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("uniMuNumber").toInt == 0) Nil
     else {
@@ -937,7 +939,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
+  def biWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("biMuNumber") < 3) Nil
     else {
@@ -1011,7 +1013,7 @@ object EstimateCC {
    *           function; not actually used in function).
    * @return List of piece-wise weights
    */
-  def pwWeight(calcConfig: CalcConfig)(bounds: Tree, in: List[Double]): List[Weight] =
+  def pwWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
     if (calcConfig.numParameters("pwUnifWeights") == 0) {
       Nil
     } else {
@@ -1051,10 +1053,10 @@ object EstimateCC {
    */
   def genWeights(
       sig: Vector[NTuple[Double]],
-      weightFunc: (Tree, List[Double]) => List[Weight]): NTuple[Tree] => List[Weight] = {
+      weightFunc: (Tree[Double], List[Double]) => List[Weight]): NTuple[Tree[Double]] => List[Weight] = {
 
     val sigT = sig.transpose
-    (pBounds: NTuple[Tree]) => {
+    (pBounds: NTuple[Tree[Double]]) => {
       val w = sigT.indices map (x => weightFunc(pBounds(x), sigT(x).toList))
       w.transpose.toList map (x => makeJoint(x.toVector))
     }

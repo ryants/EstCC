@@ -168,12 +168,12 @@ class EstimateMITest extends FlatSpec with Matchers {
   }
 
   "CtEntrySeq" should "be built correctly from a ContTable" in {
-    val entries = buildCtEntries(ct2)
+    val entries = buildCtEntries(ct2).sortLargeToSmall
     entries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),2),CtEntry((0,0),1)),6)
   }
 
   it should "be updated correctly" in {
-    val entries = buildCtEntries(ct2)
+    val entries = buildCtEntries(ct2).sortLargeToSmall
     val newEntries = entries decrementEntry 1
     newEntries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),1),CtEntry((0,0),1)), 5)
     val newEntries2 = entries decrementEntry 2

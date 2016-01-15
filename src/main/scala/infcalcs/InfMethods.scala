@@ -298,7 +298,7 @@ object EstimateMI {
       c <- 0 until t.cols
       if (t.table(r)(c) > 0)
     } yield CtEntry((r, c), t.table(r)(c))
-    CtEntrySeq(entries.sorted, t.numSamples)
+    CtEntrySeq(entries, t.numSamples)
   }
 
   /**
@@ -326,7 +326,7 @@ object EstimateMI {
 
       // Constructs list of (row, col) indices with shrinkable values (values >= 1.0),
       // sorted in decreasing order of the number of observations
-      val ctEntries = buildCtEntries(t)
+      val ctEntries = buildCtEntries(t).sortLargeToSmall
 
       val numPossible = ctEntries.total
 

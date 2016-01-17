@@ -93,13 +93,14 @@ object CTBuild {
    * @param wts List of weights.
    * @return The weighted contingency table, as a matrix of integers.
    */
-  def weightSignalData(
-      t: Vector[Vector[Double]],
-      wts: List[Double]): Vector[Vector[Double]] = {
+  def weightSignalData[A](
+      t: Vector[Vector[A]],
+      wts: List[Double])(implicit n: Numeric[A]): Vector[Vector[Double]] = {
 
+    import n.mkNumericOps
     require(t.length == wts.length, "number of rows must equal number of weights")
     t.indices.toVector map (v => t(v) map (x =>
-      x * wts(v)))
+      x.toDouble * wts(v)))
   }
 
   /**
@@ -287,87 +288,6 @@ object EstimateMI {
   }
 
   /**
-   * Builds a sequence of nonzero [[CtEntry]] instances inverse-sorted by value.
-   *
-   * @param t
-   * @return
-   */
-  def buildCtEntries(t: ContTable[Int]): CtEntrySeq = {
-    val entries = for {
-      r <- 0 until t.rows
-      c <- 0 until t.cols
-      if (t.table(r)(c) > 0)
-    } yield CtEntry((r, c), t.table(r)(c))
-    CtEntrySeq(entries, t.numSamples)
-  }
-
-  /**
-   * Resample a fraction of data by modifying an unweighted contingency table.
-   *
-   * Resamples the data by decrementing (nonzero) counts in the contingency table at
-   * randomly chosen indices. Finally, an optional weights vector is applied to the rows.
-   * Note: this function will not work unless the table is unweighted, since entries must
-   * be integers (shrinking the table is essentially removing discrete data points)
-   *
-   * @param frac Fraction of the observations to keep in the resampled table.
-   * @param t The contingency table to be resampled.
-   * @param weights Weights to be applied to rows after resampling (if any).
-   * @return The resampled contingency table.
-   */
-  def subSample(calcConfig: CalcConfig)(
-      frac: Double,
-      t: ContTable[Int],
-      weights: Option[Weight] = None): ConstructedTable[Double] = {
-
-    if (frac == 1.0) new ConstructedTable[Double](t.tableWithDoubles)
-    else {
-      // The fraction of observations to remove from the dataset
-      val numToRemove = ((1 - frac) * t.numSamples).toInt
-
-      // Constructs list of (row, col) indices with shrinkable values (values >= 1.0),
-      // sorted in decreasing order of the number of observations
-      val ctEntries = buildCtEntries(t).sortLargeToSmall
-
-      val numPossible = ctEntries.total
-
-      // Randomly samples values to be removed from a contingency table and
-      // returns the updated table
-      @tailrec
-      def shrinkTable(
-          counter: Int,
-          validEntries: CtEntrySeq,
-          st: Vector[Vector[Int]]): Vector[Vector[Int]] = {
-        if (counter == 0) st
-        else {
-          val randSample = calcConfig.rEngine.raw() * validEntries.total
-
-          @tailrec
-          def findIndex(r: Double, curIndex: Int, cumuVal: Double): Int =
-            if (cumuVal + validEntries(curIndex).value > r) curIndex
-            else findIndex(r, curIndex + 1, cumuVal + validEntries(curIndex).value)
-
-          val chosenIndex = findIndex(randSample, 0, 0)
-
-          val (row, col) = validEntries(chosenIndex).coord
-          val updatedTable: Vector[Vector[Int]] =
-            st updated(row, st(row) updated(col, st(row)(col) - 1))
-          val updatedEntries = validEntries decrementEntry chosenIndex
-          shrinkTable(counter - 1, updatedEntries, updatedTable)
-        }
-      }
-      // Shrink the uniform table and make uniform
-      val sTable =
-        makeUniform(shrinkTable(numToRemove, ctEntries, t.table))
-
-      // Reapply weights, if any
-      weights match {
-        case None => new ConstructedTable(sTable)
-        case Some(Weight(x, tag)) => new ConstructedTable(weightSignalData(sTable, x))
-      }
-    }
-  }
-
-  /**
    * Calculates the inverse sample size for subsampling data
    *
    * @param f fraction of data to sample
@@ -403,6 +323,20 @@ object EstimateMI {
       respBins: NTuple[Int]): Boolean =
     respBins.product <= p.resp.toSet.size * calcConfig.listParameters("sampleFractions").min
 
+  /**
+   * Function to weight a contingency table or, in the absence of a [[Weight]], make
+   * a uniform signal distribution
+   *
+   * @param ct
+   * @param wts
+   * @return [[ConstructedTable]]
+   */
+  def addWeight(ct: ContTable[Int], wts: Option[Weight]): ConstructedTable[Double] = {
+    wts match {
+      case None => new ConstructedTable[Double](makeUniform(ct.tableWithDoubles))
+      case Some(w) => new ConstructedTable[Double](weightSignalData(ct.table,w.weights))
+    }
+  }
 
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
@@ -413,7 +347,7 @@ object EstimateMI {
    * unbiased estimation of MI at each bin size) and randomly shuffled
    * contingency tables (for selection of the appropriate bin size).
    *
-   * Resampling of the dataset is performed using the [[subSample]] method.
+   * Resampling of the dataset is performed using the [[DRData.subSample]] method.
    *
    * The return value is a tuple containing:
    * - a list of the inverse sample sizes for each resampling fraction. This
@@ -433,7 +367,6 @@ object EstimateMI {
    *
    * @param binPair Pair of tuples containing the numbers of row and column bins.
    * @param data The input/output dataset.
-   * @param seed PRNG seed
    * @param wts An optional weights vector to be applied to the rows.
    *
    * @return (inverse sample sizes, CTs, randomized CTs, labels)
@@ -441,31 +374,24 @@ object EstimateMI {
   def buildRegData(calcConfig: CalcConfig)(
       binPair: Pair[NTuple[Int]],
       data: DRData,
-      seed: Int,
       wts: Option[Weight] = None): RegData = {
 
-    val engine = new MersenneTwister(seed)
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
-    // generates data with subSample method
-    val unweightedTable = buildTable(None)(data, binPair)
-    val randUnweightedTables =
-      (0 until numRandTables) map (y =>
-        buildTable(Some(engine))(data, binPair))
-
-    val (invFracs, subSamples, randSubSamples) = {
-      val tuples = calcConfig.fracList map { x =>
-        val inv = invSS(x, data.sig)
-        val subTable =
-          subSample(calcConfig)(x, unweightedTable, wts)
-        val randSubTables = randUnweightedTables map (y => subSample(calcConfig)(x, y, wts))
+    val (invFracs, tables, randTables) = {
+      val tuples = calcConfig.fracList.toVector map {x =>
+        val subData = data subSample x
+        val inv = invSS(x,data.sig)
+        val subTable = addWeight(buildTable(None)(subData, binPair),wts)
+        val randSubTables = (0 until numRandTables) map (y =>
+          addWeight(buildTable(Some(calcConfig.rEngine))(subData, binPair),wts))
         (inv, subTable, randSubTables)
       }
       tuples.unzip3
     }
 
     val l = wts match {
-      case None => "n"
+      case None => "Unif"
       case Some(Weight(wtList, tag)) => tag
     }
 
@@ -481,7 +407,7 @@ object EstimateMI {
         f % calcConfig.numParameters("repsPerFraction").toInt
       }"
 
-    RegData(invFracs, subSamples, randSubSamples.transpose, tags :+
+    RegData(invFracs, tables, randTables.transpose, tags :+
         s"${l}_r${rBinPair}_c${cBinPair}")
   }
 
@@ -585,19 +511,17 @@ object EstimateMI {
       numConsecRandPos: Int = 0,
       res: Vector[EstTuple] = Vector()): Vector[EstTuple] = {
 
-    val seed = genSeed(calcConfig.rEngine)
-
     val outOfRespBins = !moreRespBinsLeft(calcConfig)(pl, binPair._2)
 
     if (calcConfig.srParameters("responseValues").isDefined) {
-      val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
       val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
       Vector(EstTuple(binPair, intercepts, wts, notBiased))
     } else if (outOfRespBins || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
-      val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
       val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
       val est = EstTuple(binPair, intercepts, wts, notBiased)
@@ -628,8 +552,7 @@ object EstimateMI {
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
-      val seed = genSeed(calcConfig.rEngine)
-      val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
       val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
       Vector(EstTuple(binPair, intercepts, wts, notBiased))
@@ -642,8 +565,7 @@ object EstimateMI {
           moreRespBinsLeft(calcConfig)(pl, responseBins)) {
 
         val binPair = (signalBins, responseBins)
-        val seed = genSeed(calcConfig.rEngine)
-        val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
+        val regData = buildRegData(calcConfig)(binPair, pl, wts)
         val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
         val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
         val est = EstTuple(binPair, intercepts, wts, notBiased)
@@ -765,10 +687,6 @@ object EstimateMI {
       data: DRData,
       seed: Int,
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
-    val engine = new MersenneTwister(seed)
-    val tupleInit = (Vector[Double](), Vector[ConstructedTable[Double]]())
-    val unweightedTable = buildTable(None)(data, binPair)
-
 
     val (invFracs, tables) = {
       val fracTuples: List[(Double, Int)] = for {
@@ -778,7 +696,7 @@ object EstimateMI {
 
       (fracTuples map { x =>
         val inv = invSS(x._1, data.sig)
-        val subTable = subSample(calcConfig)(x._1, unweightedTable, wts)
+        val subTable = addWeight(buildTable(None)(data subSample x._1, binPair),wts)
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
       }).unzip

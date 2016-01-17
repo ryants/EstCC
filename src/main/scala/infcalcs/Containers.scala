@@ -16,40 +16,6 @@ import infcalcs.tables.ConstructedTable
 case class Weight(weights: List[Double], label: String)
 
 /**
- * Case class describing an entry in a [[tables.ContTable]] by pairing its
- * coordinates in the table with the value.  Note: Must be used with
- * unweighted data since values are integers (weighting converts Ints to
- * Doubles).
- *
- * @param coord
- * @param value
- */
-case class CtEntry(coord: Pair[Int], value: Int) extends Ordered[CtEntry] {
-  def compare(that: CtEntry) = this.value compare that.value
-  def decrement(v: Int = 1): CtEntry = CtEntry(coord, value - 1)
-  lazy val isShrinkable = value > 0
-}
-
-/**
- *
- * @param entries sequence of [[CtEntry]] instances
- * @param total sum of [[CtEntry]] values
- */
-case class CtEntrySeq(entries: IndexedSeq[CtEntry], total: Int){
-  def decrementEntry(index: Int): CtEntrySeq = {
-    val decEntry = entries(index).decrement()
-    val decSeq =
-      if (decEntry.isShrinkable) entries updated(index, decEntry)
-      else (entries take index) ++ (entries drop (index + 1))
-    CtEntrySeq(decSeq, total - 1)
-  }
-  def sort: CtEntrySeq = CtEntrySeq(entries.sorted, total)
-  def sortLargeToSmall: CtEntrySeq = CtEntrySeq(entries sortBy (-_.value), total)
-  def toList: List[CtEntry] = entries.toList
-  def apply(index: Int): CtEntry = entries(index)
-}
-
-/**
  * Case class holding all the necessary [[tables.ContTable]] data for performing the linear
  * regression estimates with an arbitrary numbers of randomizations
  *

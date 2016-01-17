@@ -104,19 +104,22 @@ object OtherFuncs {
   /**
    * Returns a shuffled list.
    *
-   * A custom shuffling algorithm using an instance of a Mersenne Twister
+   * A Fisher-Yates shuffling algorithm using an instance of a Mersenne Twister
    * pseudorandom number generator and a mutable array.
    *
-   * @param l The list to be shuffled.
-   * @param e The MersenneTwister random number generator to use for shuffling.
-   * @return The shuffled list.
+   * @param l sequence to shuffle
+   * @param e PRNG
+   * @param n number of elements to shuffle (starting from lowest index)
+   * @tparam A
+   * @return
    */
   def myShuffle[A: scala.reflect.ClassTag](
       l: Seq[A],
-      e: MersenneTwister): Vector[A] = {
+      e: MersenneTwister,
+      n: Int): Vector[A] = {
     val a: Array[A] = l.toArray
-    for (i <- (1 until l.length).reverse) {
-      val j = (e.raw() * (i + 1)).toInt
+    for (i <- 0 to n-2) {
+      val j = (e.raw() * (l.length - i)).toInt + i
       val t = a(i)
       a(i) = a(j)
       a(j) = t
@@ -124,6 +127,16 @@ object OtherFuncs {
     a.toVector
   }
 
+  /**
+   *
+   * @param l
+   * @param e
+   * @tparam A
+   * @return
+   */
+  def myShuffle[A: scala.reflect.ClassTag](
+      l: Seq[A],
+      e: MersenneTwister): Vector[A] = myShuffle(l,e,l.length)
 
   /**
    * Parses strings specifying list or range parameters.

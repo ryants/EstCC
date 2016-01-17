@@ -1,6 +1,7 @@
 package infcalcs
 
 import Tree._
+import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
 
 /**
@@ -176,6 +177,20 @@ class DRData(calcConfig: CalcConfig)
    */
   def respKey(numBins: NTuple[Int]): Map[NTuple[Int], Int] =
     keys(exRespKeys, respDelims(numBins), numBins)
+
+  /**
+   * Takes a subsample of the data and returns a new [[DRData]] given
+   * some fraction.
+   *
+   * @param frac
+   * @return
+   */
+  def subSample(frac: Double): DRData = {
+    val numToRemove = ((1-frac) * numObs).toInt
+    val subSamp = OtherFuncs.myShuffle(zippedVals,calcConfig.rEngine,numToRemove) drop numToRemove
+    val (subSig, subResp) = subSamp.unzip
+    new DRData(calcConfig)(subSig, subResp)
+  }
 
   /**
    * Writes data to stdout

@@ -167,48 +167,26 @@ class EstimateMITest extends FlatSpec with Matchers {
     isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
   }
 
-  "CtEntrySeq" should "be built correctly from a ContTable" in {
-    val entries = buildCtEntries(ct2).sortLargeToSmall
-    entries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),2),CtEntry((0,0),1)),6)
-  }
+  "DRData" should "correctly generate subsamples of its data" in {
 
-  it should "be updated correctly" in {
-    val entries = buildCtEntries(ct2).sortLargeToSmall
-    val newEntries = entries decrementEntry 1
-    newEntries shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),1),CtEntry((0,0),1)), 5)
-    val newEntries2 = entries decrementEntry 2
-    newEntries2 shouldBe CtEntrySeq(IndexedSeq(CtEntry((1,1),3),CtEntry((0,1),2)), 5)
-  }
+    def genValue = testConfig.rEngine.raw() * 100
 
-  "subSample" should
-    "shrink the number of observations in a contingency table" in {
-      val sample = subSample(testConfig)(0.5, ct)
-      ct.numSamples shouldBe 8
-      sample.numSamples shouldBe 4
-
-      val sampleRand = subSample(testConfig)(0.75, ct)
-      sampleRand.numSamples shouldBe 6
+    val plRand = {
+      val data = ((0 until 100).toVector map (x => (Vector(genValue),Vector(genValue)))).unzip
+      new DRData(testConfig)(data._1, data._2)
     }
+    val sub1 = plRand subSample 0.6
+    sub1.numObs shouldBe 60
 
-  it should "keep the number of contingency table entries constant" in {
-    val fracs = List(0.6, 0.7, 0.8, 0.9, 1.0)
-    val doseRand = (0 until 1000).toVector map (x => Vector(testConfig.rEngine.raw()*10.0))
-    val respRand = (0 until 1000).toVector map (x => Vector(testConfig.rEngine.raw()*10.0))
-    val plRand = new DRData(testConfig)(doseRand, respRand)
+    (sub1.zippedVals.toSet union (plRand.zippedVals diff sub1.zippedVals).toSet) shouldBe plRand.zippedVals.toSet
 
-    val ct = buildTable(None)(plRand, (Vector(10),Vector(10)))
-    val wts = Weight(List(0.1, 0.05, 0.05, 0.2, 0.1, 0.1, 0.05, 0.05, 0.2, 0.1), "test")
-    assert(wts.weights.sum === 1.0 +- 0.001)
-
-    val subs = fracs map (f => subSample(testConfig)(f, ct, Some(wts)))
-    subs.indices forall (y => (subs(y).numSamples / 1000.0) === fracs(y) +- 0.1)
   }
 
   "buildRegData" should "return an appropriate RegData data structure" in {
     // Get the RegDataMult result
     val numReps = testConfig.numParameters("repsPerFraction").toInt
     // Seeded with some integer
-    val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
+    val rdm = buildRegData(testConfig)(numBins, pl)
     // Check the inverse sample sizes
     val fracs = testConfig.listParameters("sampleFractions")
     val invss = rdm.iss
@@ -234,7 +212,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {
-    val rdm = buildRegData(testConfig)(numBins, pl, 1234567)
+    val rdm = buildRegData(testConfig)(numBins, pl)
     val regs = calcMultRegs(testConfig)(rdm)
     regs._2.length shouldBe testConfig.numParameters("numRandom").toInt
   }

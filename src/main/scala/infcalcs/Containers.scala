@@ -71,11 +71,13 @@ case class RegData(
  * @param pairBinTuples numbers of bins for given data dimensionality
  * @param estimates pairs of (mean, 95% conf) values
  * @param weight
+ * @param unbiased true if estimate is not biased
  */
 case class EstTuple(
     pairBinTuples: Pair[NTuple[Int]],
     estimates: Estimates,
-    weight: Option[Weight])
+    weight: Option[Weight],
+    unbiased: Boolean)
 
 /**
  * Case class with the actual and randomized mutual information estimates.

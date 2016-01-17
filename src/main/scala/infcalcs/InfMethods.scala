@@ -592,18 +592,20 @@ object EstimateMI {
     if (calcConfig.srParameters("responseValues").isDefined) {
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      Vector(EstTuple(binPair, intercepts, wts))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, intercepts, wts, notBiased))
     } else if (outOfRespBins || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      val est = EstTuple(binPair, intercepts, wts)
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      val est = EstTuple(binPair, intercepts, wts, notBiased)
 
       val newBins = (binPair._1, updateRespBinNumbers(calcConfig)(binPair._2))
       val newRes = res :+ est
 
-      if (isNotBiased(calcConfig)(est.estimates.randDataEstimate))
+      if (notBiased)
         genEstimatesMult(calcConfig)(pl, newBins, wts, 0, newRes)
       else
         genEstimatesMult(calcConfig)(pl, newBins, wts, numConsecRandPos + 1, newRes)
@@ -629,7 +631,8 @@ object EstimateMI {
       val seed = genSeed(calcConfig.rEngine)
       val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
       val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      Vector(EstTuple(binPair, intercepts, wts))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, intercepts, wts, notBiased))
     } else {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
@@ -642,11 +645,12 @@ object EstimateMI {
         val seed = genSeed(calcConfig.rEngine)
         val regData = buildRegData(calcConfig)(binPair, pl, seed, wts)
         val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-        val est = EstTuple(binPair, intercepts, wts)
+        val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+        val est = EstTuple(binPair, intercepts, wts, notBiased)
 
         res = res :+ est
 
-        if (isNotBiased(calcConfig)(est.estimates.randDataEstimate)) numConsecRandPos = 0
+        if (notBiased) numConsecRandPos = 0
         else numConsecRandPos += 1
 
         responseBins = updateRespBinNumbers(calcConfig)(responseBins)
@@ -739,9 +743,10 @@ object EstimateMI {
       EstTuple(
         baseTuple,
         baseEstimates,
-        None)
+        None,
+        true)
 
-    opt(base, d filter (x => isNotBiased(calcConfig)(x.estimates.randDataEstimate)))
+    opt(base, d filter (_.unbiased))
   }
 
   /**

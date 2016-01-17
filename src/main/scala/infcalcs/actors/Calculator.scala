@@ -18,7 +18,7 @@ class Calculator(implicit calcConfig: CalcConfig) extends Actor {
         if (EstCC.appConfig.verbose) EstimateMI.genEstimatesMultImp(resetCalcConfig)(p, s, w)
         else EstimateMI.genEstimatesMult(resetCalcConfig)(p, binPair, w)
       //if only numConsecRandPos EstTuples are created, they all must be biased
-      val biased = estMI.length == calcConfig.numParameters("numConsecRandPos").toInt
+      val biased = estMI forall (!_.unbiased)
       calcConfig.outF match {
         case Some(str) => IOFile.estimatesToFileMult(
           estMI,

@@ -19,10 +19,12 @@ import scala.collection.mutable.HashMap
 class DRData(calcConfig: CalcConfig)
     (val sig: Vector[NTuple[Double]], val resp: Vector[NTuple[Double]]) {
 
-  Predef.assert(sig.length == resp.length)
+  val numObs = sig.length
+
+  Predef.assert(numObs == resp.length)
   Predef.assert(checkSize(sig) == 1 && checkSize(resp) == 1)
 
-  lazy val zippedVals = (sig, resp).zipped.toSeq
+  val zippedVals = (sig, resp).zipped.toVector
 
   lazy val sigVals = calcConfig.srParameters("signalValues")
   lazy val respVals = calcConfig.srParameters("responseValues")
@@ -35,7 +37,6 @@ class DRData(calcConfig: CalcConfig)
   var exSigKeys: HashMap[NTuple[Int], Map[NTuple[Int], Int]] = HashMap()
   var exRespKeys: HashMap[NTuple[Int], Map[NTuple[Int], Int]] = HashMap()
 
-  lazy val numObs: Int = sig.length
   lazy val isEmpty: Boolean = numObs == 0
 
   /**

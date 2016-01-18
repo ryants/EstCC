@@ -102,7 +102,7 @@ object OtherFuncs {
   def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
 
   /**
-   * Returns a shuffled list.
+   * Returns a (partially) shuffled list.
    *
    * A Fisher-Yates shuffling algorithm using an instance of a Mersenne Twister
    * pseudorandom number generator and a mutable array.

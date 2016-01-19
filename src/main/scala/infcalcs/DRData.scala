@@ -188,7 +188,7 @@ class DRData(calcConfig: CalcConfig)
    */
   def subSample(frac: Double): DRData = {
     val numToRemove = ((1-frac) * numObs).toInt
-    val subSamp = OtherFuncs.myShuffle(zippedVals,calcConfig.rEngine,numToRemove) drop numToRemove
+    val subSamp = OtherFuncs.myShuffle(zippedVals,calcConfig.rEngine) drop numToRemove
     val (subSig, subResp) = subSamp.unzip
     new DRData(calcConfig)(subSig, subResp)
   }

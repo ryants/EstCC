@@ -18,7 +18,7 @@ object InfConfig {
       "numForCutoff" -> 1,
       "numConsecRandPos" -> 3, //observed number of randomized data sets above MI cutoff with consecutive bin number increments to halt calculation
       "numConsecBiasedSigEst" -> 3, //observed number of consecutive signal bin numbers with no unbiased estimates
-      "cutoffValue" -> 0.1,
+      "cutoffValue" -> 0.0,
       "uniMuNumber" -> 5,
       "uniSigmaNumber" -> 5,
       "biMuNumber" -> 5,

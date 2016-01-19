@@ -109,16 +109,14 @@ object OtherFuncs {
    *
    * @param l sequence to shuffle
    * @param e PRNG
-   * @param n number of elements to shuffle (starting from lowest index)
    * @tparam A
    * @return
    */
   def myShuffle[A: scala.reflect.ClassTag](
       l: Seq[A],
-      e: MersenneTwister,
-      n: Int): Vector[A] = {
+      e: MersenneTwister): Vector[A] = {
     val a: Array[A] = l.toArray
-    for (i <- 0 to n-2) {
+    for (i <- 0 to l.length-2) {
       val j = (e.raw() * (l.length - i)).toInt + i
       val t = a(i)
       a(i) = a(j)
@@ -126,17 +124,6 @@ object OtherFuncs {
     }
     a.toVector
   }
-
-  /**
-   *
-   * @param l
-   * @param e
-   * @tparam A
-   * @return
-   */
-  def myShuffle[A: scala.reflect.ClassTag](
-      l: Seq[A],
-      e: MersenneTwister): Vector[A] = myShuffle(l,e,l.length)
 
   /**
    * Parses strings specifying list or range parameters.

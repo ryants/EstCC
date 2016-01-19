@@ -291,15 +291,6 @@ object EstimateMI {
   }
 
   /**
-   * Calculates the inverse sample size for subsampling data
-   *
-   * @param f fraction of data to sample
-   * @param ds data set to sample from
-   */
-  def invSS[T](f: Double, ds: CTable[T])(implicit n: Numeric[T]) =
-    1.0 / (f * n.toDouble(ds.numSamples))
-
-  /**
    * Checks that there are fewer (or an equal number of) bins than unique data entries
    * for the lowest fraction of jackknifed data in each dimension
    *
@@ -395,13 +386,13 @@ object EstimateMI {
         if (!withinSampleSizeTol)
           throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
 
-        val inv = invSS(frac,subTable)
+        val inv = 1 / subTable.numSamples
 
         val randSubCalcs = (0 until numRandTables).toVector map { y =>
           val rTab = addWeight(makeUniform(buildTable(Some(calcConfig.rEngine))(subData, binPair)), wts)
           if (!withinSampleSizeTol)
             throw new SampleSizeToleranceException(s"randomized table has ${rTab.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-          val randInv = invSS(frac,rTab)
+          val randInv = 1 / rTab.numSamples
           SubCalc(randInv, rTab)
         }
 
@@ -722,7 +713,7 @@ object EstimateMI {
 
       (fracTuples map { x =>
         val subTable = addWeight(makeUniform(buildTable(None)(data subSample x._1, binPair)),wts)
-        val inv = invSS(x._1, subTable)
+        val inv = 1 / subTable.numSamples
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
       }).unzip

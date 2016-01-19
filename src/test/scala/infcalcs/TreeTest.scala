@@ -1,6 +1,6 @@
 package infcalcs
 
-import infcalcs.tables.ConstructedTable
+import infcalcs.tables.ContingencyTable
 import org.scalatest._
 import Tree._
 import CTBuild.findIndex

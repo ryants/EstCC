@@ -16,8 +16,7 @@ object IOFile {
    *
    * Each line of the file is expected to contain a whitespace-separated list
    * of numbers that can be cast as Doubles. Used as a helper function for
-   * loading dose-response datasets (by [[loadList]]) or loading
-   * contingency tables from a file (by [[tables.ImportedTable]]).
+   * loading dose-response datasets (by [[loadList]]).
    *
    * @param f Name of file to load.
    * @return The data, as a matrix of doubles.
@@ -96,25 +95,22 @@ object IOFile {
   }
 
   /**
-   * Writes mutual information regression data to a file, with randomization data.
+   * Writes mutual information regression data to a file.
    *
    * Can be useful for debugging. The tuple d given as an argument contains
    * three entries:
    * - the list of inverse sample sizes
-   * - the list of mutual information values calculated for the non-randomized
-   * data
-   * - the list of mutual information values calculated for one round of
-   * randomization on the data.
+   * - the list of mutual information values
    *
-   * @param d (inverse sample sizes, MI list, randomized MI list)
+   * @param d (inverse sample sizes, MI list)
    * @param f Name of the file to write.
    */
   def regDataToFile(
-      d: (Seq[Double], Seq[Double], Seq[Double]),
+      d: (Seq[Double], Seq[Double]),
       f: String) = {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {
-      writer.write(s"${d._1(i)} ${d._2(i)} ${d._3(i)}")
+      writer.write(s"${d._1(i)} ${d._2(i)}")
       writer.newLine()
     }
     writer.flush()
@@ -148,10 +144,14 @@ object IOFile {
     writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
 
+    def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
+    def getRandDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).randDataEstimate
+    def getCoD(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).coeffOfDetermination
+
     val lines =
       for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +
-          s"${x.estimates.dataEstimate._1} ${x.estimates.dataEstimate._2} " + (x.estimates.randDataEstimate map (
-          y => s"${y._1} ${y._2}")).mkString(" ") + s" ${x.estimates.coeffOfDetermination}"
+          s"${getDataEstimate(x.estimates)._1} ${getDataEstimate(x.estimates)._2} " + (getRandDataEstimate(x.estimates) map (
+          y => s"${y._1} ${y._2}")).mkString(" ") + s" ${getCoD(x.estimates)}"
     for (l <- lines) {
       writer.write(l)
       writer.newLine()

@@ -1,6 +1,6 @@
 package infcalcs
 
-import infcalcs.tables.ConstructedTable
+import infcalcs.tables.CTable
 
 /**
  * Created by ryansuderman on 8/25/15.
@@ -16,19 +16,55 @@ import infcalcs.tables.ConstructedTable
 case class Weight(weights: List[Double], label: String)
 
 /**
- * Case class holding all the necessary [[tables.ContTable]] data for performing the linear
- * regression estimates with an arbitrary numbers of randomizations
+ * Case class for holding a [[CTable]] instance and the inverse of its sample
+ * size, resulting from a [[DRData.subSample]] operation
  *
- * @param iss list of inverse sample sizes
- * @param subContTables subsampled [[tables.ContTable]] vector
- * @param randContTableVect vector of randomized subsampled [[tables.ContTable]] vectors
- * @param labels
+ * @param inv
+ * @param table
  */
-case class RegData(
-    iss: Vector[Double],
-    subContTables: Vector[ConstructedTable[Double]],
-    randContTableVect: Vector[Vector[ConstructedTable[Double]]],
-    labels: Vector[String])
+case class SubCalc(inv: Double, table: CTable[Double])
+
+/**
+ * Case class holding all the necessary [[SubCalc]] data for performing the linear
+ * regression estimates
+ *
+ * @param subCalcs
+ * @param label
+ */
+case class RegData(subCalcs: Vector[SubCalc], label: String){
+
+  lazy val tuples = subCalcs map (x => (x.inv, x.table.mutualInformation))
+  lazy val (invVals, miVals) = tuples.unzip
+
+  def calculateRegression: SLR = new SLR(invVals,miVals,label)
+
+}
+
+/**
+ * Same as [[RegData]] but holds arbitrary numbers of [[SubCalc]] instances
+ * for randomization purposes
+ *
+ * @param subCalcs
+ * @param label
+ */
+case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String){
+
+  lazy val trans = subCalcs.transpose
+  lazy val invVals = trans map (_ map (_.inv))
+  lazy val miVals = trans map (_ map (_.table.mutualInformation))
+
+  def calculateRegression: List[Option[SLR]] = {
+    trans.indices.toList map { x =>
+        val slrLabel = label + s"rand${x}"
+      val slr = new SLR(invVals(x),miVals(x),slrLabel)
+      if (slr.intercept.isNaN) {
+        IOFile.regDataToFile((invVals(x),miVals(x)),s"regData_NaNint_${slrLabel}.dat")
+        None
+      }
+      else Some(slr)
+    }
+  }
+}
 
 /**
  * Case class that contains all mutual information estimates for a
@@ -41,10 +77,11 @@ case class RegData(
  */
 case class EstTuple(
     pairBinTuples: Pair[NTuple[Int]],
-    estimates: Estimates,
+    estimates: Option[Estimates],
     weight: Option[Weight],
     unbiased: Boolean)
 
+//TODO make some sort of null estimate for when buildRegData throws sample size exception
 /**
  * Case class with the actual and randomized mutual information estimates.
  * Also includes the coefficient of determination for the actual linear fit

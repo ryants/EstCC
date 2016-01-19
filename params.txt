@@ -15,7 +15,8 @@ uniSigmaNumber	5
 biMuNumber	5
 biSigmaNumber	5
 repsPerFraction	20
-pwUnifWeights 1
+pwUnifWeights   1
+sampleSizeTol   0.2
 
 directory	./
 filePrefix	out

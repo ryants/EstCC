@@ -1,7 +1,7 @@
 package infcalcs.tables
 
 /** Class for building a contingency table from scratch. */
-class ConstructedTable[A](t: Vector[Vector[A]])(implicit n: Numeric[A]) extends ContTable[A] {
+class ContingencyTable[A](t: Vector[Vector[A]])(implicit n: Numeric[A]) extends CTable[A] {
 
   lazy val rows = table.length
   lazy val cols = if (table.isEmpty) 0 else table(0).length

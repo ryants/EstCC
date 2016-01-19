@@ -3,7 +3,7 @@ package infcalcs.tables
 import infcalcs.MathFuncs
 
 /** A mixin for implementing contingency tables. */
-abstract class ContTable[A](implicit n: Numeric[A]) {
+abstract class CTable[A](implicit n: Numeric[A]) {
   import n.mkNumericOps
 
   /** The number of rows in the table. */
@@ -17,7 +17,7 @@ abstract class ContTable[A](implicit n: Numeric[A]) {
    * Note: depending on the weighting scheme being used, this number may be 0,
    * leading to NaN in output.
    */
-  lazy val numSamples: A = (table map (x => x.sum)).sum
+  val numSamples: A = (table map (x => x.sum)).sum
 
   /** The table of counts, as a matrix of integers. */
   val table: Vector[Vector[A]]
@@ -145,7 +145,7 @@ abstract class ContTable[A](implicit n: Numeric[A]) {
   lazy val transferEfficiency: Double = mutualInformation / margRowEntropy
 
   /**
-   * Map of strings to various [[ContTable]] values
+   * Map of strings to various [[CTable]] values
    */
   lazy val ctVals: Map[String, Double] = Map(
     "signalEntropy" -> this.margRowEntropy,
@@ -157,7 +157,7 @@ abstract class ContTable[A](implicit n: Numeric[A]) {
   )
 
   /**
-   * Makes [[ContTable]] callable, retrieving values according to String keys
+   * Makes [[CTable]] callable, retrieving values according to String keys
    * in [[ctVals]]
    *
    * @param s string present in [[ctVals]]' keys
@@ -166,12 +166,12 @@ abstract class ContTable[A](implicit n: Numeric[A]) {
 
   /** Checks two contingency tables for equality. */
   override def equals(ct: Any): Boolean = ct match {
-    case that: ContTable[A] => this.table == that.table
+    case that: CTable[A] => this.table == that.table
     case _ => false
   }
 
   /** Pretty-prints contingency table to string */
-  override def toString = (for (x <- table) yield x mkString " ").mkString("\n") + "]\n"
+  override def toString = (for (x <- table) yield x mkString " ").mkString("\n")
 
   /** Writes a contingency table to a file (with space-delimited columns). */
   def tableToFile(f: String) = {

@@ -1,7 +1,7 @@
 package infcalcs
 
 import cern.jet.random.engine.MersenneTwister
-import tables.ContTable
+import tables.CTable
 import CTBuild.buildTable
 import EstimateMI.buildRegData
 import EstimateCC.testWeights
@@ -32,7 +32,7 @@ class Benchmarks extends Bench.LocalTime {
     d <- dataSizes
   } yield genData(d)
 
-  val tables: Gen[ContTable[Int]] = for {
+  val tables: Gen[CTable[Int]] = for {
     d <- data
   } yield buildTable(None)(d, binPair)
 

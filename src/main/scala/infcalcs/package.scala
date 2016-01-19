@@ -1,4 +1,4 @@
-import infcalcs.tables.ContTable
+import infcalcs.tables.CTable
 
 /** Information theory calculations.
   *
@@ -38,7 +38,7 @@ import infcalcs.tables.ContTable
   * by [[infcalcs.EstimateMI.buildRegData]].
   *
   * - After calculating the mutual information for each contingency table
-  * (implemented in [[infcalcs.tables.ContTable.mutualInformation]]) the unbiased mutual
+  * (implemented in [[infcalcs.tables.CTable.mutualInformation]]) the unbiased mutual
   * information is estimated by performing a linear regression of the mutual
   * information of each subsampled dataset against the inverse sample size;
   * the intercept of the linear regression is the unbiased mutual

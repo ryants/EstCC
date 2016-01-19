@@ -26,10 +26,13 @@ class Calculator(implicit calcConfig: CalcConfig) extends Actor {
         case _ =>
       }
       val opt = EstimateMI.optMIMult(resetCalcConfig)(estMI)
+
+      def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
+
       if (EstCC.appConfig.verbose) {
         w match {
-          case Some(Weight(o, l)) => println(s"${l}\tI = ${opt.estimates.dataEstimate._1}")
-          case None => println(s"Uniform\tI = ${opt.estimates.dataEstimate._1}")
+          case Some(Weight(o, l)) => println(s"${l}\tI = ${getDataEstimate(opt.estimates)._1}")
+          case None => println(s"Uniform\tI = ${getDataEstimate(opt.estimates)._1}")
         }
 
       }

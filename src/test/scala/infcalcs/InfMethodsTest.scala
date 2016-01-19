@@ -1,6 +1,6 @@
 package infcalcs
 
-import infcalcs.tables.ConstructedTable
+import infcalcs.tables.ContingencyTable
 import org.scalatest._
 import cern.jet.random.engine.MersenneTwister
 
@@ -154,7 +154,7 @@ class EstimateMITest extends FlatSpec with Matchers {
   val ct = buildTable(None)(pl, numBins)
   val ctRand = buildTable(Some(testConfig.rEngine))(pl, numBins)
 
-  val ct2 = new ConstructedTable[Int](Vector(Vector(1, 2),Vector(0, 3)))
+  val ct2 = new ContingencyTable[Int](Vector(Vector(1, 2),Vector(0, 3)))
 
   "isNotBiased" should "detect biased estimates" in {
 
@@ -186,29 +186,25 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Get the RegDataMult result
     val numReps = testConfig.numParameters("repsPerFraction").toInt
     // Seeded with some integer
-    val rdm = buildRegData(testConfig)(numBins, pl)
+    val (reg, regRand) = buildRegData(testConfig)(numBins, pl)
     // Check the inverse sample sizes
     val fracs = testConfig.listParameters("sampleFractions")
-    val invss = rdm.iss
+    val invLength = reg.subCalcs.length
     // Check the length of the inverse sample sizes
     val fracListLength = (fracs.length * numReps) + 1
-    invss.length shouldBe fracListLength // check the length
+    invLength shouldBe fracListLength // check the length
     // Check the first inverse sample size
-    invss(0) shouldBe 1 / (fracs(0) * doses1.length)
+//    invss(0) shouldBe 1.0 / rdm.subContTables(0).numSamples (DOES NOT WORK DUE TO LOW NUMBER OF CT ENTRIES & NEW SAMPLE SIZE FEATURES)
     // Check the resampled contingency tables
-    val cts = rdm.subContTables
+    val cts = reg.subCalcs map (_.table)
     // Check the length of the CT list
     cts.length shouldBe fracListLength
     // The last contingency table (fraction 1.0) should be the same as the
     // original
     cts(fracListLength - 1) shouldBe ct
     // Check the randomized contingency tables
-    val rcts = rdm.randContTableVect
-    rcts.length shouldBe testConfig.numParameters("numRandom").toInt
-    rcts(0).length shouldBe fracListLength
-    // Check the label list
-    val labels = rdm.labels
-    labels.length shouldBe fracListLength
+    regRand.trans.length shouldBe testConfig.numParameters("numRandom").toInt
+    regRand.trans(0).length shouldBe fracListLength
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {

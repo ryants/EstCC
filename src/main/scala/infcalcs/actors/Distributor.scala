@@ -69,7 +69,7 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
       p,
       genSeed(calcConfig.rEngine),
       maxOpt.weight)(calcConfig)
-    println(s"${maxOpt.estimates.dataEstimate._1}")
+    println(s"${(maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate._1}")
     context.system.shutdown()
   }
 

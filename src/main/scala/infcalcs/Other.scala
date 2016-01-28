@@ -1,7 +1,6 @@
 package infcalcs
 
 import cern.jet.stat.Probability.{errorFunction => erf}
-import cern.jet.random.engine.MersenneTwister
 import exceptions._
 import annotation.tailrec
 
@@ -93,37 +92,6 @@ object MathFuncs {
 
 /** Contains a handful of utility functions. */
 object OtherFuncs {
-
-  /**
-   * Generates an Int between 0 and 1e6, non-inclusive
-   *
-   * @param e PRNG engine
-   */
-  def genSeed(e: MersenneTwister): Int = (e.raw() * 1000000).toInt
-
-  /**
-   * Returns a (partially) shuffled list.
-   *
-   * A Fisher-Yates shuffling algorithm using an instance of a Mersenne Twister
-   * pseudorandom number generator and a mutable array.
-   *
-   * @param l sequence to shuffle
-   * @param e PRNG
-   * @tparam A
-   * @return
-   */
-  def myShuffle[A: scala.reflect.ClassTag](
-      l: Seq[A],
-      e: MersenneTwister): Vector[A] = {
-    val a: Array[A] = l.toArray
-    for (i <- 0 to l.length-2) {
-      val j = (e.raw() * (l.length - i)).toInt + i
-      val t = a(i)
-      a(i) = a(j)
-      a(j) = t
-    }
-    a.toVector
-  }
 
   /**
    * Parses strings specifying list or range parameters.

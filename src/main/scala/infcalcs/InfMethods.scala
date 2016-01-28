@@ -7,12 +7,11 @@ import annotation.tailrec
 import math._
 import Tree._
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Random, Failure, Success, Try}
 
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
 
-  import cern.jet.random.engine.MersenneTwister
   import language.implicitConversions
 
   /**
@@ -177,9 +176,10 @@ object CTBuild {
    *
    * @return contingency table for ordered pair data points
    */
-  def buildTable(eng: Option[MersenneTwister])(
+  def buildTable(
       data: DRData,
-      nb: Pair[NTuple[Int]]): ContingencyTable[Int] = {
+      nb: Pair[NTuple[Int]],
+      randomize: Boolean = false): ContingencyTable[Int] = {
 
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
@@ -213,11 +213,9 @@ object CTBuild {
       }
     }
 
-    val ct = eng match {
-      case Some(e) => addValues(table,
-        (OtherFuncs.myShuffle(data.sig, e) zip data.resp).toList)
-      case None => addValues(table, (data.zippedVals).toList)
-    }
+    val ct =
+      if (randomize) addValues(table, (Random.shuffle(data.sig) zip data.resp).toList)
+      else addValues(table, (data.zippedVals).toList)
 
     new ContingencyTable[Int](ct)
 
@@ -247,7 +245,6 @@ object EstimateMI {
   import CTBuild.{buildTable, weightSignalData}
   import EstimateCC.testWeights
   import cern.jet.random.engine.MersenneTwister
-  import OtherFuncs.genSeed
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -379,7 +376,7 @@ object EstimateMI {
 
         val subData = data subSample frac
 
-        val subTable = addWeight(makeUniform(buildTable(None)(subData, binPair)),wts)
+        val subTable = addWeight(makeUniform(buildTable(subData, binPair)),wts)
 
         val perfectSubSample = data.numObs - ((1-frac)*data.numObs).toInt
         val withinSampleSizeTol = math.abs(perfectSubSample-subTable.numSamples) <= calcConfig.sampleSizeTol(data)
@@ -389,7 +386,7 @@ object EstimateMI {
         val inv = 1 / subTable.numSamples
 
         val randSubCalcs = (0 until numRandTables).toVector map { y =>
-          val rTab = addWeight(makeUniform(buildTable(Some(calcConfig.rEngine))(subData, binPair)), wts)
+          val rTab = addWeight(makeUniform(buildTable(subData, binPair, true)), wts)
           if (!withinSampleSizeTol)
             throw new SampleSizeToleranceException(s"randomized table has ${rTab.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
           val randInv = 1 / rTab.numSamples
@@ -702,7 +699,6 @@ object EstimateMI {
   def finalEstimation(
       binPair: Pair[NTuple[Int]],
       data: DRData,
-      seed: Int,
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
 
     val (invFracs, tables) = {
@@ -712,7 +708,7 @@ object EstimateMI {
       } yield (f, n)
 
       (fracTuples map { x =>
-        val subTable = addWeight(makeUniform(buildTable(None)(data subSample x._1, binPair)),wts)
+        val subTable = addWeight(makeUniform(buildTable(data subSample x._1, binPair)),wts)
         val inv = 1 / subTable.numSamples
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
@@ -750,8 +746,6 @@ object EstimateMI {
  *
  */
 object EstimateCC {
-
-  import OtherFuncs.genSeed
 
   /**
    * Determines whether the weights cover a sufficient range of the input space.
@@ -1107,7 +1101,7 @@ object EstimateCC {
       }
     val estimate = finalOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
     println(estimate.dataEstimate._1)
-    EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, genSeed(calcConfig.rEngine), finalOpt.weight)
+    EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, finalOpt.weight)
 
   }
 
@@ -1161,7 +1155,7 @@ object EstimateCC {
       val maxOpt = EstimateMI.optMIMult(calcConfig)(results map EstimateMI.optMIMult(calcConfig))
       val estimate = maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
       println(estimate.dataEstimate._1)
-      EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, genSeed(calcConfig.rEngine), maxOpt.weight)
+      EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, maxOpt.weight)
 
     } else if (numConsecBiasedSigEst == calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
         !EstimateMI.moreSigBinsLeft(calcConfig)(p, signalBins)) {
@@ -1170,7 +1164,7 @@ object EstimateCC {
       val maxOpt = EstimateMI.optMIMult(calcConfig)(optRes)
       val estimate = maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
       println(estimate.dataEstimate._1)
-      EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, genSeed(calcConfig.rEngine), maxOpt.weight)
+      EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, maxOpt.weight)
 
     } else {
       //adaptive control

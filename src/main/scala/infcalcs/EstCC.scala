@@ -1,7 +1,6 @@
 package infcalcs
 
 import OtherFuncs._
-import cern.jet.random.engine.MersenneTwister
 import EstimateCC.{
 estimateCC,
 estimateCCVerbose
@@ -28,9 +27,6 @@ object EstCC extends App with CLOpts {
   }
 
   // Get config info
-  val engine =
-    if (appConfig.seed != -1) new MersenneTwister(appConfig.seed)
-    else new MersenneTwister(new java.util.Date())
   val dataFile = appConfig.dataFile
   val paramFile = if (appConfig.paramFile == "") None else Some(appConfig.paramFile)
   val rawParameters = importParameters(paramFile)
@@ -41,7 +37,7 @@ object EstCC extends App with CLOpts {
   }
 
   //TODO inject appConfig into calcConfig for use in actors (avoid global variable)
-  implicit val calcConfig = CalcConfig(parameters, engine)
+  implicit val calcConfig = CalcConfig(parameters)
   val p = loadList(dataFile, calcConfig.sigCols, calcConfig.respCols)
 
   if (appConfig.verbose) {

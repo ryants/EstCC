@@ -11,13 +11,11 @@ import infcalcs._
 class Calculator(implicit calcConfig: CalcConfig) extends Actor {
 
   def receive = {
-    case Estimate(w, s, p, seed, wIndex, sIndex) => {
-      val resetCalcConfig = calcConfig resetMtEngine seed
-      val binPair = (s, resetCalcConfig.initResponseBins)
+    case Estimate(w, s, p, wIndex, sIndex) => {
+      val binPair = (s, calcConfig.initResponseBins)
       val estMI =
-        if (EstCC.appConfig.verbose) EstimateMI.genEstimatesMultImp(resetCalcConfig)(p, s, w)
-        else EstimateMI.genEstimatesMult(resetCalcConfig)(p, binPair, w)
-      //if only numConsecRandPos EstTuples are created, they all must be biased
+        if (EstCC.appConfig.verbose) EstimateMI.genEstimatesMultImp(calcConfig)(p, s, w)
+        else EstimateMI.genEstimatesMult(calcConfig)(p, binPair, w)
       val biased = estMI forall (!_.unbiased)
       calcConfig.outF match {
         case Some(str) => IOFile.estimatesToFileMult(
@@ -25,7 +23,7 @@ class Calculator(implicit calcConfig: CalcConfig) extends Actor {
           s"${str}_${wIndex}_${sIndex}.dat")
         case _ =>
       }
-      val opt = EstimateMI.optMIMult(resetCalcConfig)(estMI)
+      val opt = EstimateMI.optMIMult(calcConfig)(estMI)
 
       def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
 

@@ -52,8 +52,7 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
           }
           updateSignalBins()
           (0 until numCalculators) foreach { n => {
-            val newSeed = genSeed(calcConfig.rEngine)
-            (context actorSelection s"calc_${n}") ! Estimate(weights(wtIndex), signalBins, p, newSeed, wtIndex, sigIndex)
+            (context actorSelection s"calc_${n}") ! Estimate(weights(wtIndex), signalBins, p, wtIndex, sigIndex)
             sentCalc()
           }
           }
@@ -64,8 +63,7 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
         if (EstCC.appConfig.verbose) {
           println(s"${totalCalculations - received} weights remaining for signal bin number = ${signalBins.mkString(",")}")
         }
-        val newSeed = genSeed(calcConfig.rEngine)
-        sender ! Estimate(weights(wtIndex), signalBins, p, newSeed, wtIndex, sigIndex)
+        sender ! Estimate(weights(wtIndex), signalBins, p, wtIndex, sigIndex)
         sentCalc()
       } else {
         if (EstCC.appConfig.verbose) {

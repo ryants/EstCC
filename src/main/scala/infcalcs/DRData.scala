@@ -1,8 +1,8 @@
 package infcalcs
 
 import Tree._
-import scala.annotation.tailrec
 import scala.collection.mutable.HashMap
+import scala.util.Random
 
 /**
  * Structure for input-output (dose-response) data.
@@ -188,7 +188,7 @@ class DRData(calcConfig: CalcConfig)
    */
   def subSample(frac: Double): DRData = {
     val numToRemove = ((1-frac) * numObs).toInt
-    val subSamp = OtherFuncs.myShuffle(zippedVals,calcConfig.rEngine) drop numToRemove
+    val subSamp = Random.shuffle(zippedVals) drop numToRemove
     val (subSig, subResp) = subSamp.unzip
     new DRData(calcConfig)(subSig, subResp)
   }

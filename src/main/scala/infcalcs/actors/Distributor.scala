@@ -48,8 +48,7 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
         context actorOf(Calculator.props(calcConfig), s"calc_${x}"))
 
       calcList foreach { c => {
-        val newSeed = genSeed(calcConfig.rEngine)
-        c ! Estimate(weights(sent), signalBins, p, newSeed, sent, sigIndex)
+        c ! Estimate(weights(sent), signalBins, p, sent, sigIndex)
         sentCalc()
       }
       }
@@ -67,7 +66,6 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
     EstimateMI.finalEstimation(
       maxOpt.pairBinTuples,
       p,
-      genSeed(calcConfig.rEngine),
       maxOpt.weight)(calcConfig)
     println(s"${(maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate._1}")
     context.system.shutdown()

@@ -2,15 +2,16 @@ package infcalcs
 
 import infcalcs.tables.ContingencyTable
 import org.scalatest._
-import cern.jet.random.engine.MersenneTwister
 
 import CTBuild._
 import EstimateMI._
 import EstimateCC._
 
+import scala.util.Random
+
 class CTBuildTest extends FlatSpec with Matchers {
 
-  val testConfig = CalcConfig(new MersenneTwister(12345))
+  val testConfig = CalcConfig()
 
   val dList1 = Vector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0)
   val dList2 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0)
@@ -95,7 +96,7 @@ class CTBuildTest extends FlatSpec with Matchers {
     val data = new DRData(testConfig)(doses, responses)
     val numBins = Tuple2(Vector(2), Vector(4))
     // Call with no weighting and no randomization
-    val ct = buildTable(None)(data, numBins)
+    val ct = buildTable(data, numBins)
     ct.rows shouldBe 2
     ct.cols shouldBe 4
     ct.numSamples shouldBe 8
@@ -114,7 +115,7 @@ class CTBuildTest extends FlatSpec with Matchers {
     val data = new DRData(testConfig)(doses, responses)
     val numBins = Tuple2(Vector(2), Vector(4))
     // Call with no weighting but with randomization
-    val ctRand = buildTable(Some(testConfig.rEngine))(data,numBins)
+    val ctRand = buildTable(data,numBins,true)
     ctRand.rows shouldBe 2
     ctRand.cols shouldBe 4
     ctRand.numSamples shouldBe 8
@@ -140,7 +141,7 @@ class CTBuildTest extends FlatSpec with Matchers {
 
 class EstimateMITest extends FlatSpec with Matchers {
 
-  val testConfig = CalcConfig(new MersenneTwister(12345))
+  val testConfig = CalcConfig()
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
     Vector(x))
@@ -151,15 +152,15 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   val pl = new DRData(testConfig)(doses1, responses)
   val numBins = Tuple2(Vector(2), Vector(4))
-  val ct = buildTable(None)(pl, numBins)
-  val ctRand = buildTable(Some(testConfig.rEngine))(pl, numBins)
+  val ct = buildTable(pl, numBins)
+  val ctRand = buildTable(pl, numBins, true)
 
   val ct2 = new ContingencyTable[Int](Vector(Vector(1, 2),Vector(0, 3)))
 
   "isNotBiased" should "detect biased estimates" in {
 
     val testParams = OtherFuncs.updateParameters(List(("cutoffValue","0.0"),("numForCutoff","1")),InfConfig.defaultParameters)
-    val thisTestConfig = CalcConfig(testParams, new MersenneTwister(12345))
+    val thisTestConfig = CalcConfig(testParams)
     val randEstimates1 = List((0.54,0.53))
     val randEstimates2 = List((0.3,0.4),(0.0,0.3),(-0.4,0.1))
 
@@ -169,7 +170,7 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   "DRData" should "correctly generate subsamples of its data" in {
 
-    def genValue = testConfig.rEngine.raw() * 100
+    def genValue = Random.nextDouble() * 100
 
     val plRand = {
       val data = ((0 until 100).toVector map (x => (Vector(genValue),Vector(genValue)))).unzip
@@ -236,14 +237,14 @@ class EstimateMITest extends FlatSpec with Matchers {
 
 class EstimateCCTest extends FlatSpec with Matchers {
 
-  val testConfig = CalcConfig(new MersenneTwister(12345))
+  val testConfig = CalcConfig()
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x => Vector(x))
   val doses2 = Vector(0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0) map (x => Vector(x))
   val responses = Vector(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0) map (x => Vector(x))
   val pl = new DRData(testConfig)(responses, responses)
   val numBins = Tuple2(Vector(4), Vector(4))
-  val ct = buildTable(None)(pl, numBins)
+  val ct = buildTable(pl, numBins)
 
   "EstimateCC" should "generate unimodal Gaussian weights" in {
     val rd = pl sigDelims numBins._1
@@ -264,7 +265,7 @@ class EstimateCCTest extends FlatSpec with Matchers {
 class MultiVarTest extends FlatSpec with Matchers {
   import OtherFuncs._
 
-  val testConfig = CalcConfig(new MersenneTwister(12345))
+  val testConfig = CalcConfig()
 
   val d2d = Vector(Vector(0.0, 0.0), Vector(0.0, 1.0), Vector(1.0, 0.0),
     Vector(1.0, 1.0))
@@ -278,11 +279,11 @@ class MultiVarTest extends FlatSpec with Matchers {
   val binTuple = Tuple2(Vector(1,2), Vector(2,2))
   val rd = data sigDelims binTuple._1
   val cd = data respDelims binTuple._2
-  val ct = buildTable(None)(data, binTuple)
+  val ct = buildTable(data, binTuple)
   
   val binTuple2 = Tuple2(Vector(2,3,1),Vector(2,2))
   val rd2 = data2 sigDelims binTuple2._1
-  val ct2 = buildTable(None)(data2, binTuple2)
+  val ct2 = buildTable(data2, binTuple2)
 
   "n-dimensional dose-response data" should "produce correct data structures" in {
     rd.length shouldBe 2 
@@ -326,7 +327,7 @@ class MultiVarTest extends FlatSpec with Matchers {
           .updateSigRespParams("responseValues", Some(testValues)))
       val testConfig2 = CalcConfig(parameters)
       val data3 = new DRData(testConfig2)(testValues, testValues)
-      val ct3 = buildTable(None)(data3, binTuple2)
+      val ct3 = buildTable(data3, binTuple2)
       ct3.rows shouldBe 16
       ct3.cols shouldBe 16
     }
@@ -359,7 +360,7 @@ class MultiVarTest extends FlatSpec with Matchers {
       Vector(1, 1)->3, Vector(2, 0)->4, Vector(2, 1)->5)
     (data5 sigDelims bins).length shouldBe 2
     (data5 sigDelims bins) map (_.entries) shouldBe Vector(3, 2)
-    val ct4 = buildTable(None)(data5, (bins, bins))
+    val ct4 = buildTable(data5, (bins, bins))
     ct4.rows shouldBe 6
     ct4.cols shouldBe 6
   }

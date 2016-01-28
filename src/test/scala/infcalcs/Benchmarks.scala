@@ -1,11 +1,11 @@
 package infcalcs
 
-import cern.jet.random.engine.MersenneTwister
 import tables.CTable
 import CTBuild.buildTable
-import EstimateMI.buildRegData
 import EstimateCC.testWeights
 import org.scalameter.api._
+
+import scala.util.Random
 
 /**
  * Created by ryansuderman on 1/13/16.
@@ -13,13 +13,12 @@ import org.scalameter.api._
 class Benchmarks extends Bench.LocalTime {
 
   val benchConfig = CalcConfig()
-  val prng = new MersenneTwister(12345)
 
   def signal = (i: Int) => Vector((i % 20).toDouble)
   def response = (d: Double) => Vector(d * 100)
   def genData(size: Int) = {
     val range = 0 until size
-    val (sig, resp) = (range map (x => (signal(x), response(prng.raw())))).toVector.unzip
+    val (sig, resp) = (range map (x => (signal(x), response(Random.nextDouble())))).toVector.unzip
     new DRData(benchConfig)(sig,resp)
   }
 
@@ -34,7 +33,7 @@ class Benchmarks extends Bench.LocalTime {
 
   val tables: Gen[CTable[Int]] = for {
     d <- data
-  } yield buildTable(None)(d, binPair)
+  } yield buildTable(d, binPair)
 
   performance of "subSample" in {
     measure method "drdata subsample" in {

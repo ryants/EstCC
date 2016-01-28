@@ -24,7 +24,6 @@ case class Estimate(
     wt: Option[Weight],
     sigBins: NTuple[Int],
     p: DRData,
-    seed: Int,
     wIndex: Int,
     sIndex: Int)
 

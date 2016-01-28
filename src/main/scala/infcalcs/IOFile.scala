@@ -29,6 +29,7 @@ object IOFile {
     } yield (l.split("\\s+") map (x => x.toDouble)).toVector
   }
 
+  //TODO make exception for incorrectly formatted file
   /**
    * Loads parameters from a file, or returns an empty list if no file is given.
    *

@@ -28,8 +28,7 @@ class FixedDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distr
         if (EstCC.appConfig.verbose) {
           println(s"${totalCalculations - received} weights remaining for current signal bins")
         }
-        val newSeed = genSeed(calcConfig.rEngine)
-        sender ! Estimate(wts(sent), sb, p, newSeed, sent, sigIndex)
+        sender ! Estimate(wts(sent), sb, p, sent, sigIndex)
         sentCalc()
       } else if (receivedAllCalcs) {
         stopCalculation()

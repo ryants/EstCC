@@ -5,7 +5,7 @@ import infcalcs.EstTuple
 import infcalcs.EstimateCC.getWeights
 import infcalcs.OtherFuncs._
 import infcalcs._
-import infcalcs.exceptions.ExcessActorException
+import infcalcs.exceptions.{InappropriateInitBinsException, ExcessActorException}
 
 /**
  * Created by ryansuderman on 9/18/15.
@@ -43,20 +43,23 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
   def updateEstList(r: Result) = estList = estList :+ r.res
 
   def initializeCalculators(init: Init) =
-    if (init.numActors < weights.length) {
-      val calcList = (0 until init.numActors).toList map (x =>
-        context actorOf(Calculator.props(calcConfig), s"calc_${x}"))
+    if (!EstimateMI.binNumberIsAppropriate(calcConfig)(p, (calcConfig.initBinTuples)))
+      throw new InappropriateInitBinsException("initial bin numbers are too large")
+    else {
+      if (init.numActors < weights.length) {
+        val calcList = (0 until init.numActors).toList map (x =>
+          context actorOf(Calculator props calcConfig, s"calc_${x}"))
 
-      calcList foreach { c => {
-        c ! Estimate(weights(sent), signalBins, p, sent, sigIndex)
-        sentCalc()
+        calcList foreach { c => {
+          c ! Estimate(weights(sent), signalBins, p, sent, sigIndex)
+          sentCalc()
+        }
+        }
+      } else {
+        // requires that the number of actors is less than the number of weights per signal bin number
+        throw new ExcessActorException("excess actors")
       }
-      }
-    } else {
-      // requires that the number of actors is less than the number of weights per signal bin number
-      throw new ExcessActorException("excess actors")
     }
-
 
   def stopCalculation() = {
     if (EstCC.appConfig.verbose) {
@@ -67,7 +70,7 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
       maxOpt.pairBinTuples,
       p,
       maxOpt.weight)(calcConfig)
-    println(s"${(maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate._1}")
+    println(s"${(maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)).dataEstimate._1}")
     context.system.shutdown()
   }
 

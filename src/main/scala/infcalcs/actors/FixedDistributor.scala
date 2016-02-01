@@ -41,6 +41,10 @@ class FixedDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distr
           println(s"${e.getMessage()}")
           context.system.shutdown()
         }
+        case e2: InappropriateInitBinsException => {
+          println(s"${e2.getMessage()}")
+          context.system.shutdown()
+        }
       }
     }
   }

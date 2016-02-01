@@ -82,6 +82,10 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
           println(s"${e.getMessage()}")
           context.system.shutdown()
         }
+        case e2: InappropriateInitBinsException => {
+          println(s"${e2.getMessage()}")
+          context.system.shutdown()
+        }
       }
     }
   }
@@ -97,13 +101,16 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
   }
 
   def stopCriterion() = {
+    //checks if incrementing signal bins is appropriate
+    val nextSignalBins = EstimateMI.updateSigBinNumbers(calcConfig)(signalBins)
+    val binNumberIsNotAppropriate = !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (nextSignalBins,calcConfig.initResponseBins))
     val criterion = numConsecBiasedSigEst >= calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
-        !EstimateMI.moreSigBinsLeft(calcConfig)(p, signalBins)
+        binNumberIsNotAppropriate
 
     if (EstCC.appConfig.verbose && criterion){
       println(s"Number of consecutive optimal estimates with lower total bins: ${numConsecBiasedSigEst}")
-      val moreBinsLeft = EstimateMI.moreSigBinsLeft(calcConfig)(p, signalBins)
-      if (moreBinsLeft) println(s"Signal bin limit has not been reached")
+
+      if (!binNumberIsNotAppropriate) println(s"Signal bin limit has not been reached")
       else println(s"Signal bin limit has been reached with ${signalBins.product} total bins")
     }
 

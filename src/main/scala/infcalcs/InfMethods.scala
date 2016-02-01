@@ -272,7 +272,7 @@ object EstimateMI {
       val rsums: Vector[Double] = table map (_.sum)
       val total = rsums.sum
       val uRow = total / t.length.toDouble
-      val uWts: List[Double] = testWeights("unif",(rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList)
+      val uWts: List[Double] = testWeights("unif", (rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList)
       weightSignalData(table, uWts)
     }
   }
@@ -288,32 +288,29 @@ object EstimateMI {
   }
 
   /**
-   * Checks that there are fewer (or an equal number of) bins than unique data entries
-   * for the lowest fraction of jackknifed data in each dimension
+   * Checks that there are fewer (or an equal number of) bins than nonzero
+   * [[CalcConfig.lowerAvgEntryLimit]] for the lowest fraction of jackknifed
+   * data in both dimensions, OR checks that the number of unique values in
+   * each dimension is lower than the number of bins in the respective dimensions
    *
    * @param calcConfig
    * @param p
-   * @param sigBins
+   * @param binPair
    * @return
    */
-  def moreSigBinsLeft(calcConfig: CalcConfig)(
+  def binNumberIsAppropriate(calcConfig: CalcConfig)(
       p: DRData,
-      sigBins: NTuple[Int]): Boolean =
-    sigBins.product <= p.sig.toSet.size * calcConfig.listParameters("sampleFractions").min
+      binPair: Pair[NTuple[Int]]): Boolean = {
 
+    val totalBins = binPair._1.product * binPair._2.product
+    val minSample = calcConfig.listParameters("sampleFractions").min
 
-  /**
-   * Identical to [[moreSigBinsLeft]] but for response bin space
-   *
-   * @param calcConfig
-   * @param p
-   * @param respBins
-   * @return
-   */
-  def moreRespBinsLeft(calcConfig: CalcConfig)(
-      p: DRData,
-      respBins: NTuple[Int]): Boolean =
-    respBins.product <= p.resp.toSet.size * calcConfig.listParameters("sampleFractions").min
+    if (calcConfig.lowerAvgEntryLimit > 0)
+      ((p.numObs * minSample) / totalBins) >= calcConfig.lowerAvgEntryLimit
+    else
+      ((binPair._1.product <= p.sig.toSet.size * minSample) &&
+          (binPair._2.product <= p.resp.toSet.size * minSample))
+  }
 
   /**
    * Function to weight a contingency table
@@ -325,7 +322,7 @@ object EstimateMI {
   def addWeight(ct: CTable[Double], wts: Option[Weight]): CTable[Double] = {
     wts match {
       case None => ct
-      case Some(w) => new ContingencyTable[Double](weightSignalData(ct.table,w.weights))
+      case Some(w) => new ContingencyTable[Double](weightSignalData(ct.table, w.weights))
     }
   }
 
@@ -370,16 +367,16 @@ object EstimateMI {
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
     val (reg, regRand) = {
-      val tuples = calcConfig.fracList.indices.toVector map {x =>
+      val tuples = calcConfig.fracList.indices.toVector map { x =>
 
         val frac = calcConfig.fracList(x)
 
         val subData = data subSample frac
 
-        val subTable = addWeight(makeUniform(buildTable(subData, binPair)),wts)
+        val subTable = addWeight(makeUniform(buildTable(subData, binPair)), wts)
 
-        val perfectSubSample = data.numObs - ((1-frac)*data.numObs).toInt
-        val withinSampleSizeTol = math.abs(perfectSubSample-subTable.numSamples) <= calcConfig.sampleSizeTol(data)
+        val perfectSubSample = data.numObs - ((1 - frac) * data.numObs).toInt
+        val withinSampleSizeTol = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
         if (!withinSampleSizeTol)
           throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
 
@@ -408,7 +405,7 @@ object EstimateMI {
 
     val tag = s"${label}_r${rBinPair}_c${cBinPair}"
 
-    (RegData(reg,tag), RegDataRand(regRand,tag + "rand"))
+    (RegData(reg, tag), RegDataRand(regRand, tag + "rand"))
   }
 
   /**
@@ -486,7 +483,7 @@ object EstimateMI {
       numConsecRandPos: Int = 0,
       res: Vector[EstTuple] = Vector()): Vector[EstTuple] = {
 
-    val outOfRespBins = !moreRespBinsLeft(calcConfig)(pl, binPair._2)
+    val binNumberIsNotAppropriate = !binNumberIsAppropriate(calcConfig)(pl, binPair)
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
@@ -502,7 +499,7 @@ object EstimateMI {
         }
         case Failure(t) => throw t
       }
-    } else if (outOfRespBins || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
+    } else if (binNumberIsNotAppropriate || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
       val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
@@ -562,9 +559,9 @@ object EstimateMI {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
       var responseBins = calcConfig.initResponseBins
-
+      
       while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
-          moreRespBinsLeft(calcConfig)(pl, responseBins)) {
+          binNumberIsAppropriate(calcConfig)(pl, (signalBins,responseBins))) {
 
         val binPair = (signalBins, responseBins)
         val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
@@ -680,7 +677,7 @@ object EstimateMI {
         baseTuple,
         Some(baseEstimates),
         None,
-        true)
+        false)
 
     opt(base, d filter (_.unbiased))
   }
@@ -708,7 +705,7 @@ object EstimateMI {
       } yield (f, n)
 
       (fracTuples map { x =>
-        val subTable = addWeight(makeUniform(buildTable(data subSample x._1, binPair)),wts)
+        val subTable = addWeight(makeUniform(buildTable(data subSample x._1, binPair)), wts)
         val inv = 1 / subTable.numSamples
         subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
         (inv, subTable)
@@ -1038,13 +1035,13 @@ object EstimateCC {
 
         wts(w) match {
           case Some(Weight(v, l)) => {
-            val estimate = opt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
+            val estimate = opt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
             val printOut = s"  ${1 + w}) Weight: ${l}, " +
                 s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
             println(printOut)
           }
           case None => {
-            val estimate = opt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
+            val estimate = opt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
             val printOut = s"  ${1 + w}) Weight: Uniform, " +
                 s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
             println(printOut)
@@ -1073,13 +1070,13 @@ object EstimateCC {
         var index = 0
 
         while (numConsecBiasedSigEst < calcConfig.numParameters("numConsecBiasedSigEst").toInt &&
-            EstimateMI.moreSigBinsLeft(calcConfig)(p, signalBins)) {
+            EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))) {
 
           println(s"# Signal Bins: ${signalBins.product}")
 
           weights = getWeights(calcConfig)(p, signalBins)
           val estimates = calcEstimates((signalBins, calcConfig.initResponseBins), weights, index)
-          val incrCriterion = estimates.foldLeft(true)((b, x) => b && (x.length > calcConfig.numParameters("numConsecRandPos")))
+          val incrCriterion = estimates forall (est => est forall (!_.unbiased))
           val opt = EstimateMI.optMIMult(calcConfig)(
             estimates map EstimateMI.optMIMult(calcConfig))
 
@@ -1099,7 +1096,7 @@ object EstimateCC {
         EstimateMI.optMIMult(calcConfig)(optList.toVector)
 
       }
-    val estimate = finalOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
+    val estimate = finalOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
     println(estimate.dataEstimate._1)
     EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, finalOpt.weight)
 
@@ -1153,16 +1150,16 @@ object EstimateCC {
       val results: Vector[Vector[EstTuple]] = calcEstimates()
       //get optimal mi and output final estimation
       val maxOpt = EstimateMI.optMIMult(calcConfig)(results map EstimateMI.optMIMult(calcConfig))
-      val estimate = maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
+      val estimate = maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
       println(estimate.dataEstimate._1)
       EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, maxOpt.weight)
 
     } else if (numConsecBiasedSigEst == calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
-        !EstimateMI.moreSigBinsLeft(calcConfig)(p, signalBins)) {
+        !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))) {
       //output results when stop criterion is reached
 
       val maxOpt = EstimateMI.optMIMult(calcConfig)(optRes)
-      val estimate = maxOpt.estimates getOrElse Estimates((0.0,0.0),Nil,0.0)
+      val estimate = maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
       println(estimate.dataEstimate._1)
       EstimateMI.finalEstimation(maxOpt.pairBinTuples, p, maxOpt.weight)
 
@@ -1173,7 +1170,7 @@ object EstimateCC {
       val results: Vector[Vector[EstTuple]] = calcEstimates()
 
       //to increment numConsecBiasedSigEst, all weights must produce only biased estimates for a given signal bin number
-      val incrCriterion = results.foldLeft(true)((b, x) => b && (x.length > calcConfig.numParameters("numConsecRandPos").toInt))
+      val incrCriterion = results forall (res => res forall (!_.unbiased))
 
       //optimal estimate selected
       val maxOpt = EstimateMI.optMIMult(calcConfig)(results map EstimateMI.optMIMult(calcConfig))

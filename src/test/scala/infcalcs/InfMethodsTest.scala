@@ -157,6 +157,16 @@ class EstimateMITest extends FlatSpec with Matchers {
 
   val ct2 = new ContingencyTable[Int](Vector(Vector(1, 2),Vector(0, 3)))
 
+  "moreBinsLeft" should "determine if the bin numbers can be incremented" in {
+    val locParams = OtherFuncs.updateParameters(List(("avgEntriesPerBin","1")),InfConfig.defaultParameters)
+    val locConfig = CalcConfig(locParams)
+
+    binNumberIsAppropriate(locConfig)(pl,(Vector(2),Vector(2))) shouldBe true
+    binNumberIsAppropriate(locConfig)(pl,(Vector(3),Vector(2))) shouldBe true
+    binNumberIsAppropriate(locConfig)(pl,(Vector(2),Vector(3))) shouldBe true
+    binNumberIsAppropriate(locConfig)(pl,(Vector(3),Vector(3))) shouldBe false
+  }
+
   "isNotBiased" should "detect biased estimates" in {
 
     val testParams = OtherFuncs.updateParameters(List(("cutoffValue","0.0"),("numForCutoff","1")),InfConfig.defaultParameters)

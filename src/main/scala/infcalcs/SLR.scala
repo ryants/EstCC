@@ -56,14 +56,6 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
     val ssRes = (yList.indices map (x => math.pow((yList(x) - regLine(xList(x))),2))).sum
     1-(ssRes/ssTot)
   }
-  lazy val rSquaredMeanData = {
-    val means = meanData.values.toSeq
-    val xVals = meanData.keys.toSeq
-    val mean = avg(means)
-    val ssTot = (means map (x => math.pow((x - mean),2))).sum
-    val ssRes = (means.indices map (x => math.pow((means(x) - regLine(xVals(x))),2))).sum
-    1-(ssRes/ssTot)
-  }
 
   /** Alternative constructor: takes x and y data but applies an empty label. */
   def this(xList: Seq[Double], yList: Seq[Double]) = this(xList, yList, "")
@@ -83,7 +75,7 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
     writer write header
     writer.newLine()
 
-    writer write s"# CoD (all): ${rSquared}\tCoD (means): ${rSquaredMeanData}"
+    writer write s"# CoD: ${rSquared}"
     writer.newLine()
 
     writer write s"# intercept: ${intercept}\tslope: ${slope}"

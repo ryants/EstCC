@@ -1,6 +1,9 @@
 package infcalcs.tables
 
-import infcalcs.MathFuncs
+import infcalcs.{CtPos, MathFuncs}
+import infcalcs.Orderings._
+
+import scala.annotation.tailrec
 
 /** A mixin for implementing contingency tables. */
 abstract class CTable[A](implicit n: Numeric[A]) {
@@ -24,12 +27,44 @@ abstract class CTable[A](implicit n: Numeric[A]) {
   /** The table of counts, transposed. */
   lazy val ttable: Vector[Vector[A]] = table.transpose
 
+  /** table with doubles */
+  lazy val tableWithDoubles: Vector[Vector[Double]] =
+    table map (_ map (_.toDouble))
+
+  lazy val cTableWithDoubles: ContingencyTable[Double] =
+    new ContingencyTable[Double](tableWithDoubles)
+
+  /** table entries as frequencies */
+  lazy val jointProbTable: Vector[Vector[Double]] =
+    table map (_ map (_.toDouble / numSamples.toDouble))
+
   /**
-   * Converts the current table to use Doubles
+   * Converts the probability table to a list of [[CtPos]] instances
+   * for sorting by probability
    * @return
    */
-  def tableWithDoubles: Vector[Vector[Double]] =
-    table map (x => x map (y => n toDouble y))
+  def generateCtPos: List[CtPos] = {
+
+    def genCumCtPos(cs: List[CtPos]): List[CtPos] = {
+      @tailrec
+      def helper(rem: List[CtPos], cum: Double = 0.0, acc: List[CtPos] = Nil): List[CtPos] = {
+        if (rem.isEmpty) acc
+        else {
+          val newCum = cum + rem.head.prob
+          val newCtPos = CtPos(newCum, rem.head.coord)
+          helper(rem.tail, newCum, acc :+ newCtPos)
+        }
+      }
+      helper(cs)
+    }
+
+    val pt = jointProbTable
+    val ctPosList = pt.indices.toList flatMap { x =>
+      pt(x).indices map (y => CtPos(pt(x)(y),(x,y)))
+    }
+
+    genCumCtPos(ctPosList.sorted)
+  }
 
   /**
    * Converts a vector of counts to a marginal probability.

@@ -1,5 +1,6 @@
 package infcalcs
 
+import infcalcs.exceptions.ValueOutOfBoundsException
 import infcalcs.tables.ContingencyTable
 import org.scalatest._
 
@@ -67,7 +68,7 @@ class CTBuildTest extends FlatSpec with Matchers {
     findVectIndex(Vector(1.5), tree, key) shouldBe 1
     findVectIndex(Vector(6.1), tree, key) shouldBe 4
     findVectIndex(Vector(7.5), tree, key) shouldBe 4
-    findVectIndex(Vector(9.0), tree, key) shouldBe 4
+    a [ValueOutOfBoundsException] should be thrownBy findVectIndex(Vector(9.0), tree, key)
 
     // Now try with a list containing repeated values
     // Bins: (0, 1), (2, 2), (3, 3), (3, 3)
@@ -141,6 +142,9 @@ class CTBuildTest extends FlatSpec with Matchers {
 
 class EstimateMITest extends FlatSpec with Matchers {
 
+  import Tree._
+  import Orderings._
+
   val testConfig = CalcConfig()
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
@@ -178,7 +182,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
   }
 
-  "DRData" should "correctly generate subsamples of its data" in {
+  "subSample" should "correctly generate subsamples of a data set" in {
 
     def genValue = Random.nextDouble() * 100
 
@@ -186,10 +190,13 @@ class EstimateMITest extends FlatSpec with Matchers {
       val data = ((0 until 100).toVector map (x => (Vector(genValue),Vector(genValue)))).unzip
       new DRData(testConfig)(data._1, data._2)
     }
-    val sub1 = plRand subSample 0.6
-    sub1.numObs shouldBe 60
 
-    (sub1.zippedVals.toSet union (plRand.zippedVals diff sub1.zippedVals).toSet) shouldBe plRand.zippedVals.toSet
+    val ct = buildTable(plRand,(Vector(10),Vector(10)))
+    val ctPosList = ct.generateCtPos
+    val probTree = buildTree(buildOrderedNodeList(ctPosList))
+
+    val frac = 0.7
+    subSample((frac*ct.numSamples).toInt,probTree).numSamples shouldBe 70
 
   }
 

@@ -71,17 +71,10 @@ object CTBuild {
    * @param dim The binary tree specifying the bounds of each bin.
    * @return The index of the bin that should contain the value.
    */
-  def findIndex[A](value: A, dim: Tree[A])(implicit ev: Ordering[A]): Int =
-    if (ev.gt(value, dim.maxVal)) dim.maxValIndex
-    else {
-      @tailrec
-      def trace(curIndex: Int, curNode: Tree[A]): Int = {
-        if (curNode.isEmpty) curIndex
-        else if (ev.lteq(value, curNode.value.get)) trace(curNode.index, curNode.left)
-        else trace(curIndex, curNode.right)
-      }
-      trace(dim.index, dim)
-    }
+  def findIndex[A](value: A, dim: Tree[A])(implicit ev: Ordering[A]): Int = {
+    findLteqTreePos(value,dim).index
+  }
+
 
   /**
    * Multiplies the values in each row of a contingency table by a weight.
@@ -244,7 +237,7 @@ object EstimateMI {
 
   import CTBuild.{buildTable, weightSignalData}
   import EstimateCC.testWeights
-  import cern.jet.random.engine.MersenneTwister
+  import Orderings._
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -326,6 +319,35 @@ object EstimateMI {
     }
   }
 
+  def subSample(size: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
+
+    val entries = t.toList
+    val rows = (entries map (_.coord._1)).max + 1
+    val cols = (entries map (_.coord._2)).max + 1
+
+
+    def buildSubTable(is: List[Pair[Int]]): ContingencyTable[Int] = {
+      val table = (0 until rows).toVector map (x => (0 until cols).toVector map (y => 0))
+
+      @tailrec
+      def builder(t: Vector[Vector[Int]], cs: List[Pair[Int]]): ContingencyTable[Int] = {
+        if (cs.isEmpty) new ContingencyTable(t)
+        else {
+          val (r, c) = cs.head
+          val nt = t updated(r, t(r) updated(c, t(r)(c) + 1))
+          builder(nt, cs.tail)
+        }
+      }
+      builder(table, is)
+    }
+
+    //need to make CtPos dummy instances to search tree
+    val randomNumbers = (0 until size).toList map (x => CtPos(Random.nextDouble(), (-1, -1)))
+    val coords = randomNumbers map (x => findLteqTreePos(x, t).value.get.coord)
+    buildSubTable(coords)
+
+  }
+
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
    *
@@ -335,7 +357,7 @@ object EstimateMI {
    * unbiased estimation of MI at each bin size) and randomly shuffled
    * contingency tables (for selection of the appropriate bin size).
    *
-   * Resampling of the dataset is performed using the [[DRData.subSample]] method.
+   * Resampling of the dataset is performed using the [[subSample]] method.
    *
    * The return value is a tuple containing:
    * - a list of the inverse sample sizes for each resampling fraction. This
@@ -366,31 +388,38 @@ object EstimateMI {
 
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
+    val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
+
+    val randTables = (0 until numRandTables).toVector map (x =>
+      addWeight(makeUniform(buildTable(data, binPair, true)), wts))
+    val randProbTrees = randTables map (x =>
+      buildTree(buildOrderedNodeList(x.generateCtPos)))
+
+
     val (reg, regRand) = {
       val tuples = calcConfig.fracList.indices.toVector map { x =>
 
         val frac = calcConfig.fracList(x)
 
-        val subData = data subSample frac
+        if (frac != 1.0) {
+          val subTable = subSample((frac * data.numObs).toInt, probTree)
+          val inv = 1.0 / subTable.numSamples.toDouble
 
-        val subTable = addWeight(makeUniform(buildTable(subData, binPair)), wts)
+          val randSubCalcs = randProbTrees map { x =>
+            val randSubTable = subSample((frac * data.numObs).toInt, x)
+            val randInv = 1.0 / randSubTable.numSamples.toDouble
+            SubCalc(randInv, randSubTable.cTableWithDoubles)
+          }
 
-        val perfectSubSample = data.numObs - ((1 - frac) * data.numObs).toInt
-        val withinSampleSizeTol = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
-        if (!withinSampleSizeTol)
-          throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
+          (SubCalc(inv, subTable.cTableWithDoubles), randSubCalcs)
 
-        val inv = 1 / subTable.numSamples
-
-        val randSubCalcs = (0 until numRandTables).toVector map { y =>
-          val rTab = addWeight(makeUniform(buildTable(subData, binPair, true)), wts)
-          if (!withinSampleSizeTol)
-            throw new SampleSizeToleranceException(s"randomized table has ${rTab.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-          val randInv = 1 / rTab.numSamples
-          SubCalc(randInv, rTab)
+        } else {
+          val inv = 1.0 / table.numSamples.toDouble
+          val randInvs = randTables map (x => 1.0 / x.numSamples.toDouble)
+          (SubCalc(inv, table), randTables.indices.toVector map (x => SubCalc(randInvs(x), randTables(x))))
         }
 
-        (SubCalc(inv, subTable), randSubCalcs)
       }
       tuples.unzip
     }
@@ -486,35 +515,18 @@ object EstimateMI {
     val binNumberIsNotAppropriate = !binNumberIsAppropriate(calcConfig)(pl, binPair)
 
     if (calcConfig.srParameters("responseValues").isDefined) {
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          Vector(EstTuple(binPair, None, wts, false))
-        }
-        case Failure(t) => throw t
-      }
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
+
     } else if (binNumberIsNotAppropriate || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      val est = regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          EstTuple(binPair, Some(intercepts), wts, notBiased)
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          EstTuple(binPair, None, wts, false)
-        }
-        case Failure(t) => throw t
-      }
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
 
       val newBins = (binPair._1, updateRespBinNumbers(calcConfig)(binPair._2))
       val newRes = res :+ est
@@ -542,19 +554,11 @@ object EstimateMI {
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          Vector(EstTuple(binPair, None, wts, false))
-        }
-        case Failure(t) => throw t
-      }
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
+
     } else {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
@@ -564,19 +568,10 @@ object EstimateMI {
           binNumberIsAppropriate(calcConfig)(pl, (signalBins,responseBins))) {
 
         val binPair = (signalBins, responseBins)
-        val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-        val est = regData match {
-          case Success(reg) => {
-            val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-            val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-            EstTuple(binPair, Some(intercepts), wts, notBiased)
-          }
-          case Failure(e: SampleSizeToleranceException) => {
-            println(e.msg)
-            EstTuple(binPair, None, wts, false)
-          }
-          case Failure(t) => throw t
-        }
+        val regData = buildRegData(calcConfig)(binPair, pl, wts)
+        val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+        val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+        val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
 
         res = res :+ est
 
@@ -697,6 +692,9 @@ object EstimateMI {
       data: DRData,
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
 
+    val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
+
     val (invFracs, tables) = {
       val fracTuples: List[(Double, Int)] = for {
         f <- calcConfig.listParameters("sampleFractions") :+ 1.0
@@ -704,10 +702,13 @@ object EstimateMI {
       } yield (f, n)
 
       (fracTuples map { x =>
-        val subTable = addWeight(makeUniform(buildTable(data subSample x._1, binPair)), wts)
-        val inv = 1 / subTable.numSamples
-        subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
-        (inv, subTable)
+        if (x != 1.0) {
+          val subTable = subSample((x._1 * data.numObs).toInt, probTree)
+          val inv = 1.0 / subTable.numSamples.toDouble
+          subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
+          (inv, subTable.cTableWithDoubles)
+        }
+        else (1.0 / data.numObs.toDouble, table)
       }).unzip
     }
 
@@ -1215,7 +1216,7 @@ object EstimateCC {
           val calc = Calculation((sigBins,respBins),mi,randMi,randMi <= cutoff)
           Vector(calc)
         } else if (numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt ||
-            !EstimateMI.moreRespBinsLeft(calcConfig)(data, respBins)) {
+            !EstimateMI.binNumberIsAppropriate(calcConfig)(data, (sigBins,respBins))) {
           res
         } else {
           val mi = buildTable(data, (sigBins, respBins)).mutualInformation
@@ -1230,7 +1231,7 @@ object EstimateCC {
       if (calcConfig.srParameters("signalValues").isDefined) {
         varyRespBinsSize(calcConfig.initResponseBins)
       } else if (numConsecBiasedSigEst == calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
-          !EstimateMI.moreSigBinsLeft(calcConfig)(data, sigBins)) {
+          !EstimateMI.binNumberIsAppropriate(calcConfig)(data, (sigBins, calcConfig.initResponseBins))) {
         res
       } else {
         val respRes = varyRespBinsSize(calcConfig.initResponseBins)

@@ -1,9 +1,7 @@
 package infcalcs
 
-import infcalcs.tables.ContingencyTable
 import org.scalatest._
 import Tree._
-import CTBuild.findIndex
 
 class TreeTest extends FlatSpec with Matchers {
 
@@ -56,6 +54,15 @@ class TreeTest extends FlatSpec with Matchers {
     val l = List()
     val bt = buildTree(l)
     bt.isEmpty shouldBe true
+  }
+
+  it should "successfully find a position in a tree" in {
+    val l = List(4.0, 3.0, 2.0, 1.0)
+    val orderedNodes = buildOrderedNodeList(l)
+    val bt = buildTree(orderedNodes)
+    findLteqTreePos(2.2,bt) shouldBe bt.right
+    findLteqTreePos(2.2,bt).index shouldBe 2
+    findLteqTreePos(3.2,bt) shouldBe bt.right.right
   }
 
 }

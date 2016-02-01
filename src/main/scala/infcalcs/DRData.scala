@@ -180,20 +180,6 @@ class DRData(calcConfig: CalcConfig)
     keys(exRespKeys, respDelims(numBins), numBins)
 
   /**
-   * Takes a subsample of the data and returns a new [[DRData]] given
-   * some fraction.
-   *
-   * @param frac
-   * @return
-   */
-  def subSample(frac: Double): DRData = {
-    val numToRemove = ((1-frac) * numObs).toInt
-    val subSamp = Random.shuffle(zippedVals) drop numToRemove
-    val (subSig, subResp) = subSamp.unzip
-    new DRData(calcConfig)(subSig, subResp)
-  }
-
-  /**
    * Writes data to stdout
    */
   override def toString() =

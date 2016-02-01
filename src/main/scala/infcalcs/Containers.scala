@@ -1,6 +1,8 @@
 package infcalcs
 
-import infcalcs.tables.CTable
+import infcalcs.tables.{ContingencyTable, CTable}
+
+import scala.annotation.tailrec
 
 /**
  * Created by ryansuderman on 8/25/15.
@@ -16,8 +18,17 @@ import infcalcs.tables.CTable
 case class Weight(weights: List[Double], label: String)
 
 /**
+ * Case class that contains the probability of a particular bin in a
+ * contingency table
+ *
+ * @param prob probability
+ * @param coord (row,col) location in a contingency table
+ */
+case class CtPos(prob: Double, coord: Pair[Int])
+
+/**
  * Case class for holding a [[CTable]] instance and the inverse of its sample
- * size, resulting from a [[DRData.subSample]] operation
+ * size, resulting from a subsampling operation
  *
  * @param inv
  * @param table
@@ -33,8 +44,7 @@ case class SubCalc(inv: Double, table: CTable[Double])
  */
 case class RegData(subCalcs: Vector[SubCalc], label: String){
 
-  lazy val tuples = subCalcs map (x => (x.inv, x.table.mutualInformation))
-  lazy val (invVals, miVals) = tuples.unzip
+  lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.mutualInformation))).unzip
 
   def calculateRegression: SLR = new SLR(invVals,miVals,label)
 
@@ -81,7 +91,6 @@ case class EstTuple(
     weight: Option[Weight],
     unbiased: Boolean)
 
-//TODO make some sort of null estimate for when buildRegData throws sample size exception
 /**
  * Case class with the actual and randomized mutual information estimates.
  * Also includes the coefficient of determination for the actual linear fit

@@ -25,6 +25,7 @@ object InfConfig {
       "biSigmaNumber" -> 5,
       "repsPerFraction" -> 20,
       "pwUnifWeights" -> 1, //pwUnifWeights takes either 1 or 0
+      "avgEntriesPerBin" -> 0, //0 means bin number is bounded only by number of unique values in data set
       "sampleSizeTol" -> 0.2) //tolerable variation in sample size (this value times the smallest spacing between sampleFractions entries)
 
   /** Parameters that have string values. */

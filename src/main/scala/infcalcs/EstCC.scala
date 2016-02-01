@@ -3,7 +3,8 @@ package infcalcs
 import OtherFuncs._
 import EstimateCC.{
 estimateCC,
-estimateCCVerbose
+estimateCCVerbose,
+calculateWithoutEstimator
 }
 import IOFile.{loadList, importParameters}
 import akka.actor.{ActorSystem, Props}
@@ -38,11 +39,16 @@ object EstCC extends App with CLOpts {
 
   //TODO inject appConfig into calcConfig for use in actors (avoid global variable)
   implicit val calcConfig = CalcConfig(parameters)
-  val p = loadList(dataFile, calcConfig.sigCols, calcConfig.respCols)
+  val p = loadList(dataFile)
 
   if (appConfig.verbose) {
     calcConfig.parameters.print
     println("\nResults:\n")
+  }
+
+  if (appConfig.noReg) {
+    calculateWithoutEstimator(p)
+    System exit 0
   }
 
   // Calculate and output estimated mutual information values given calculated weights

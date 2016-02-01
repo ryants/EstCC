@@ -96,6 +96,20 @@ case class Estimates(
     coeffOfDetermination: Double)
 
 /**
+ * Case class for storing calculations without regression estimator
+ *
+ * @param pairBinTuple
+ * @param mi
+ * @param randMi
+ * @param unBiased
+ */
+case class Calculation(
+    pairBinTuple: Pair[NTuple[Int]],
+    mi: Double,
+    randMi: Double,
+    unBiased: Boolean)
+
+/**
  * Case class holding the calculation parameters as denoted by the [[InfConfig]]
  * object and optional paramter file.
  *

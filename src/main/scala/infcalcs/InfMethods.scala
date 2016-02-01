@@ -689,7 +689,6 @@ object EstimateMI {
    *
    * @param binPair pair of n-dimensional bin number vectors
    * @param data [[DRData]]
-   * @param seed initializes PRNG
    * @param wts optional [[Weight]] depending on which weight resulted in
    *            maximal mutual information
    */
@@ -743,6 +742,8 @@ object EstimateMI {
  *
  */
 object EstimateCC {
+
+  import CTBuild._
 
   /**
    * Determines whether the weights cover a sufficient range of the input space.
@@ -1188,6 +1189,62 @@ object EstimateCC {
       }
 
     }
+  }
+
+  def calculateWithoutEstimator(data: DRData)
+      (implicit calcConfig: CalcConfig): Unit = {
+
+    val cutoff = calcConfig.numParameters("cutoffValue")
+
+    @tailrec
+    def varySigBinsSize(
+        sigBins: NTuple[Int],
+        numConsecBiasedSigEst: Int = 0,
+        res: Vector[Calculation] = Vector()
+        ): Vector[Calculation] = {
+
+      @tailrec
+      def varyRespBinsSize(
+          respBins: NTuple[Int],
+          numConsecRandPos: Int = 0,
+          res: Vector[Calculation] = Vector()): Vector[Calculation] =
+
+        if (calcConfig.srParameters("responseValues").isDefined) {
+          val mi = buildTable(data, (sigBins, respBins)).mutualInformation
+          val randMi = buildTable(data, (sigBins, respBins), true).mutualInformation
+          val calc = Calculation((sigBins,respBins),mi,randMi,randMi <= cutoff)
+          Vector(calc)
+        } else if (numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt ||
+            !EstimateMI.moreRespBinsLeft(calcConfig)(data, respBins)) {
+          res
+        } else {
+          val mi = buildTable(data, (sigBins, respBins)).mutualInformation
+          val randMi = buildTable(data, (sigBins, respBins), true).mutualInformation
+          val newRespBins = EstimateMI.updateRespBinNumbers(calcConfig)(respBins)
+          val calc = Calculation((sigBins, respBins),mi,randMi,randMi <= cutoff)
+          if (randMi > calcConfig.numParameters("cutoffValue"))
+            varyRespBinsSize(newRespBins, numConsecRandPos + 1, res :+ calc)
+          else varyRespBinsSize(newRespBins, 0, res :+ calc)
+        }
+
+      if (calcConfig.srParameters("signalValues").isDefined) {
+        varyRespBinsSize(calcConfig.initResponseBins)
+      } else if (numConsecBiasedSigEst == calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
+          !EstimateMI.moreSigBinsLeft(calcConfig)(data, sigBins)) {
+        res
+      } else {
+        val respRes = varyRespBinsSize(calcConfig.initResponseBins)
+        val newSigBins = EstimateMI.updateSigBinNumbers(calcConfig)(sigBins)
+        if (respRes.isEmpty) varySigBinsSize(newSigBins, numConsecBiasedSigEst + 1, res)
+        else varySigBinsSize(newSigBins, 0, res ++ respRes)
+      }
+
+    }
+
+    val results = varySigBinsSize(calcConfig.initSignalBins)
+    IOFile.calculatedToFile(results,"no_regr_calc.dat")
+    println((results filter (_.unBiased) map (_.mi)).max)
+
   }
 
 }

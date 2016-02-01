@@ -55,14 +55,12 @@ object IOFile {
    * 4 columns or fewer correctly
    *
    * @param f Name of file to load.
-   * @param sigCols List of integers indicating which columns of the file to load for signal values.
-   * @param respCols List of integers indicating which columns of the file to load for response values.
    * @return 2D vector of data from file
    */
-  def loadList(
-      f: String,
-      sigCols: Vector[Int],
-      respCols: Vector[Int])(implicit calcConfig: CalcConfig): DRData = {
+  def loadList(f: String)(implicit calcConfig: CalcConfig): DRData = {
+
+    val sigCols = calcConfig.sigCols
+    val respCols = calcConfig.respCols
 
     val d = importData(f)
     if (d.isEmpty) new DRData(calcConfig)(Vector(), Vector())
@@ -112,6 +110,26 @@ object IOFile {
     val writer = new BufferedWriter(new FileWriter(new File(f)))
     for (i <- (0 until d._1.length).toList) {
       writer.write(s"${d._1(i)} ${d._2(i)}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+
+  /**
+   *
+   * @param cs
+   * @param f
+   */
+  def calculatedToFile(cs: Vector[Calculation], f: String): Unit = {
+
+    def b2s(bins: NTuple[Int]): String = bins mkString ","
+
+    val writer = new BufferedWriter(new FileWriter(new File(f)))
+    writer write "# Signal Bins\tResponse Bins\tMI\tRand MI"
+    writer.newLine()
+    cs foreach { x =>
+      writer write s"${b2s(x.pairBinTuple._1)}\t${b2s(x.pairBinTuple._2)}\t${x.mi}\t${x.randMi}"
       writer.newLine()
     }
     writer.flush()

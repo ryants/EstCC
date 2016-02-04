@@ -400,11 +400,7 @@ object EstimateMI {
     val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
     val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
 
-    val randTables = (0 until numRandTables).toVector map (x =>
-      addWeight(makeUniform(buildTable(data, binPair, true)), wts))
-    val randProbTrees = randTables map (x =>
-      buildTree(buildOrderedNodeList(x.generateCtPos)))
-
+    val randProbTree = buildTree(buildOrderedNodeList(table.generateRandCtPos))
 
     val (reg, regRand) = {
       val tuples = calcConfig.fracList.indices.toVector map { x =>
@@ -415,8 +411,8 @@ object EstimateMI {
           val subTable = subSample((frac * data.numObs).toInt, probTree)
           val inv = 1.0 / subTable.numSamples.toDouble
 
-          val randSubCalcs = randProbTrees map { x =>
-            val randSubTable = subSample((frac * data.numObs).toInt, x)
+          val randSubCalcs = (0 until numRandTables).toVector map { x =>
+            val randSubTable = subSample((frac * data.numObs).toInt, randProbTree)
             val randInv = 1.0 / randSubTable.numSamples.toDouble
             SubCalc(randInv, randSubTable.cTableWithDoubles)
           }
@@ -425,8 +421,9 @@ object EstimateMI {
 
         } else {
           val inv = 1.0 / table.numSamples.toDouble
-          val randInvs = randTables map (x => 1.0 / x.numSamples.toDouble)
-          (SubCalc(inv, table), randTables.indices.toVector map (x => SubCalc(randInvs(x), randTables(x))))
+          val randTables = (0 until numRandTables).toVector map (x =>
+            SubCalc(inv, subSample(data.numObs, randProbTree).cTableWithDoubles))
+          (SubCalc(inv, table), randTables)
         }
 
       }

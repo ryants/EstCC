@@ -196,7 +196,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     val probTree = buildTree(buildOrderedNodeList(ctPosList))
 
     val frac = 0.7
-    subSample((frac*ct.numSamples).toInt,probTree).numSamples shouldBe 70
+    subSample((frac*ct.numSamples).toInt,10,10,probTree).numSamples shouldBe 70
 
   }
 

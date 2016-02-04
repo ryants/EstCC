@@ -328,12 +328,7 @@ object EstimateMI {
     }
   }
 
-  def subSample(size: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
-
-    val entries = t.toList
-    val rows = (entries map (_.coord._1)).max + 1
-    val cols = (entries map (_.coord._2)).max + 1
-
+  def subSample(size: Int, rows: Int, cols: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
 
     def buildSubTable(is: List[Pair[Int]]): ContingencyTable[Int] = {
       val table = (0 until rows).toVector map (x => (0 until cols).toVector map (y => 0))
@@ -397,6 +392,9 @@ object EstimateMI {
 
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
+    val rows = binPair._1.product
+    val cols = binPair._2.product
+
     val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
     val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
 
@@ -408,11 +406,11 @@ object EstimateMI {
         val frac = calcConfig.fracList(x)
 
         if (frac != 1.0) {
-          val subTable = subSample((frac * data.numObs).toInt, probTree)
+          val subTable = subSample((frac * data.numObs).toInt, rows, cols, probTree)
           val inv = 1.0 / subTable.numSamples.toDouble
 
           val randSubCalcs = (0 until numRandTables).toVector map { x =>
-            val randSubTable = subSample((frac * data.numObs).toInt, randProbTree)
+            val randSubTable = subSample((frac * data.numObs).toInt, rows, cols, randProbTree)
             val randInv = 1.0 / randSubTable.numSamples.toDouble
             SubCalc(randInv, randSubTable.cTableWithDoubles)
           }
@@ -422,7 +420,7 @@ object EstimateMI {
         } else {
           val inv = 1.0 / table.numSamples.toDouble
           val randTables = (0 until numRandTables).toVector map (x =>
-            SubCalc(inv, subSample(data.numObs, randProbTree).cTableWithDoubles))
+            SubCalc(inv, subSample(data.numObs, rows, cols, randProbTree).cTableWithDoubles))
           (SubCalc(inv, table), randTables)
         }
 
@@ -700,6 +698,8 @@ object EstimateMI {
 
     val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
     val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
+    val rows = binPair._1.product
+    val cols = binPair._2.product
 
     val (invFracs, tables) = {
       val fracTuples: List[(Double, Int)] = for {
@@ -709,7 +709,7 @@ object EstimateMI {
 
       (fracTuples map { x =>
         if (x != 1.0) {
-          val subTable = subSample((x._1 * data.numObs).toInt, probTree)
+          val subTable = subSample((x._1 * data.numObs).toInt, rows, cols, probTree)
           val inv = 1.0 / subTable.numSamples.toDouble
           subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
           (inv, subTable.cTableWithDoubles)

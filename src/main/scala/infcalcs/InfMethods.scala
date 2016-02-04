@@ -301,8 +301,17 @@ object EstimateMI {
     if (calcConfig.lowerAvgEntryLimit > 0)
       ((p.numObs * minSample) / totalBins) >= calcConfig.lowerAvgEntryLimit
     else
-      ((binPair._1.product <= p.sig.toSet.size * minSample) &&
-          (binPair._2.product <= p.resp.toSet.size * minSample))
+      if (calcConfig.defSigVals && calcConfig.defRespVals)
+        binPair._1.product == p.numUniqueSigVals &&
+          binPair._2.product == p.numUniqueRespVals
+      else if (calcConfig.defSigVals && !calcConfig.defRespVals)
+        binPair._2.product <= (p.numUniqueRespVals * minSample)
+      else if (calcConfig.defRespVals && !calcConfig.defSigVals)
+        binPair._1.product <= (p.numUniqueSigVals * minSample)
+      else
+        binPair._1.product <= p.numUniqueSigVals * minSample &&
+          binPair._2.product <= p.numUniqueRespVals * minSample
+
   }
 
   /**

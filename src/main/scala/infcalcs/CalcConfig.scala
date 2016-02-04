@@ -50,11 +50,14 @@ class CalcConfig(val parameters: Parameters) {
   lazy val sigDim = sigCols.length
   lazy val respDim = respCols.length
 
+  val defSigVals = srParameters("signalValues").isDefined
+  val defRespVals = srParameters("responseValues").isDefined
+
   assert(sigDim == listParameters("sigBinSpacing").length)
   assert(respDim == listParameters("respBinSpacing").length)
 
-  assert(srParameters("responseValues").isDefined || !listParameters("respBinSpacing").isEmpty)
-  assert(srParameters("signalValues").isDefined || !listParameters("sigBinSpacing").isEmpty)
+  assert(defSigVals || !listParameters("respBinSpacing").isEmpty)
+  assert(defRespVals || !listParameters("sigBinSpacing").isEmpty)
 
   // Determine number of response bins if values not specified
   lazy val initResponseBins: NTuple[Int] = srParameters("responseValues") match {

@@ -29,6 +29,15 @@ class DRData(calcConfig: CalcConfig)
   lazy val sigVals = calcConfig.srParameters("signalValues")
   lazy val respVals = calcConfig.srParameters("responseValues")
 
+  lazy val numUniqueSigVals = sigVals match {
+    case None => sig.toSet.size
+    case Some(x) => x.size
+  }
+  lazy val numUniqueRespVals = respVals match {
+    case None => resp.toSet.size
+    case Some(x) => x.size
+  }
+
   val sigDim = dim(sig)
   val respDim = dim(resp)
 

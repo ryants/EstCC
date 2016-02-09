@@ -142,8 +142,6 @@ class CTBuildTest extends FlatSpec with Matchers {
 
 class EstimateMITest extends FlatSpec with Matchers {
 
-  import Tree._
-
   val testConfig = CalcConfig()
 
   val doses1 = Vector(0.0, 1.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0) map (x =>
@@ -191,14 +189,13 @@ class EstimateMITest extends FlatSpec with Matchers {
     }
 
     val frac = 0.7
-    plRand subSample frac shouldBe 70
+    (plRand subSample frac).numObs shouldBe 70
 
   }
 
   "buildRegData" should "return an appropriate RegData data structure" in {
-    // Get the RegDataMult result
+    // Get the result
     val numReps = testConfig.numParameters("repsPerFraction").toInt
-    // Seeded with some integer
     val (reg, regRand) = buildRegData(testConfig)(numBins, pl)
     // Check the inverse sample sizes
     val fracs = testConfig.listParameters("sampleFractions")

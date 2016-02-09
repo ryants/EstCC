@@ -359,7 +359,7 @@ object EstimateMI {
 
         val frac = calcConfig.fracList(x)
         val subData = data subSample frac
-        val perfectSubSample = data.numObs - ((1-frac)*data.numObs)
+        val perfectSubSample = data.numObs - ((1-frac)*data.numObs).toInt
 
         if (frac != 1.0) {
           val subTable = addWeight(makeUniform(buildTable(subData, binPair)), wts)

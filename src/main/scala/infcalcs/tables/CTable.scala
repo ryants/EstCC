@@ -1,7 +1,6 @@
 package infcalcs.tables
 
-import infcalcs.{CtPos, MathFuncs}
-import infcalcs.Orderings._
+import infcalcs.MathFuncs
 
 import scala.annotation.tailrec
 
@@ -33,48 +32,6 @@ abstract class CTable[A](implicit n: Numeric[A]) {
 
   lazy val cTableWithDoubles: ContingencyTable[Double] =
     new ContingencyTable[Double](tableWithDoubles)
-
-  /** table entries as frequencies */
-  lazy val jointProbTable: Vector[Vector[Double]] =
-    table map (_ map (_.toDouble / numSamples.toDouble))
-
-  private def genCumCtPos(cs: List[CtPos]): List[CtPos] = {
-    @tailrec
-    def helper(rem: List[CtPos], cum: Double = 0.0, acc: List[CtPos] = Nil): List[CtPos] = {
-      if (rem.isEmpty) acc
-      else {
-        val newCum = cum + rem.head.prob
-        val newCtPos = CtPos(newCum, rem.head.coord)
-        helper(rem.tail, newCum, acc :+ newCtPos)
-      }
-    }
-    helper(cs)
-  }
-
-  /**
-   * Converts the probability table to a list of [[CtPos]] instances
-   * for sorting by probability
-   * @return
-   */
-  def generateCtPos: List[CtPos] = {
-
-    val pt = jointProbTable
-    val ctPosList = pt.indices.toList flatMap { x =>
-      pt(x).indices map (y => CtPos(pt(x)(y),(x,y)))
-    }
-    genCumCtPos(ctPosList.sorted)
-  }
-
-  def generateRandCtPos: List[CtPos] = {
-
-    val randProb = 1.0 / (rows * cols)
-    val randCtPosList = for {
-      r <- (0 until rows).toList
-      c <- (0 until cols).toList
-    } yield CtPos(randProb, (r,c))
-    genCumCtPos(randCtPosList)
-
-  }
 
   /**
    * Converts a vector of counts to a marginal probability.

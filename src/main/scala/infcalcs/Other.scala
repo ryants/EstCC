@@ -250,13 +250,3 @@ object OtherFuncs {
     }
   }
 }
-
-object Orderings {
-
-  implicit object CtPosOrdering extends Ordering[CtPos]{
-
-    def compare(a: CtPos, b: CtPos) = a.prob compare b.prob
-
-  }
-
-}

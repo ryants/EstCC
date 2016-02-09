@@ -1,7 +1,6 @@
 package infcalcs
 
 import Tree._
-import scala.collection.mutable.HashMap
 import scala.util.Random
 
 /**
@@ -41,11 +40,6 @@ class DRData(calcConfig: CalcConfig)
   val sigDim = dim(sig)
   val respDim = dim(resp)
 
-  var exSigDelims: HashMap[NTuple[Int], NTuple[Tree[Double]]] = HashMap()
-  var exRespDelims: HashMap[NTuple[Int], NTuple[Tree[Double]]] = HashMap()
-  var exSigKeys: HashMap[NTuple[Int], Map[NTuple[Int], Int]] = HashMap()
-  var exRespKeys: HashMap[NTuple[Int], Map[NTuple[Int], Int]] = HashMap()
-
   lazy val isEmpty: Boolean = numObs == 0
 
   /**
@@ -67,6 +61,22 @@ class DRData(calcConfig: CalcConfig)
   private def dim(d: Vector[NTuple[Double]]): Int = d.head.length
 
   /**
+   * Returns binary tree giving the values delimiting the bounds of each bin.
+   *
+   * The tree returned by this function has numBins nodes; the value
+   * associated with each node represents the maximum data value contained in
+   * that bin, ie, the upper inclusive bin bound.
+   *
+   * @param v The list of doubles to be partitioned.
+   * @param numBins The number of bins to divide the list into.
+   * @return Binary tree containing the maximum value in each bin.
+   */
+  private def getBinDelims(v: Vector[Double], numBins: Int): Tree[Double] = {
+    val delimList = CTBuild.partitionList(v, numBins) map (_.max)
+    buildTree(buildOrderedNodeList(delimList))
+  }
+
+  /**
    * Calculates bin delimiters for arbitrary dimensioned data points
    *
    * @note calling this function when a discrete value set is provided for the
@@ -78,7 +88,7 @@ class DRData(calcConfig: CalcConfig)
    * @param numBins number of bins per dimension
    * @return Vector of trees ([[Tree]])
    */
-  private def getDelims(
+  private def delims(
       values: Option[Vector[NTuple[Double]]],
       data: Vector[NTuple[Double]],
       numBins: NTuple[Int]): NTuple[Tree[Double]] =
@@ -88,7 +98,7 @@ class DRData(calcConfig: CalcConfig)
           (x => buildTree(buildOrderedNodeList(x)))
     else {
       val dt = data.transpose
-      ((0 until dim(data)) map (x => CTBuild.getBinDelims(dt(x), numBins(x)))).toVector
+      ((0 until dim(data)) map (x => getBinDelims(dt(x), numBins(x)))).toVector
     }
 
   /**
@@ -100,57 +110,13 @@ class DRData(calcConfig: CalcConfig)
    * @return vector of bin index vectors
    *
    */
-  private def calcBinKey(
+  private def keys(
       trees: NTuple[Tree[Double]]): Map[NTuple[Int], Int] = {
 
     val dimLengths = trees map (_.toList.length)
     val vtups = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
-    ((0 until vtups.length) map (x => (vtups(x), x))).toMap
+    (vtups.indices map (x => (vtups(x), x))).toMap
   }
-
-  /**
-   * Determines the delimiters for a particular set of data points given a 
-   * specified number of bins
-   *
-   * @param v optional values specified for bin delimiting (overrides bin-based
-   *          delimiting)
-   * @param data Vector of n-dimensional data points
-   * @param h HashMap of previously calculated delimiters for efficiency
-   * @param nb n-dimensional vector of bins
-   * @return n-dimensional vector of bin-delimiters (Vector of [[Tree]])
-   */
-  private def delims(
-      v: Option[Vector[NTuple[Double]]],
-      data: Vector[NTuple[Double]],
-      h: HashMap[NTuple[Int], NTuple[Tree[Double]]],
-      nb: NTuple[Int]): NTuple[Tree[Double]] =
-    if (h contains nb) h(nb)
-    else {
-      val d = getDelims(v, data, nb)
-      h update(nb, d)
-      d
-    }
-
-  /**
-   * Constructs a key for building a 2-dimensional contingency table from 
-   * an n-dimensional data set. This function constructs a Map from n-dimensinal
-   * bin indices to 1-dimensional bin indices
-   *
-   * @param h HashMap of previously calculated keys 
-   * @param trees n-dimensional bin-delimiting trees for data
-   * @param nb n-dimensional vector of bin numbers
-   * @return mapping of n-dimensional indices to 1-dimensional indices  
-   */
-  private def keys(
-      h: HashMap[NTuple[Int], Map[NTuple[Int], Int]],
-      trees: NTuple[Tree[Double]],
-      nb: NTuple[Int]): Map[NTuple[Int], Int] =
-    if (h contains nb) h(nb)
-    else {
-      val k = calcBinKey(trees)
-      h update(nb, k)
-      k
-    }
 
   /**
    * Delimiters for signal space
@@ -159,7 +125,7 @@ class DRData(calcConfig: CalcConfig)
    * @return n-dimensional vector of bin-delimiting [[Tree]]s
    */
   def sigDelims(numBins: NTuple[Int]): NTuple[Tree[Double]] =
-    delims(sigVals, sig, exSigDelims, numBins)
+    delims(sigVals, sig, numBins)
 
   /**
    * Delimiters for response space
@@ -168,7 +134,7 @@ class DRData(calcConfig: CalcConfig)
    * @return n-dimensional vector of bin-delimiting [[Tree]]s
    */
   def respDelims(numBins: NTuple[Int]): NTuple[Tree[Double]] =
-    delims(respVals, resp, exRespDelims, numBins)
+    delims(respVals, resp, numBins)
 
   /**
    * Index key for signal space
@@ -177,7 +143,7 @@ class DRData(calcConfig: CalcConfig)
    * @return mapping of n-dimensional indices to 1-dimensional indices
    */
   def sigKey(numBins: NTuple[Int]): Map[NTuple[Int], Int] =
-    keys(exSigKeys, sigDelims(numBins), numBins)
+    keys(sigDelims(numBins))
 
   /**
    * Index key for response space
@@ -186,7 +152,20 @@ class DRData(calcConfig: CalcConfig)
    * @return mapping of n-dimensional indices to 1-dimensional indices
    */
   def respKey(numBins: NTuple[Int]): Map[NTuple[Int], Int] =
-    keys(exRespKeys, respDelims(numBins), numBins)
+    keys(respDelims(numBins))
+
+  /**
+   * Generates a new [[DRData]] from sampling random values of the
+   * original data set
+   *
+   * @param frac
+   * @return
+   */
+  def subSample(frac: Double): DRData = {
+    val numToRemove = ((1-frac) * numObs).toInt
+    val (subS, subR) = (Random.shuffle(zippedVals) drop numToRemove).unzip
+    new DRData(calcConfig)(subS,subR)
+  }
 
   /**
    * Writes data to stdout

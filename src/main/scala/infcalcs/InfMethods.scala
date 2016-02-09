@@ -98,22 +98,6 @@ object CTBuild {
   }
 
   /**
-   * Returns binary tree giving the values delimiting the bounds of each bin.
-   *
-   * The tree returned by this function has numBins nodes; the value
-   * associated with each node represents the maximum data value contained in
-   * that bin, ie, the upper inclusive bin bound.
-   *
-   * @param v The list of doubles to be partitioned.
-   * @param numBins The number of bins to divide the list into.
-   * @return Binary tree containing the maximum value in each bin.
-   */
-  def getBinDelims(v: Vector[Double], numBins: Int): Tree[Double] = {
-    val delimList = partitionList(v, numBins) map (_.max)
-    buildTree(buildOrderedNodeList(delimList))
-  }
-
-  /**
    * Produces a vector of bin index vectors in order to find the bin number
    * for some arbitrary ndim data point
    *
@@ -237,7 +221,6 @@ object EstimateMI {
 
   import CTBuild.{buildTable, weightSignalData}
   import EstimateCC.testWeights
-  import Orderings._
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -328,30 +311,6 @@ object EstimateMI {
     }
   }
 
-  def subSample(size: Int, rows: Int, cols: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
-
-    def buildSubTable(is: List[Pair[Int]]): ContingencyTable[Int] = {
-      val table = (0 until rows).toVector map (x => (0 until cols).toVector map (y => 0))
-
-      @tailrec
-      def builder(t: Vector[Vector[Int]], cs: List[Pair[Int]]): ContingencyTable[Int] = {
-        if (cs.isEmpty) new ContingencyTable(t)
-        else {
-          val (r, c) = cs.head
-          val nt = t updated(r, t(r) updated(c, t(r)(c) + 1))
-          builder(nt, cs.tail)
-        }
-      }
-      builder(table, is)
-    }
-
-    //need to make CtPos dummy instances to search tree
-    val randomNumbers = (0 until size).toList map (x => CtPos(Random.nextDouble(), (-1, -1)))
-    val coords = randomNumbers map (x => findLteqTreePos(x, t).value.get.coord)
-    buildSubTable(coords)
-
-  }
-
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
    *
@@ -361,7 +320,7 @@ object EstimateMI {
    * unbiased estimation of MI at each bin size) and randomly shuffled
    * contingency tables (for selection of the appropriate bin size).
    *
-   * Resampling of the dataset is performed using the [[subSample]] method.
+   * Resampling of the dataset is performed using the [[DRData.subSample]] method.
    *
    * The return value is a tuple containing:
    * - a list of the inverse sample sizes for each resampling fraction. This
@@ -395,22 +354,25 @@ object EstimateMI {
     val rows = binPair._1.product
     val cols = binPair._2.product
 
-    val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
-    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
-
-    val randProbTree = buildTree(buildOrderedNodeList(table.generateRandCtPos))
-
     val (reg, regRand) = {
       val tuples = calcConfig.fracList.indices.toVector map { x =>
 
         val frac = calcConfig.fracList(x)
+        val subData = data subSample frac
+        val perfectSubSample = data.numObs - ((1-frac)*data.numObs)
 
         if (frac != 1.0) {
-          val subTable = subSample((frac * data.numObs).toInt, rows, cols, probTree)
+          val subTable = addWeight(makeUniform(buildTable(subData, binPair)), wts)
+          val withinSampleSizeTol = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
+          if (!withinSampleSizeTol)
+            throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
           val inv = 1.0 / subTable.numSamples.toDouble
 
           val randSubCalcs = (0 until numRandTables).toVector map { x =>
-            val randSubTable = subSample((frac * data.numObs).toInt, rows, cols, randProbTree)
+            val randSubTable = addWeight(makeUniform(buildTable(subData, binPair, true)), wts)
+            val withinSampleSizeTolRand = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
+            if (!withinSampleSizeTolRand)
+              throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
             val randInv = 1.0 / randSubTable.numSamples.toDouble
             SubCalc(randInv, randSubTable.cTableWithDoubles)
           }
@@ -418,9 +380,10 @@ object EstimateMI {
           (SubCalc(inv, subTable.cTableWithDoubles), randSubCalcs)
 
         } else {
-          val inv = 1.0 / table.numSamples.toDouble
+          val inv = 1.0 / data.numObs.toDouble
+          val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
           val randTables = (0 until numRandTables).toVector map (x =>
-            SubCalc(inv, subSample(data.numObs, rows, cols, randProbTree).cTableWithDoubles))
+            SubCalc(inv, addWeight(makeUniform(buildTable(subData, binPair, true)), wts)))
           (SubCalc(inv, table), randTables)
         }
 
@@ -696,11 +659,6 @@ object EstimateMI {
       data: DRData,
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
 
-    val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
-    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos))
-    val rows = binPair._1.product
-    val cols = binPair._2.product
-
     val (invFracs, tables) = {
       val fracTuples: List[(Double, Int)] = for {
         f <- calcConfig.listParameters("sampleFractions") :+ 1.0
@@ -709,12 +667,13 @@ object EstimateMI {
 
       (fracTuples map { x =>
         if (x != 1.0) {
-          val subTable = subSample((x._1 * data.numObs).toInt, rows, cols, probTree)
+          val subData = data subSample x._1
+          val subTable = addWeight(makeUniform(buildTable(subData,binPair)),wts)
           val inv = 1.0 / subTable.numSamples.toDouble
           subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
           (inv, subTable.cTableWithDoubles)
         }
-        else (1.0 / data.numObs.toDouble, table)
+        else (1.0 / data.numObs.toDouble, addWeight(makeUniform(buildTable(data,binPair)),wts))
       }).unzip
     }
 

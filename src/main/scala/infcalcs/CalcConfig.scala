@@ -92,6 +92,9 @@ class CalcConfig(val parameters: Parameters) {
     } yield f
   } :+ 1.0).toVector
 
+  lazy val minFracDiff = (listParameters("sampleFractions") sliding 2 map (x => math.abs(x(1)-x(0)))).min
+  def sampleSizeTol(data: DRData) = numParameters("sampleSizeTol") * minFracDiff * data.numObs
+
   lazy val lowerAvgEntryLimit = numParameters("avgEntriesPerBin")
 
   lazy val outF = if (stringParameters("filePrefix").trim.isEmpty) None else Some(stringParameters("filePrefix"))

@@ -143,7 +143,6 @@ class CTBuildTest extends FlatSpec with Matchers {
 class EstimateMITest extends FlatSpec with Matchers {
 
   import Tree._
-  import Orderings._
 
   val testConfig = CalcConfig()
 
@@ -191,12 +190,8 @@ class EstimateMITest extends FlatSpec with Matchers {
       new DRData(testConfig)(data._1, data._2)
     }
 
-    val ct = buildTable(plRand,(Vector(10),Vector(10)))
-    val ctPosList = ct.generateCtPos
-    val probTree = buildTree(buildOrderedNodeList(ctPosList))
-
     val frac = 0.7
-    subSample((frac*ct.numSamples).toInt,10,10,probTree).numSamples shouldBe 70
+    plRand subSample frac shouldBe 70
 
   }
 
@@ -361,13 +356,6 @@ class MultiVarTest extends FlatSpec with Matchers {
     val data4 = new DRData(testConfig)(testValues, testValues map (x => x :+ (x(0) + 3.0)))
     (data4 sigDelims Vector(2,4,1)).length shouldBe 3
     (data4 respDelims Vector(12,2,2,6)).length shouldBe 4
-  }
-  
-  it should "recall existing binDelims and binKeys" in {
-    val data = new DRData(testConfig)(testValues, testValues)
-    data.exSigDelims contains Vector(1,2,3) shouldBe false
-    val bd = data sigDelims Vector(1,2,3)  
-    data.exSigDelims contains Vector(1,2,3) shouldBe true
   }
 
   "calcBinKeys" should "correctly place values in the contingency table" in {

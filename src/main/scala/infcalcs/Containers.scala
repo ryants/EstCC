@@ -18,15 +18,6 @@ import scala.annotation.tailrec
 case class Weight(weights: List[Double], label: String)
 
 /**
- * Case class that contains the probability of a particular bin in a
- * contingency table
- *
- * @param prob probability
- * @param coord (row,col) location in a contingency table
- */
-case class CtPos(prob: Double, coord: Pair[Int])
-
-/**
  * Case class for holding a [[CTable]] instance and the inverse of its sample
  * size, resulting from a subsampling operation
  *

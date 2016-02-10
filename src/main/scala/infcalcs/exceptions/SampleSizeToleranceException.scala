@@ -3,4 +3,4 @@ package infcalcs.exceptions
 /**
  * Created by ryansuderman on 2/9/16.
  */
-class SampleSizeToleranceException(msg: String) extends Exception(msg)
+class SampleSizeToleranceException(val msg: String) extends Exception(msg)

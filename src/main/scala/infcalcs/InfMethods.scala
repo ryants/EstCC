@@ -351,9 +351,6 @@ object EstimateMI {
 
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
-    val rows = binPair._1.product
-    val cols = binPair._2.product
-
     val (reg, regRand) = {
       val tuples = calcConfig.fracList.indices.toVector map { x =>
 
@@ -482,19 +479,37 @@ object EstimateMI {
     val binNumberIsNotAppropriate = !binNumberIsAppropriate(calcConfig)(pl, binPair)
 
     if (calcConfig.srParameters("responseValues").isDefined) {
-      val regData = buildRegData(calcConfig)(binPair, pl, wts)
-      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
+      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
+      val est = regData match {
+        case Success(reg) => {
+          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
+          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+          EstTuple(binPair, Some(intercepts), wts, notBiased)
+        }
+        case Failure(e: SampleSizeToleranceException) => {
+          println(e.msg)
+          EstTuple(binPair, None, wts, false)
+        }
+        case Failure(t) => throw t
+      }
+      Vector(est)
 
     } else if (binNumberIsNotAppropriate || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
-      val regData = buildRegData(calcConfig)(binPair, pl, wts)
-      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-      val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
-
+      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
+      val est = regData match {
+        case Success(reg) => {
+          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
+          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+          EstTuple(binPair, Some(intercepts), wts, notBiased)
+        }
+        case Failure(e: SampleSizeToleranceException) => {
+          println(e.msg)
+          EstTuple(binPair, None, wts, false)
+        }
+        case Failure(t) => throw t
+      }
       val newBins = (binPair._1, updateRespBinNumbers(calcConfig)(binPair._2))
       val newRes = res :+ est
 
@@ -521,11 +536,20 @@ object EstimateMI {
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
-      val regData = buildRegData(calcConfig)(binPair, pl, wts)
-      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
-
+      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
+      val est = regData match {
+        case Success(reg) => {
+          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
+          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+          EstTuple(binPair, Some(intercepts), wts, notBiased)
+        }
+        case Failure(e: SampleSizeToleranceException) => {
+          println(e.msg)
+          EstTuple(binPair, None, wts, false)
+        }
+        case Failure(t) => throw t
+      }
+      Vector(est)
     } else {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
@@ -535,10 +559,19 @@ object EstimateMI {
           binNumberIsAppropriate(calcConfig)(pl, (signalBins,responseBins))) {
 
         val binPair = (signalBins, responseBins)
-        val regData = buildRegData(calcConfig)(binPair, pl, wts)
-        val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
-        val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-        val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
+        val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
+        val est = regData match {
+          case Success(reg) => {
+            val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
+            val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+            EstTuple(binPair, Some(intercepts), wts, notBiased)
+          }
+          case Failure(e: SampleSizeToleranceException) => {
+            println(e.msg)
+            EstTuple(binPair, None, wts, false)
+          }
+          case Failure(t) => throw t
+        }
 
         res = res :+ est
 

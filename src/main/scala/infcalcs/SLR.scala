@@ -12,6 +12,8 @@ import MathFuncs.avg
  */
 class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
 
+  assert(xList.length == yList.length)
+
   /** The number of datapoints. */
   val n: Double = xList.length.toDouble
 

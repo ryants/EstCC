@@ -161,11 +161,12 @@ class DRData(calcConfig: CalcConfig)
    * @param frac
    * @return
    */
-  def subSample(frac: Double): DRData = {
-    val numToRemove = ((1-frac) * numObs).toInt
-    val (subS, subR) = (Random.shuffle(zippedVals) drop numToRemove).unzip
-    new DRData(calcConfig)(subS,subR)
-  }
+  def subSample(frac: Double): DRData =
+    if (frac < 1.0) {
+      val numToRemove = ((1 - frac) * numObs).toInt
+      val (subS, subR) = (Random.shuffle(zippedVals) drop numToRemove).unzip
+      new DRData(calcConfig)(subS, subR)
+    } else this
 
   /**
    * Writes data to stdout

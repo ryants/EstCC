@@ -56,8 +56,8 @@ class CalcConfig(val parameters: Parameters) {
   assert(sigDim == listParameters("sigBinSpacing").length)
   assert(respDim == listParameters("respBinSpacing").length)
 
-  assert(defSigVals || !listParameters("respBinSpacing").isEmpty)
-  assert(defRespVals || !listParameters("sigBinSpacing").isEmpty)
+  assert(defRespVals || !listParameters("respBinSpacing").isEmpty)
+  assert(defSigVals || !listParameters("sigBinSpacing").isEmpty)
 
   // Determine number of response bins if values not specified
   lazy val initResponseBins: NTuple[Int] = srParameters("responseValues") match {

@@ -1,7 +1,7 @@
 package infcalcs
 
 import Tree._
-import scala.util.Random
+import Orderings._
 
 /**
  * Structure for input-output (dose-response) data.
@@ -42,6 +42,28 @@ class DRData(calcConfig: CalcConfig)
 
   lazy val isEmpty: Boolean = numObs == 0
 
+  val fracs = genSubFracs()
+
+  val repsPerFrac = 0 until calcConfig.numParameters("repsPerFraction").toInt
+
+  val fracList = (repsPerFrac.toList map (_ => 1.0)) ++ (for {
+    f <- fracs
+    x <- repsPerFrac
+  } yield f)
+
+  /**
+   * Generates fractions for subsampling the data which are uniformaly distributed
+   * in inverse sample space
+   */
+  private def genSubFracs() = {
+    val numFracs = calcConfig.numParameters("numFractions").toInt
+    val maxInvSample = 1.0 / (calcConfig.numParameters("lowFraction") * numObs)
+    val minInvSample = 1.0 / numObs
+    val incr = (maxInvSample - minInvSample) / numFracs.toDouble
+    val invs = (1 to numFracs) map (x => (x * incr) + minInvSample)
+    invs.toVector map (x => 1.0 / (numObs * x))
+  }
+
   /**
    * Confirms that each data point has the same dimensionality
    *
@@ -71,8 +93,8 @@ class DRData(calcConfig: CalcConfig)
    * @param numBins The number of bins to divide the list into.
    * @return Binary tree containing the maximum value in each bin.
    */
-  private def getBinDelims(v: Vector[Double], numBins: Int): Tree[Double] = {
-    val delimList = CTBuild.partitionList(v, numBins) map (_.max)
+  private def getBinDelims(v: Vector[Double], numBins: Int): Tree[Bin] = {
+    val delimList = CTBuild.partitionList(v, numBins)
     buildTree(buildOrderedNodeList(delimList))
   }
 
@@ -91,14 +113,23 @@ class DRData(calcConfig: CalcConfig)
   private def delims(
       values: Option[Vector[NTuple[Double]]],
       data: Vector[NTuple[Double]],
-      numBins: NTuple[Int]): NTuple[Tree[Double]] =
+      numBins: NTuple[Int]): NTuple[Tree[Bin]] =
 
-    if (values.isDefined)
-      values.get.transpose map (_.toSet.toList) map
-          (x => buildTree(buildOrderedNodeList(x)))
-    else {
-      val dt = data.transpose
-      ((0 until dim(data)) map (x => getBinDelims(dt(x), numBins(x)))).toVector
+    values match {
+      case None => {
+        val dt = data.transpose
+        ((0 until dim(data)) map (x => getBinDelims(dt(x), numBins(x)))).toVector
+      }
+      case Some(v) => {
+        val valsByDim = v.transpose map (_.toSet.toVector.sorted)
+
+        val bins = valsByDim map (x => x.indices.toList map (y =>
+          Bin(y, List(x(y)), if (y == 0) Double.NegativeInfinity else x(y - 1))))
+
+        def toTree: List[Bin] => Tree[Bin] = buildOrderedNodeList[Bin] _ andThen buildTree[Bin] _
+
+        bins map toTree
+      }
     }
 
   /**
@@ -111,8 +142,7 @@ class DRData(calcConfig: CalcConfig)
    *
    */
   private def keys(
-      trees: NTuple[Tree[Double]]): Map[NTuple[Int], Int] = {
-
+      trees: NTuple[Tree[Bin]]): Map[NTuple[Int], Int] = {
     val dimLengths = trees map (_.toList.length)
     val vtups = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
     (vtups.indices map (x => (vtups(x), x))).toMap
@@ -124,7 +154,7 @@ class DRData(calcConfig: CalcConfig)
    * @param numBins n-dimensional vector of bin numbers
    * @return n-dimensional vector of bin-delimiting [[Tree]]s
    */
-  def sigDelims(numBins: NTuple[Int]): NTuple[Tree[Double]] =
+  def sigDelims(numBins: NTuple[Int]): NTuple[Tree[Bin]] =
     delims(sigVals, sig, numBins)
 
   /**
@@ -133,7 +163,7 @@ class DRData(calcConfig: CalcConfig)
    * @param numBins n-dimensional vector of bin numbers
    * @return n-dimensional vector of bin-delimiting [[Tree]]s
    */
-  def respDelims(numBins: NTuple[Int]): NTuple[Tree[Double]] =
+  def respDelims(numBins: NTuple[Int]): NTuple[Tree[Bin]] =
     delims(respVals, resp, numBins)
 
   /**
@@ -153,20 +183,6 @@ class DRData(calcConfig: CalcConfig)
    */
   def respKey(numBins: NTuple[Int]): Map[NTuple[Int], Int] =
     keys(respDelims(numBins))
-
-  /**
-   * Generates a new [[DRData]] from sampling random values of the
-   * original data set
-   *
-   * @param frac
-   * @return
-   */
-  def subSample(frac: Double): DRData =
-    if (frac < 1.0) {
-      val numToRemove = ((1 - frac) * numObs).toInt
-      val (subS, subR) = (Random.shuffle(zippedVals) drop numToRemove).unzip
-      new DRData(calcConfig)(subS, subR)
-    } else this
 
   /**
    * Writes data to stdout

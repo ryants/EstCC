@@ -25,7 +25,7 @@ trait Weight {
 
 }
 
-case class GWeight(p: Pair[Double], bt: Tree[Double], vs: List[Double]) extends Weight {
+case class GWeight(p: Pair[Double], bt: Tree[Bin], vs: List[Double]) extends Weight {
 
   import MathFuncs.intUniG
 
@@ -35,10 +35,10 @@ case class GWeight(p: Pair[Double], bt: Tree[Double], vs: List[Double]) extends 
   val weights = {
     val minVal = vs.min
     val boundList = bt.toList
-    val firstTerm = Weight.calcWeight(intUniG(p._1, p._2), minVal, boundList.head)
+    val firstTerm = Weight.calcWeight(intUniG(p._1, p._2), minVal, boundList.head.max)
     Weight.testWeights(label, firstTerm +: {
       for (x <- 0 until (boundList.length - 1)) yield Weight.calcWeight(
-        intUniG(p._1, p._2), boundList(x), boundList(x + 1))
+        intUniG(p._1, p._2), boundList(x).max, boundList(x + 1).max)
     }.toList)
   }
 
@@ -48,7 +48,7 @@ case class BWeight(
     p1: Pair[Double],
     p2: Pair[Double],
     w: Double,
-    bt: Tree[Double],
+    bt: Tree[Bin],
     vs: List[Double]) extends Weight {
 
   import MathFuncs.intBiG
@@ -62,16 +62,16 @@ case class BWeight(
   val weights = {
     val minVal = vs.min
     val boundList = bt.toList
-    val firstTerm = Weight.calcWeight(intBiG(p1, p2, (w, 1 - w)), minVal, boundList.head)
+    val firstTerm = Weight.calcWeight(intBiG(p1, p2, (w, 1 - w)), minVal, boundList.head.max)
     Weight.testWeights(label, firstTerm +: {
       for (x <- 0 until (boundList.length - 1)) yield Weight.calcWeight(
-        intBiG(p1, p2, (w, 1 - w)), boundList(x), boundList(x + 1))
+        intBiG(p1, p2, (w, 1 - w)), boundList(x).max, boundList(x + 1).max)
     }.toList)
   }
 
 }
 
-case class PWeight(b: Pair[Int], bt: Tree[Double]) extends Weight {
+case class PWeight(b: Pair[Int], bt: Tree[Bin]) extends Weight {
 
   val label = "PWU(%d, %d)" format(b._1, b._2)
 
@@ -85,7 +85,7 @@ case class PWeight(b: Pair[Int], bt: Tree[Double]) extends Weight {
 
 }
 
-case class UWeight(bt: Tree[Double]) extends Weight {
+case class UWeight(bt: Tree[Bin]) extends Weight {
 
   val label = "Uniform"
 

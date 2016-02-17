@@ -211,3 +211,19 @@ object ParameterFuncs {
       else throw new IllegalParameterException(s"illegal parameter: $k")
     }
 }
+
+object Orderings {
+
+  implicit object CtPosOrdering extends Ordering[CtPos] {
+
+    def compare(a: CtPos, b: CtPos) = a.cumProb compare b.cumProb
+
+  }
+
+  implicit object BinOrdering extends Ordering[Bin] {
+
+    def compare(a: Bin, b: Bin) = a.index compare b.index
+
+  }
+
+}

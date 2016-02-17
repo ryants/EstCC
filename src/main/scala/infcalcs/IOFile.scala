@@ -203,7 +203,7 @@ object IOFile {
    * @param s file name
    */
   def delimInfoToFile(
-      dPair: Pair[NTuple[Tree[Double]]],
+      dPair: Pair[NTuple[Tree[Bin]]],
       kPair: Pair[Map[NTuple[Int], Int]],
       s: String): Unit = {
 

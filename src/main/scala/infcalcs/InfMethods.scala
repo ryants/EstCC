@@ -7,7 +7,8 @@ import annotation.tailrec
 import math._
 import Tree._
 
-import scala.util.{Random, Failure, Success, Try}
+import scala.util.Random
+import Orderings._
 
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
@@ -34,7 +35,7 @@ object CTBuild {
    * @param numBins The number of bins to divide the list into.
    * @return A list of length numBins containing each of the sublists.
    */
-  def partitionList(v: Vector[Double], numBins: Int): List[List[Double]] = {
+  def partitionList(v: Vector[Double], numBins: Int): List[Bin] = {
     val avgPerBin = v.length / numBins
     val rem = v.length % numBins
     val elemPerBin: List[Int] = {
@@ -51,7 +52,12 @@ object CTBuild {
       else (ls take es.head) :: buildPartList(es.tail, ls drop es.head)
     }
 
-    buildPartList(elemPerBin, sv)
+    val partList = buildPartList(elemPerBin, sv)
+
+    (partList.indices map { x =>
+      val lowerBound = if (x == 0) Double.NegativeInfinity else partList(x - 1).max
+      Bin(x, partList(x), lowerBound)
+    }).toList
   }
 
   /**
@@ -71,10 +77,22 @@ object CTBuild {
    * @param dim The binary tree specifying the bounds of each bin.
    * @return The index of the bin that should contain the value.
    */
-  def findIndex[A](value: A, dim: Tree[A])(implicit ev: Ordering[A]): Int = {
-    findLteqTreePos(value, dim).index
-  }
+  def findIndex(value: Double, dim: Tree[Bin]): Int = {
 
+    @tailrec
+    def trace(tree: Tree[Bin] = dim): Bin =
+      if (value > tree.maxVal.max) throw new ValueOutOfBoundsException(("value is larger than maximum in tree"))
+      else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
+      else {
+        val bin = tree.value.get
+        if (value > bin.lowerBound && value <= bin.max) bin
+        else if (value <= bin.lowerBound) trace(tree.left)
+        else trace(tree.right)
+      }
+
+    trace().index
+
+  }
 
   /**
    * Produces a vector of bin index vectors in order to find the bin number
@@ -113,7 +131,7 @@ object CTBuild {
    */
   def findVectIndex(
       tuple: NTuple[Double],
-      binDelims: NTuple[Tree[Double]],
+      binDelims: NTuple[Tree[Bin]],
       m: Map[NTuple[Int], Int]): Int = {
 
     val indices: Vector[Int] = (Range(0, tuple.length) map (x =>
@@ -199,6 +217,7 @@ object CTBuild {
 object EstimateMI {
 
   import CTBuild.buildTable
+  import Orderings._
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -227,10 +246,10 @@ object EstimateMI {
       binPair: Pair[NTuple[Int]]): Boolean = {
 
     val totalBins = binPair._1.product * binPair._2.product
-    val minSample = calcConfig.listParameters("sampleFractions").min
+    val minSample = calcConfig.numParameters("lowFraction")
 
     if (calcConfig.lowerAvgEntryLimit > 0)
-      ((p.numObs * minSample) / totalBins) >= calcConfig.lowerAvgEntryLimit
+      ((p.numObs * minSample) / totalBins.toDouble) >= calcConfig.lowerAvgEntryLimit
     else
     if (calcConfig.defSigVals && calcConfig.defRespVals)
       binPair._1.product == p.numUniqueSigVals &&
@@ -242,7 +261,50 @@ object EstimateMI {
     else
       binPair._1.product <= p.numUniqueSigVals * minSample &&
           binPair._2.product <= p.numUniqueRespVals * minSample
+  }
 
+  def resample(size: Int, rows: Int, cols: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
+
+    @tailrec
+    def findCtPos(value: Double, tree: Tree[CtPos] = t): CtPos =
+      if (value > tree.maxVal.cumProb) throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.cumProb}}) in tree"))
+      else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
+      else {
+        val ctPos = tree.value.get
+        if (value > ctPos.lowerBound && value <= ctPos.cumProb) ctPos
+        else if (value <= ctPos.lowerBound) findCtPos(value, tree.left)
+        else findCtPos(value, tree.right)
+      }
+
+    def buildSampledTable(is: List[Pair[Int]]): ContingencyTable[Int] = {
+      val table = (0 until rows).toVector map (x => (0 until cols).toVector map (y => 0))
+
+      @tailrec
+      def builder(t: Vector[Vector[Int]], cs: List[Pair[Int]]): ContingencyTable[Int] = {
+        if (cs.isEmpty) new ContingencyTable(t)
+        else {
+          val (r, c) = cs.head
+          val nt = t updated(r, t(r) updated(c, t(r)(c) + 1))
+          builder(nt, cs.tail)
+        }
+      }
+      builder(table, is)
+    }
+
+    //need to make CtPos dummy instances to search tree
+    val randomNumbers = (0 until size).toList map (_ => Random.nextDouble())
+    val coords = randomNumbers map (x => findCtPos(x, t).coord)
+    buildSampledTable(coords)
+
+  }
+
+  def buildTableWithWeight(
+      data: DRData,
+      binPair: Pair[NTuple[Int]],
+      wts: Option[Weight],
+      rand: Boolean = false) = wts match {
+    case Some(w) => w weightTable buildTable(data, binPair, rand)
+    case None => buildTable(data, binPair, rand)
   }
 
   /**
@@ -254,7 +316,7 @@ object EstimateMI {
    * unbiased estimation of MI at each bin size) and randomly shuffled
    * contingency tables (for selection of the appropriate bin size).
    *
-   * Resampling of the dataset is performed using the [[DRData.subSample]] method.
+   * Resampling of the dataset is performed using the [[resample]] method.
    *
    * The return value is a tuple containing:
    * - a list of the inverse sample sizes for each resampling fraction. This
@@ -281,59 +343,31 @@ object EstimateMI {
   def buildRegData(calcConfig: CalcConfig)(
       binPair: Pair[NTuple[Int]],
       data: DRData,
-      wts: Option[Weight] = None): (RegData, RegDataRand) = {
+      wts: Option[Weight]): (RegData, RegDataRand) = {
 
     val numRandTables = calcConfig.numParameters("numRandom").toInt
 
+    val table = buildTableWithWeight(data, binPair, wts)
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos()))
+
+    val randProbTree = buildTree(buildOrderedNodeList(table.generateCtPos(true)))
+
+
     val (reg, regRand) = {
-      val tuples = calcConfig.fracList.indices.toVector map { x =>
+      val tuples = data.fracList.indices.toVector map { x =>
 
-        val frac = calcConfig.fracList(x)
-        val subData = data subSample frac
-        val perfectSubSample = data.numObs - ((1 - frac) * data.numObs).toInt
-        val subTable = buildTable(subData, binPair)
+        val frac = data.fracList(x)
 
-        if (frac != 1.0) {
-          val wtSubTable = wts match {
-            case None => subTable.cTableWithDoubles
-            case Some(w) => w weightTable subTable
-          }
-          val withinSampleSizeTol = math.abs(perfectSubSample - wtSubTable.numSamples) <= calcConfig.sampleSizeTol(data)
-          if (!withinSampleSizeTol)
-            throw new SampleSizeToleranceException(s"table has ${wtSubTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-          val inv = 1.0 / wtSubTable.numSamples.toDouble
+        val subTable = resample((frac * data.numObs).toInt, table.rows, table.cols, probTree)
+        val inv = 1.0 / subTable.numSamples.toDouble
 
-          val randSubCalcs = (0 until numRandTables).toVector map { x =>
-            val randSubTable = buildTable(subData, binPair, true)
-            val wtRandSubTable = wts match {
-              case None => randSubTable.cTableWithDoubles
-              case Some(w) => w weightTable randSubTable
-            }
-            val withinSampleSizeTolRand = math.abs(perfectSubSample - wtSubTable.numSamples) <= calcConfig.sampleSizeTol(data)
-            if (!withinSampleSizeTolRand)
-              throw new SampleSizeToleranceException(s"table has ${wtSubTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-            val randInv = 1.0 / wtRandSubTable.numSamples.toDouble
-            SubCalc(randInv, wtRandSubTable.cTableWithDoubles)
-          }
-
-          (SubCalc(inv, wtSubTable.cTableWithDoubles), randSubCalcs)
-
-        } else {
-          val inv = 1.0 / data.numObs.toDouble
-          val table = buildTable(data, binPair)
-          val wtTable = wts match {
-            case None => table.cTableWithDoubles
-            case Some(w) => w weightTable table
-          }
-          val randTables = (0 until numRandTables).toVector map { x =>
-            val randTable = buildTable(data, binPair, true)
-            wts match {
-              case None => SubCalc(inv, randTable.cTableWithDoubles)
-              case Some(w) => SubCalc(inv, w weightTable randTable)
-            }
-          }
-          (SubCalc(inv, wtTable), randTables)
+        val randSubCalcs = (0 until numRandTables).toVector map { x =>
+          val randSubTable = resample((frac * data.numObs).toInt, table.rows, table.cols, randProbTree)
+          val randInv = 1.0 / randSubTable.numSamples.toDouble
+          SubCalc(randInv, randSubTable.cTableWithDoubles)
         }
+
+        (SubCalc(inv, subTable.cTableWithDoubles), randSubCalcs)
 
       }
       tuples.unzip
@@ -430,37 +464,19 @@ object EstimateMI {
     val binNumberIsNotAppropriate = !binNumberIsAppropriate(calcConfig)(pl, binPair)
 
     if (calcConfig.srParameters("responseValues").isDefined) {
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      val est = regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          EstTuple(binPair, Some(intercepts), wts, notBiased)
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          EstTuple(binPair, None, wts, false)
-        }
-        case Failure(t) => throw t
-      }
-      Vector(est)
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
 
     } else if (binNumberIsNotAppropriate || numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt) {
       res
     } else {
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      val est = regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          EstTuple(binPair, Some(intercepts), wts, notBiased)
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          EstTuple(binPair, None, wts, false)
-        }
-        case Failure(t) => throw t
-      }
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
+
       val newBins = (binPair._1, updateRespBinNumbers(calcConfig)(binPair._2))
       val newRes = res :+ est
 
@@ -487,20 +503,10 @@ object EstimateMI {
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
-      val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-      val est = regData match {
-        case Success(reg) => {
-          val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-          val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-          EstTuple(binPair, Some(intercepts), wts, notBiased)
-        }
-        case Failure(e: SampleSizeToleranceException) => {
-          println(e.msg)
-          EstTuple(binPair, None, wts, false)
-        }
-        case Failure(t) => throw t
-      }
-      Vector(est)
+      val regData = buildRegData(calcConfig)(binPair, pl, wts)
+      val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+      val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+      Vector(EstTuple(binPair, Some(intercepts), wts, notBiased))
     } else {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
@@ -510,19 +516,10 @@ object EstimateMI {
           binNumberIsAppropriate(calcConfig)(pl, (signalBins, responseBins))) {
 
         val binPair = (signalBins, responseBins)
-        val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
-        val est = regData match {
-          case Success(reg) => {
-            val intercepts = multIntercepts(calcMultRegs(calcConfig)(reg))
-            val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
-            EstTuple(binPair, Some(intercepts), wts, notBiased)
-          }
-          case Failure(e: SampleSizeToleranceException) => {
-            println(e.msg)
-            EstTuple(binPair, None, wts, false)
-          }
-          case Failure(t) => throw t
-        }
+        val regData = buildRegData(calcConfig)(binPair, pl, wts)
+        val intercepts = multIntercepts(calcMultRegs(calcConfig)(regData))
+        val notBiased = isNotBiased(calcConfig)(intercepts.randDataEstimate)
+        val est = EstTuple(binPair, Some(intercepts), wts, notBiased)
 
         res = res :+ est
 
@@ -643,32 +640,23 @@ object EstimateMI {
       data: DRData,
       wts: Option[Weight])(implicit calcConfig: CalcConfig): Unit = {
 
+    val table = buildTableWithWeight(data, binPair, wts)
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos()))
+
     val (invFracs, tables) = {
-      val fracTuples: List[(Double, Int)] = for {
-        f <- calcConfig.listParameters("sampleFractions") :+ 1.0
+      val fracTuples: List[(Double, Int)] = (1.0, 0) :: (for {
+        f <- data.fracs.toList
         n <- 0 until calcConfig.numParameters("repsPerFraction").toInt
-      } yield (f, n)
+      } yield (f, n))
 
       (fracTuples map { x =>
         if (x != 1.0) {
-          val subData = data subSample x._1
-          val subTable = buildTable(subData, binPair)
-          val wtSubTable = wts match {
-            case None => subTable.cTableWithDoubles
-            case Some(w) => w weightTable subTable
-          }
-          val inv = 1.0 / wtSubTable.numSamples.toDouble
-          wtSubTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
-          (inv, wtSubTable.cTableWithDoubles)
+          val subTable = resample((x._1 * data.numObs).toInt, table.rows, table.cols, probTree)
+          val inv = 1.0 / subTable.numSamples.toDouble
+          subTable tableToFile s"ct_fe_${subTable.numSamples}_${x._2}.dat"
+          (inv, subTable.cTableWithDoubles)
         }
-        else {
-          val table = buildTable(data, binPair)
-          val wtTable = wts match {
-            case None => table.cTableWithDoubles
-            case Some(w) => w weightTable table
-          }
-          (1.0 / data.numObs.toDouble, wtTable)
-        }
+        else (1.0 / data.numObs.toDouble, table)
       }).unzip
     }
 
@@ -711,7 +699,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def genUnimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
+  def genUnimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("uniMuNumber").toInt == 0) Nil
     else {
@@ -747,7 +735,7 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def genBimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
+  def genBimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("biMuNumber") < 3) Nil
     else {
@@ -793,7 +781,7 @@ object EstimateCC {
    * @param bounds Binary tree specifying bin bounds.
    * @return List of piece-wise weights
    */
-  def genPieceWiseUniformWeights(calcConfig: CalcConfig)(bounds: Tree[Double]): List[Weight] =
+  def genPieceWiseUniformWeights(calcConfig: CalcConfig)(bounds: Tree[Bin]): List[Weight] =
     if (!calcConfig.boolParameters("pwUniformWeight")) {
       Nil
     } else {
@@ -808,6 +796,7 @@ object EstimateCC {
       } yield (x, y)
 
       nodePairs map (x => PWeight(x, bounds))
+
     }
 
 
@@ -827,9 +816,9 @@ object EstimateCC {
    */
   def genWeights1(
       sig: Vector[NTuple[Double]],
-      weightFunc: (Tree[Double], List[Double]) => List[Weight]): NTuple[Tree[Double]] => List[Weight] = {
+      weightFunc: (Tree[Bin], List[Double]) => List[Weight]): NTuple[Tree[Bin]] => List[Weight] = {
     val sigT = sig.transpose
-    (pBounds: NTuple[Tree[Double]]) => {
+    (pBounds: NTuple[Tree[Bin]]) => {
       val w = sigT.indices map (x => weightFunc(pBounds(x), sigT(x).toList))
       w.transpose.toList map (x => Weight.makeJoint(x.toVector))
     }
@@ -837,14 +826,14 @@ object EstimateCC {
 
   def genWeights2(
       sig: Vector[NTuple[Double]],
-      weightFunc: Tree[Double] => List[Weight]): NTuple[Tree[Double]] => List[Weight] =
-    (pBounds: NTuple[Tree[Double]]) => {
+      weightFunc: Tree[Bin] => List[Weight]): NTuple[Tree[Bin]] => List[Weight] =
+    (pBounds: NTuple[Tree[Bin]]) => {
       val w = sig.transpose.indices map (x => weightFunc(pBounds(x)))
       w.transpose.toList map (x => Weight.makeJoint(x.toVector))
     }
 
 
-  def genUniformWeight(calcConfig: CalcConfig)(t: NTuple[Tree[Double]]): Option[Weight] =
+  def genUniformWeight(calcConfig: CalcConfig)(t: NTuple[Tree[Bin]]): Option[Weight] =
     if (calcConfig.boolParameters("uniformWeight"))
       Some(Weight.makeJoint(t map (x => UWeight(x))))
     else

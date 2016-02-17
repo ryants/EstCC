@@ -1,12 +1,36 @@
 package infcalcs
 
 import infcalcs.tables.{ContingencyTable, CTable}
-
 import scala.annotation.tailrec
 
 /**
  * Created by ryansuderman on 8/25/15.
  */
+
+/**
+ * Case class representing a discrete entity in one dimension of a contingency table,
+ * (equivalent to a histogram bin).
+ *
+ * @param index bin number
+ * @param values list of entries in bin
+ * @param lowerBound bin can contain values above this count (non-inclusive)
+ */
+case class Bin(index: Int, values: List[Double], lowerBound: Double){
+
+  lazy val count = values.length
+  lazy val max = values.max
+
+}
+
+/**
+ * Case class that contains the cumulative probability of a particular bin in a
+ * contingency table
+ *
+ * @param coord (row,col) location in a contingency table
+ * @param cumProb cumulative probability
+ * @param lowerBound lower bound on probability (non-inclusive)
+ */
+case class CtPos(coord: Pair[Int], cumProb: Double, lowerBound: Double)
 
 /**
  * Case class for holding a [[CTable]] instance and the inverse of its sample

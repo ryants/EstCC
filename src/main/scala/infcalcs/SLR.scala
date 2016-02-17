@@ -12,7 +12,7 @@ import MathFuncs.avg
  */
 class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
 
-  assert(xList.length == yList.length)
+  require(xList.length == yList.length)
 
   /** The number of datapoints. */
   val n: Double = xList.length.toDouble
@@ -51,7 +51,7 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
   lazy val i95Conf = iError * studentTInverse(0.05, xList.length - 2)
   /** The 95% confidence interval of the slope estimate. */
   lazy val s95Conf = sError * studentTInverse(0.05, xList.length - 2)
-  /** The coefficient of determination (R^2) */
+  /** The coefficient of determination */
   lazy val rSquared = {
     val mean = sy / yList.length
     val ssTot = (yList map (x => math.pow((x - mean),2))).sum

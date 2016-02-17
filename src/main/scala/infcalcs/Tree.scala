@@ -116,27 +116,4 @@ object Tree {
       new Node(l(m._1).index, l(m._1).value, buildTree(m._2), buildTree(m._3))
     }
 
-  /**
-   * Finds the node whose value is closest to, but not greater than, the value in question
-   * and returns the node
-   *
-   * @param value
-   * @param tree
-   * @param o
-   * @tparam A
-   * @return
-   */
-  def findLteqTreePos[A](value: A, tree: Tree[A])(implicit o: Ordering[A]): Tree[A] = {
-
-    @tailrec
-    def trace(cur: Tree[A], rem: Tree[A]): Tree[A] = {
-      if (rem.isEmpty) cur
-      else if (o.lteq(value, rem.value.get)) trace(rem, rem.left)
-      else trace(cur, rem.right)
-    }
-    if (o.gt(value, tree.maxVal)) throw new ValueOutOfBoundsException("value is larger than upper bound of highest bin")
-    else trace(tree, tree)
-
-  }
-
 }

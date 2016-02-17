@@ -1,6 +1,8 @@
 package infcalcs.tables
 
-import infcalcs.MathFuncs
+import infcalcs._
+
+import scala.annotation.tailrec
 
 import scala.annotation.tailrec
 
@@ -32,6 +34,54 @@ abstract class CTable[A](implicit n: Numeric[A]) {
 
   lazy val cTableWithDoubles: ContingencyTable[Double] =
     new ContingencyTable[Double](tableWithDoubles)
+
+  /** table entries as frequencies */
+  lazy val jointProbTable: Vector[Vector[Double]] =
+    table map (_ map (_.toDouble / numSamples.toDouble))
+
+
+  /**
+   * Function that produces a list of [[CtPos]] instances with cumulative
+   * probabilities
+   *
+   * @param cs
+   * @return
+   */
+  private def genCumCtPos(cs: List[(Pair[Int],Double)]): List[CtPos] = {
+    @tailrec
+    def helper(rem: List[(Pair[Int],Double)], cum: Double = 0.0, acc: List[CtPos] = Nil): List[CtPos] = {
+      if (rem.isEmpty) acc
+      else {
+        val newCum = cum + rem.head._2
+        val newCtPos = CtPos(rem.head._1,newCum,cum)
+        helper(rem.tail, newCum, acc :+ newCtPos)
+      }
+    }
+    helper(cs)
+  }
+
+  /**
+   * Converts the probability table to a list of [[CtPos]] instances
+   * for sorting by probability
+   * @return
+   */
+  def generateCtPos(rand: Boolean = false): List[CtPos] =
+    if (rand) {
+      val randProb = 1.0 / (rows * cols).toDouble
+      val probList = (for {
+        x <- table.indices
+        y <- table(x).indices
+      } yield ((x, y), randProb)).toList
+      genCumCtPos(probList)
+    } else {
+      val pt = jointProbTable
+      val probList = (for {
+        x <- pt.indices
+        y <- pt(x).indices
+        if pt(x)(y) != 0.0
+      } yield ((x, y), pt(x)(y))).toList
+      genCumCtPos(probList sortWith (_._2 < _._2))
+    }
 
   /**
    * Converts a vector of counts to a marginal probability.

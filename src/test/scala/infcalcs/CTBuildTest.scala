@@ -19,42 +19,49 @@ class CTBuildTest extends FlatSpec with Matchers {
   "A contingency table builder" should "divide lists into equal sublists" in {
     // Divide into 4 bins
     partitionList(dList1, 4) shouldBe
-        List(List(1.0, 2.0), List(3.0, 4.0), List(5.0, 6.0), List(7.0, 8.0))
+        List(Bin(0,List(1.0, 2.0),Double.NegativeInfinity), Bin(1,List(3.0, 4.0),2.0),
+          Bin(2,List(5.0, 6.0),4.0), Bin(3,List(7.0, 8.0),6.0))
     // Divide into 3 bins
     partitionList(dList1, 3) shouldBe
-        List(List(1.0, 2.0), List(3.0, 4.0, 5.0), List(6.0, 7.0, 8.0))
+        List(Bin(0,List(1.0, 2.0),Double.NegativeInfinity), Bin(1,List(3.0, 4.0, 5.0),2.0),
+          Bin(2,List(6.0, 7.0, 8.0),5.0))
     partitionList(dList1, 5) shouldBe
-        List(List(1.0), List(2.0), List(3.0, 4.0), List(5.0, 6.0), List(7.0, 8.0))
+        List(Bin(0,List(1.0),Double.NegativeInfinity), Bin(1,List(2.0),1.0),
+          Bin(2,List(3.0, 4.0),2.0), Bin(3,List(5.0, 6.0),4.0), Bin(4,List(7.0, 8.0),6.0))
   }
 
   it should "build a binary tree with the values delimiting each bin" in {
     // Bins: (1), (2), (3, 4), (5, 6), (7, 8)
     val tree = dr sigDelims Vector(5)
+    val bins = List(Bin(0,List(1.0),Double.NegativeInfinity), Bin(1,List(2.0),1.0),
+      Bin(2,List(3.0, 4.0),2.0), Bin(3,List(5.0, 6.0),4.0), Bin(4,List(7.0, 8.0),6.0))
     // Should be 5 nodes for 5 bins
     tree(0).entries shouldBe 5
     // The middle bin should have max value 4.0
-    tree(0).value shouldBe Some(4.0)
+    tree(0).value shouldBe Some(bins(2))
     // Test the left-hand side of the tree
-    tree(0).left.value shouldBe Some(1.0)
+    tree(0).left.value shouldBe Some(bins(0))
     tree(0).left.left.value shouldBe None
-    tree(0).left.right.value shouldBe Some(2.0)
+    tree(0).left.right.value shouldBe Some(bins(1))
     // Test the right-hand side of the tree
-    tree(0).right.value shouldBe Some(6.0)
+    tree(0).right.value shouldBe Some(bins(3))
     tree(0).right.left.value shouldBe None
-    tree(0).right.right.value shouldBe Some(8.0)
+    tree(0).right.right.value shouldBe Some(bins(4))
 
     // Now try with a list containing repeated values
     // Bins: (0, 1), (2, 2), (3, 3), (3, 3)
     val tree2 = dr respDelims Vector(4)
-    tree2(0).value shouldBe Some(2.0)
+    val bins2 = List(Bin(0,List(0.0,1.0),Double.NegativeInfinity),Bin(1,List(2.0,2.0),1.0),
+      Bin(2,List(3.0,3.0),2.0),Bin(3,List(3.0,3.0),3.0))
+    tree2(0).value shouldBe Some(bins2(1))
     // Test the left-hand side of the tree2
-    tree2(0).left.value shouldBe Some(1.0)
+    tree2(0).left.value shouldBe Some(bins2(0))
     tree2(0).left.left.value shouldBe None
     tree2(0).left.right.value shouldBe None
     // Test the right-hand side of the tree2
-    tree2(0).right.value shouldBe Some(3.0)
+    tree2(0).right.value shouldBe Some(bins2(2))
     tree2(0).right.left.value shouldBe None
-    tree2(0).right.right.value shouldBe Some(3.0)
+    tree2(0).right.right.value shouldBe Some(bins2(3))
   }
 
   it should "find the correct bin for insertion of a value" in {

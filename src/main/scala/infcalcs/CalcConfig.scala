@@ -54,11 +54,11 @@ class CalcConfig(val parameters: Parameters) {
   val defSigVals = srParameters("signalValues").isDefined
   val defRespVals = srParameters("responseValues").isDefined
 
-  assert(sigDim == listParameters("sigBinSpacing").length)
-  assert(respDim == listParameters("respBinSpacing").length)
+  require(sigDim == listParameters("sigBinSpacing").length)
+  require(respDim == listParameters("respBinSpacing").length)
 
-  assert(defRespVals || !listParameters("respBinSpacing").isEmpty)
-  assert(defSigVals || !listParameters("sigBinSpacing").isEmpty)
+  require(defRespVals || !listParameters("respBinSpacing").isEmpty)
+  require(defSigVals || !listParameters("sigBinSpacing").isEmpty)
 
   // Determine number of response bins if values not specified
   lazy val initResponseBins: NTuple[Int] = srParameters("responseValues") match {
@@ -81,16 +81,6 @@ class CalcConfig(val parameters: Parameters) {
   }
 
   lazy val initBinTuples = (initSignalBins, initResponseBins)
-
-  lazy val fracList = ({
-    for {
-      f <- listParameters("sampleFractions")
-      n <- 0 until numParameters("repsPerFraction").toInt
-    } yield f
-  } :+ 1.0).toVector
-
-  lazy val minFracDiff = (listParameters("sampleFractions") sliding 2 map (x => math.abs(x(1)-x(0)))).min
-  def sampleSizeTol(data: DRData) = numParameters("sampleSizeTol") * minFracDiff * data.numObs
 
   lazy val lowerAvgEntryLimit = numParameters("avgEntriesPerBin")
 

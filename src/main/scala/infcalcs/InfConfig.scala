@@ -7,7 +7,6 @@ object InfConfig {
   val listParams: Map[String, List[Double]] =
     Map("signalColumns" -> List(0.0),
       "responseColumns" -> List(1.0),
-      "sampleFractions" -> List(0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975),
       "biPeakWeights" -> List(0.4, 0.5, 0.6),
       "sigBinSpacing" -> List(4),
       "respBinSpacing" -> List(4))
@@ -24,7 +23,8 @@ object InfConfig {
       "biMuNumber" -> 5,
       "biSigmaNumber" -> 5,
       "repsPerFraction" -> 20,
-      "sampleSizeTol" -> 0.2, //tolerable variation in sample size (this value times the smallest spacing between sampleFractions entries)
+      "lowFraction" -> 0.6, //lowest fraction for subsampling data
+      "numFractions" -> 5, //number of fractions for subsampling (uniformly distributed in inverse sample space)
       "avgEntriesPerBin" -> 0) //0 means bin number is bounded only by number of unique values in data set
 
   val boolParams: Map[String, Boolean] =

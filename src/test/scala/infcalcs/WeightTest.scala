@@ -43,12 +43,12 @@ class WeightTest extends FlatSpec with Matchers {
     val randXData = (0 until 1000).toVector map (x => Vector(Random.nextDouble))
     val randYData = (0 until 1000).toVector map (x => Vector(Random.nextDouble))
     val randDRData = new DRData(testConfig)(randXData,randYData)
-    val subRandData = randDRData subSample 0.6
 
-    val rct = buildTable(subRandData, (Vector(10),Vector(10)))
+    val rct = buildTable(randDRData, (Vector(10),Vector(10)))
     val wt2 = CustomWeight("testWeight2",List(0.2,0.0,0.2,0.0,0.2,0.0,0.2,0.0,0.1,0.1))
     val wrct = wt2 weightTable rct
-    wrct.numSamples shouldBe (0.6 * randDRData.numObs).toInt
+    wrct.table(1).sum shouldBe 0.0
+    wrct.numSamples shouldBe randDRData.numObs
 
   }
 

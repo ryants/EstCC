@@ -29,7 +29,8 @@ class EstimateMITest extends FlatSpec with Matchers {
   val ct2 = new ContingencyTable[Int](Vector(Vector(1, 2), Vector(0, 3)))
 
   "moreBinsLeft" should "determine if the bin numbers can be incremented" in {
-    val locParams = ParameterFuncs.updateParameters(List(("avgEntriesPerBin", "1")), InfConfig.defaultParameters)
+    val locParams = ParameterFuncs.updateParameters(
+      List(("avgEntriesPerBin", "1"),("lowFraction","0.8")), InfConfig.defaultParameters)
     val locConfig = CalcConfig(locParams)
 
     binNumberIsAppropriate(locConfig)(pl, (Vector(2), Vector(2))) shouldBe true
@@ -58,20 +59,25 @@ class EstimateMITest extends FlatSpec with Matchers {
       new DRData(testConfig)(data._1, data._2)
     }
 
+    import Tree._
+    import Orderings._
+
+    val table = buildTable(plRand,(Vector(2),Vector(4)))
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos()))
     val frac = 0.7
-    (plRand subSample frac).numObs shouldBe 70
+    resample((frac * plRand.numObs).toInt,2,4,probTree).numSamples shouldBe 70
 
   }
 
   "buildRegData" should "return an appropriate RegData data structure" in {
     // Get the result
     val numReps = testConfig.numParameters("repsPerFraction").toInt
-    val (reg, regRand) = buildRegData(testConfig)(numBins, pl)
+    val (reg, regRand) = buildRegData(testConfig)(numBins, pl, None)
     // Check the inverse sample sizes
-    val fracs = testConfig.listParameters("sampleFractions")
+    val fracs = pl.fracs
     val invLength = reg.subCalcs.length
     // Check the length of the inverse sample sizes
-    val fracListLength = (fracs.length * numReps) + 1
+    val fracListLength = (fracs.length * numReps) + numReps
     invLength shouldBe fracListLength // check the length
     // Check the first inverse sample size
     //    invss(0) shouldBe 1.0 / rdm.subContTables(0).numSamples (DOES NOT WORK DUE TO LOW NUMBER OF CT ENTRIES & NEW SAMPLE SIZE FEATURES)
@@ -79,16 +85,16 @@ class EstimateMITest extends FlatSpec with Matchers {
     val cts = reg.subCalcs map (_.table)
     // Check the length of the CT list
     cts.length shouldBe fracListLength
-    // The last contingency table (fraction 1.0) should be the same as the
-    // original
-    cts(fracListLength - 1) shouldBe ct
+    // The first contingency table (fraction 1.0) should have the same number of entries
+    // as the original
+    cts.head.numSamples shouldBe ct.numSamples
     // Check the randomized contingency tables
     regRand.trans.length shouldBe testConfig.numParameters("numRandom").toInt
     regRand.trans(0).length shouldBe fracListLength
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {
-    val rdm = buildRegData(testConfig)(numBins, pl)
+    val rdm = buildRegData(testConfig)(numBins, pl, None)
     val regs = calcMultRegs(testConfig)(rdm)
     regs._2.length shouldBe testConfig.numParameters("numRandom").toInt
   }

@@ -72,30 +72,9 @@ object CTBuild {
    * @return The index of the bin that should contain the value.
    */
   def findIndex[A](value: A, dim: Tree[A])(implicit ev: Ordering[A]): Int = {
-    findLteqTreePos(value,dim).index
+    findLteqTreePos(value, dim).index
   }
 
-
-  /**
-   * Multiplies the values in each row of a contingency table by a weight.
-   *
-   * The length of 'wts' should equal length of 't'. Note that after
-   * multiplication by the weight values the entries in the contingency table
-   * are rounded to the nearest integer.
-   *
-   * @param t A contingency table, as a matrix of integers.
-   * @param wts List of weights.
-   * @return The weighted contingency table, as a matrix of integers.
-   */
-  def weightSignalData[A](
-      t: Vector[Vector[A]],
-      wts: List[Double])(implicit n: Numeric[A]): Vector[Vector[Double]] = {
-
-    import n.mkNumericOps
-    require(t.length == wts.length, "number of rows must equal number of weights")
-    t.indices.toVector map (v => t(v) map (x =>
-      x.toDouble * wts(v)))
-  }
 
   /**
    * Produces a vector of bin index vectors in order to find the bin number
@@ -219,8 +198,7 @@ object CTBuild {
  */
 object EstimateMI {
 
-  import CTBuild.{buildTable, weightSignalData}
-  import EstimateCC.testWeights
+  import CTBuild.buildTable
 
   /**
    * Checks if each row vector in a matrix has the same sum.
@@ -231,36 +209,6 @@ object EstimateMI {
   def isUniform(t: Vector[Vector[Double]]): Boolean = {
     val rsums = t map (_.sum)
     !(rsums exists (_ != rsums.head))
-  }
-
-  /**
-   * Re-weights rows in a matrix to have approximately equal sums across rows.
-   *
-   * Empty rows with no observations (sums of 0) remain empty after weighting.
-   *
-   * @param t A 2D matrix of Doubles (e.g., a contingency table)
-   * @return A re-weighted matrix.
-   */
-  def makeUniform[A](t: Vector[Vector[A]])(implicit n: Numeric[A]): Vector[Vector[Double]] = {
-    val table = t map (_ map (y => n toDouble y))
-    if (isUniform(table)) table
-    else {
-      val rsums: Vector[Double] = table map (_.sum)
-      val total = rsums.sum
-      val uRow = total / t.length.toDouble
-      val uWts: List[Double] = testWeights("unif", (rsums map (x => if (x == 0.0) 0.0 else uRow / x)).toList)
-      weightSignalData(table, uWts)
-    }
-  }
-
-  /**
-   *
-   * @param t
-   * @tparam A
-   * @return
-   */
-  def makeUniform[A](t: CTable[A]): ContingencyTable[Double] = {
-    new ContingencyTable[Double](makeUniform(t.tableWithDoubles))
   }
 
   /**
@@ -284,31 +232,17 @@ object EstimateMI {
     if (calcConfig.lowerAvgEntryLimit > 0)
       ((p.numObs * minSample) / totalBins) >= calcConfig.lowerAvgEntryLimit
     else
-      if (calcConfig.defSigVals && calcConfig.defRespVals)
-        binPair._1.product == p.numUniqueSigVals &&
+    if (calcConfig.defSigVals && calcConfig.defRespVals)
+      binPair._1.product == p.numUniqueSigVals &&
           binPair._2.product == p.numUniqueRespVals
-      else if (calcConfig.defSigVals && !calcConfig.defRespVals)
-        binPair._2.product <= (p.numUniqueRespVals * minSample)
-      else if (calcConfig.defRespVals && !calcConfig.defSigVals)
-        binPair._1.product <= (p.numUniqueSigVals * minSample)
-      else
-        binPair._1.product <= p.numUniqueSigVals * minSample &&
+    else if (calcConfig.defSigVals && !calcConfig.defRespVals)
+      binPair._2.product <= (p.numUniqueRespVals * minSample)
+    else if (calcConfig.defRespVals && !calcConfig.defSigVals)
+      binPair._1.product <= (p.numUniqueSigVals * minSample)
+    else
+      binPair._1.product <= p.numUniqueSigVals * minSample &&
           binPair._2.product <= p.numUniqueRespVals * minSample
 
-  }
-
-  /**
-   * Function to weight a contingency table
-   *
-   * @param ct
-   * @param wts
-   * @return [[ContingencyTable]]
-   */
-  def addWeight(ct: CTable[Double], wts: Option[Weight]): CTable[Double] = {
-    wts match {
-      case None => ct
-      case Some(w) => new ContingencyTable[Double](weightSignalData(ct.table, w.weights))
-    }
   }
 
   /**
@@ -356,32 +290,49 @@ object EstimateMI {
 
         val frac = calcConfig.fracList(x)
         val subData = data subSample frac
-        val perfectSubSample = data.numObs - ((1-frac)*data.numObs).toInt
+        val perfectSubSample = data.numObs - ((1 - frac) * data.numObs).toInt
+        val subTable = buildTable(subData, binPair)
 
         if (frac != 1.0) {
-          val subTable = addWeight(makeUniform(buildTable(subData, binPair)), wts)
-          val withinSampleSizeTol = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
+          val wtSubTable = wts match {
+            case None => subTable.cTableWithDoubles
+            case Some(w) => w weightTable subTable
+          }
+          val withinSampleSizeTol = math.abs(perfectSubSample - wtSubTable.numSamples) <= calcConfig.sampleSizeTol(data)
           if (!withinSampleSizeTol)
-            throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-          val inv = 1.0 / subTable.numSamples.toDouble
+            throw new SampleSizeToleranceException(s"table has ${wtSubTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
+          val inv = 1.0 / wtSubTable.numSamples.toDouble
 
           val randSubCalcs = (0 until numRandTables).toVector map { x =>
-            val randSubTable = addWeight(makeUniform(buildTable(subData, binPair, true)), wts)
-            val withinSampleSizeTolRand = math.abs(perfectSubSample - subTable.numSamples) <= calcConfig.sampleSizeTol(data)
+            val randSubTable = buildTable(subData, binPair, true)
+            val wtRandSubTable = wts match {
+              case None => randSubTable.cTableWithDoubles
+              case Some(w) => w weightTable randSubTable
+            }
+            val withinSampleSizeTolRand = math.abs(perfectSubSample - wtSubTable.numSamples) <= calcConfig.sampleSizeTol(data)
             if (!withinSampleSizeTolRand)
-              throw new SampleSizeToleranceException(s"table has ${subTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
-            val randInv = 1.0 / randSubTable.numSamples.toDouble
-            SubCalc(randInv, randSubTable.cTableWithDoubles)
+              throw new SampleSizeToleranceException(s"table has ${wtSubTable.numSamples} entries, should have ${perfectSubSample} ${0xB1.toChar} ${calcConfig.sampleSizeTol(data)}")
+            val randInv = 1.0 / wtRandSubTable.numSamples.toDouble
+            SubCalc(randInv, wtRandSubTable.cTableWithDoubles)
           }
 
-          (SubCalc(inv, subTable.cTableWithDoubles), randSubCalcs)
+          (SubCalc(inv, wtSubTable.cTableWithDoubles), randSubCalcs)
 
         } else {
           val inv = 1.0 / data.numObs.toDouble
-          val table = addWeight(makeUniform(buildTable(data, binPair)), wts)
-          val randTables = (0 until numRandTables).toVector map (x =>
-            SubCalc(inv, addWeight(makeUniform(buildTable(subData, binPair, true)), wts)))
-          (SubCalc(inv, table), randTables)
+          val table = buildTable(data, binPair)
+          val wtTable = wts match {
+            case None => table.cTableWithDoubles
+            case Some(w) => w weightTable table
+          }
+          val randTables = (0 until numRandTables).toVector map { x =>
+            val randTable = buildTable(data, binPair, true)
+            wts match {
+              case None => SubCalc(inv, randTable.cTableWithDoubles)
+              case Some(w) => SubCalc(inv, w weightTable randTable)
+            }
+          }
+          (SubCalc(inv, wtTable), randTables)
         }
 
       }
@@ -389,8 +340,8 @@ object EstimateMI {
     }
 
     val label = wts match {
-      case None => "Unif"
-      case Some(Weight(wtList, tag)) => tag
+      case None => "None"
+      case Some(w) => w.label
     }
 
     val rBinPair = binPair._1 mkString ","
@@ -554,9 +505,9 @@ object EstimateMI {
       var numConsecRandPos = 0
       var res: Array[EstTuple] = Array()
       var responseBins = calcConfig.initResponseBins
-      
+
       while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
-          binNumberIsAppropriate(calcConfig)(pl, (signalBins,responseBins))) {
+          binNumberIsAppropriate(calcConfig)(pl, (signalBins, responseBins))) {
 
         val binPair = (signalBins, responseBins)
         val regData = Try(buildRegData(calcConfig)(binPair, pl, wts))
@@ -701,12 +652,23 @@ object EstimateMI {
       (fracTuples map { x =>
         if (x != 1.0) {
           val subData = data subSample x._1
-          val subTable = addWeight(makeUniform(buildTable(subData,binPair)),wts)
-          val inv = 1.0 / subTable.numSamples.toDouble
-          subTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
-          (inv, subTable.cTableWithDoubles)
+          val subTable = buildTable(subData, binPair)
+          val wtSubTable = wts match {
+            case None => subTable.cTableWithDoubles
+            case Some(w) => w weightTable subTable
+          }
+          val inv = 1.0 / wtSubTable.numSamples.toDouble
+          wtSubTable tableToFile s"ct_fe_${x._1}_${x._2}.dat"
+          (inv, wtSubTable.cTableWithDoubles)
         }
-        else (1.0 / data.numObs.toDouble, addWeight(makeUniform(buildTable(data,binPair)),wts))
+        else {
+          val table = buildTable(data, binPair)
+          val wtTable = wts match {
+            case None => table.cTableWithDoubles
+            case Some(w) => w weightTable table
+          }
+          (1.0 / data.numObs.toDouble, wtTable)
+        }
       }).unzip
     }
 
@@ -732,82 +694,15 @@ object EstimateMI {
  * Most importantly are the [[EstimateCC.estimateCC]] and [[EstimateCC.estimateCCVerbose]]
  * functions which are used in the [[EstCC]] main object to estimate the channel capacity.
  *
- * The weighting functions [[EstimateCC.uniWeight]] and [[EstimateCC.biWeight]] generate
+ * The weighting functions [[EstimateCC.genUnimodalWeights]] and [[EstimateCC.genBimodalWeights]] generate
  * weights for unimodal and bimodal Gaussian-based probability density functions and
- * [[EstimateCC.pwWeight]] produces discrete piecewise probability mass functions by
+ * [[EstimateCC.genPieceWiseUniformWeights]] produces discrete piecewise probability mass functions by
  * iteratively selecting signal values to omit from the mutual information estimation.
- * These values are then aggregated into a list of [[Weight]] by the
- * [[EstimateCC.genWeights]] function used for channel capacity estimation.
  *
  */
 object EstimateCC {
 
   import CTBuild._
-
-  /**
-   * Determines whether the weights cover a sufficient range of the input space.
-   *
-   * If the sum of the weights is above the threshold, the weights are
-   * returned; otherwise a [[exceptions.LowProbException]] is thrown containing the given
-   * message.
-   *
-   * @param msg String to pass to the exception if thrown.
-   * @param wts The list of weights.
-   * @param threshold The threshold to use to evaluate the weights.
-   * @return The list of weights.
-   * @throws exceptions.LowProbException if the sum of weights is less than the threshold
-   */
-  @throws(classOf[exceptions.LowProbException])
-  def testWeights(
-      msg: String,
-      wts: List[Double],
-      threshold: Double = 0.95): List[Double] =
-    if (wts.sum > threshold) {
-      wts
-    } else {
-      println(wts);
-      println(wts.sum);
-      throw new LowProbException(msg)
-    }
-
-  /**
-   * Generates signal weights for n-dim signal data
-   *
-   * Given n marginal signal distributions and assuming independence
-   * between the distributions, a joint signal distribution is
-   * calculated and a [[Weight]] is generated.
-   *
-   * @param wv vector of weights for signal distributions
-   * @return weight for joint distribution
-   */
-  def makeJoint(wv: Vector[Weight]): Weight = {
-    val dimLengths = wv map (x => x.weights.length)
-    val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
-
-    val wND: List[Double] =
-      testWeights(
-        "joint dist failure",
-        (i.toList.view map (x =>
-          (Range(0, x.length) map (y =>
-            wv(y).weights(x(y)))).product)).force.toList)
-
-    val jointString = (wv map (x => x.label)).mkString(";")
-
-    Weight(wND, jointString)
-  }
-
-  /** Given a function, finds the difference in its evaluation of two numbers. */
-  def calcWeight(func: Double => Double, lb: Double, hb: Double): Double =
-    func(hb) - func(lb)
-
-  /**
-   * This function is applied to raw weights in order to account for the
-   * uniform weight applied in the CTBuild object when building a contingency
-   * table (a sort of 'unweighting' of the uniformly weighted data prior to
-   * its uni/bi-modal weighting)
-   */
-  def normWeight(bounds: Tree[Double])(p: Double): Double =
-    p / (1.0 / bounds.toList.length.toDouble)
 
   /**
    * Generates list of unimodal (Gaussian) weights.
@@ -816,12 +711,12 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from a unimodal Gaussian.
    */
-  def uniWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
+  def genUnimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("uniMuNumber").toInt == 0) Nil
     else {
 
-      val logSpace = calcConfig.stringParameters("logSpace").toBoolean
+      val logSpace = calcConfig.boolParameters("logSpace")
       // Create a list of evenly-distributed means that span the input range
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
@@ -841,26 +736,8 @@ object EstimateCC {
         i <- uSigFracList
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
 
-      def genWeightString(p: Pair[Double]): String = "G(%1.2f,%1.2f)" format(
-          p._1, p._2)
+      wtParams map (p => GWeight(p, bounds, in))
 
-      // Calculates and tests weights. Takes a (mu, sigma) tuple, and makes sure
-      // that the proposed weights cover a sufficient range of the inputs
-      def weights(p: Pair[Double]): Weight = {
-        val mu = p._1;
-        val sigma = p._2
-        val boundList = bounds.toList
-        def wtFunc(d: Double) = MathFuncs.intUniG(mu, sigma)(d)
-        val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
-        val rawWeights = testWeights("uni " + p.toString, firstTerm +: {
-          for (x <- 0 until (boundList.length - 1)) yield calcWeight(
-            wtFunc, boundList(x), boundList(x + 1))
-        }.toList)
-        Weight(rawWeights map normWeight(bounds), genWeightString(p))
-      }
-
-      // Apply genWeights to the (mu, sigma) tuples and return
-      for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
     }
 
   /**
@@ -870,11 +747,11 @@ object EstimateCC {
    * @param in The input dataset.
    * @return List of weights drawn from bimodal Gaussians.
    */
-  def biWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
+  def genBimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
 
     if (calcConfig.numParameters("biMuNumber") < 3) Nil
     else {
-      val logSpace = calcConfig.stringParameters("logSpace").toBoolean
+      val logSpace = calcConfig.boolParameters("logSpace")
 
       val minVal = if (logSpace) log(in.min) else in.min
       val maxVal = if (logSpace) log(in.max) else in.max
@@ -898,41 +775,15 @@ object EstimateCC {
       val numSig = calcConfig.numParameters("biSigmaNumber").toInt
       val bSigFracList = ((1 to numSig) map (x =>
         x * (1.0 / (1.0 + numSig)))).toList
-      val bRelCont =
-        calcConfig.listParameters("biPeakWeights") map (x => (x, 1 - x))
-      val wtParams: List[(Pair[Double], Pair[Double], Pair[Double])] = for {
+      val wtParams: List[(Pair[Double], Pair[Double], Double)] = for {
         p <- mp.toList
         s <- bSigFracList map (x => (x * maxSD(p, minVal), x * maxSD(p, maxVal)))
         if (s._1 > 0.0001 && s._2 > 0.0001)
-        w <- bRelCont
+        w <- calcConfig.listParameters("biPeakWeights")
       } yield (p, s, w)
 
-      // Constructs a string label for each weight
-      def genWeightLabel(t: (Pair[Double], Pair[Double], Pair[Double])) = {
-        val gauss1 = "G1(%1.2f,%1.2f)" format(t._1._1, t._2._1)
-        val gauss2 = "G2(%1.2f,%1.2f)" format(t._1._2, t._2._2)
-        s"${t._3._1}*${gauss1},${t._3._2}*${gauss2}"
-      }
+      wtParams map (x => BWeight(x._1, x._2, x._3, bounds, in))
 
-      // Calculates and tests weights. Takes a tuple containing parameters for a
-      // bimodal Gaussian and makes sure that the proposed weights cover a
-      // sufficient range of the inputs
-      def weights(t: (Pair[Double], Pair[Double], Pair[Double])): Weight = {
-        val muPair = t._1;
-        val sigmaPair = t._2;
-        val pPair = t._3
-        val boundList = bounds.toList
-        def wtFunc(d: Double) = MathFuncs.intBiG(muPair, sigmaPair, pPair)(d)
-        val firstTerm = calcWeight(wtFunc, minVal, boundList.head)
-        val rawWeights = testWeights("bi " + t.toString, firstTerm +: {
-          for (x <- 0 until (boundList.length - 1)) yield calcWeight(
-            wtFunc, boundList(x), boundList(x + 1))
-        }.toList)
-        Weight(rawWeights map normWeight(bounds), genWeightLabel(t))
-      }
-      // Apply genWeights to the proposed bimodal Gaussian parameter tuples and
-      // return
-      for (x <- (0 until wtParams.length).toList) yield weights(wtParams(x))
     }
 
   /**
@@ -940,12 +791,10 @@ object EstimateCC {
    * bin i to bin j with all outer bins (<i and >j) weighted to 0
    *
    * @param bounds Binary tree specifying bin bounds.
-   * @param in The input dataset (placeholder to accommodate [[genWeights]]
-   *           function; not actually used in function).
    * @return List of piece-wise weights
    */
-  def pwWeight(calcConfig: CalcConfig)(bounds: Tree[Double], in: List[Double]): List[Weight] =
-    if (calcConfig.numParameters("pwUnifWeights") == 0) {
+  def genPieceWiseUniformWeights(calcConfig: CalcConfig)(bounds: Tree[Double]): List[Weight] =
+    if (!calcConfig.boolParameters("pwUniformWeight")) {
       Nil
     } else {
       val lBoundsList = bounds.toList
@@ -958,15 +807,9 @@ object EstimateCC {
         if !(x == 0 && y == maxIndex)
       } yield (x, y)
 
-      def weights(ib: Pair[Int]): Weight = {
-        val wt = 1.0 / (ib._2 - ib._1 + 1.0).toDouble
-        val wtList = indices map (x =>
-          if (ib._1 <= x && x <= ib._2) wt else 0.0) map normWeight(bounds)
-        Weight(wtList, "PWU(%d, %d)" format(ib._1, ib._2))
-      }
-
-      nodePairs map weights
+      nodePairs map (x => PWeight(x, bounds))
     }
+
 
   /**
    * Generates a list of weights for n-dim input data
@@ -974,7 +817,7 @@ object EstimateCC {
    * Weights are generated for a n-dim input distribution by calculating
    * the marginal distributions for the n independent random variables
    * representing the signal.  These are used to produce a joint
-   * distribution (see [[makeJoint]]) in order to construct a list of
+   * distribution (see [[Weight.makeJoint]]) in order to construct a list of
    * weights corresponding to the structure of the contingency table as
    * seen in [[CTBuild]].
    *
@@ -982,24 +825,38 @@ object EstimateCC {
    * @param weightFunc function determining calculation of weight distribution
    * @return list of weights for a signal set of ordered tuples
    */
-  def genWeights(
+  def genWeights1(
       sig: Vector[NTuple[Double]],
       weightFunc: (Tree[Double], List[Double]) => List[Weight]): NTuple[Tree[Double]] => List[Weight] = {
-
     val sigT = sig.transpose
     (pBounds: NTuple[Tree[Double]]) => {
       val w = sigT.indices map (x => weightFunc(pBounds(x), sigT(x).toList))
-      w.transpose.toList map (x => makeJoint(x.toVector))
+      w.transpose.toList map (x => Weight.makeJoint(x.toVector))
     }
-
   }
 
-  def getWeights(calcConfig: CalcConfig)(p: DRData, signalBins: NTuple[Int]) = {
+  def genWeights2(
+      sig: Vector[NTuple[Double]],
+      weightFunc: Tree[Double] => List[Weight]): NTuple[Tree[Double]] => List[Weight] =
+    (pBounds: NTuple[Tree[Double]]) => {
+      val w = sig.transpose.indices map (x => weightFunc(pBounds(x)))
+      w.transpose.toList map (x => Weight.makeJoint(x.toVector))
+    }
+
+
+  def genUniformWeight(calcConfig: CalcConfig)(t: NTuple[Tree[Double]]): Option[Weight] =
+    if (calcConfig.boolParameters("uniformWeight"))
+      Some(Weight.makeJoint(t map (x => UWeight(x))))
+    else
+      None
+
+  def getWeights(calcConfig: CalcConfig)(p: DRData, signalBins: NTuple[Int]): List[Option[Weight]] = {
     val signalTree = p sigDelims signalBins
-    val weights = None :: (List(
-      genWeights(p.sig, uniWeight(calcConfig))(signalTree),
-      genWeights(p.sig, biWeight(calcConfig))(signalTree),
-      genWeights(p.sig, pwWeight(calcConfig))(signalTree)).flatten map (x => Some(x)))
+    val weights = None :: (
+        genUniformWeight(calcConfig)(signalTree) :: (List(
+          genWeights1(p.sig, genUnimodalWeights(calcConfig))(signalTree),
+          genWeights1(p.sig, genBimodalWeights(calcConfig))(signalTree),
+          genWeights2(p.sig, genPieceWiseUniformWeights(calcConfig))(signalTree)).flatten map (x => Some(x))))
     weights
   }
 
@@ -1034,15 +891,15 @@ object EstimateCC {
         }
 
         wts(w) match {
-          case Some(Weight(v, l)) => {
+          case Some(wt) => {
             val estimate = opt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
-            val printOut = s"  ${1 + w}) Weight: ${l}, " +
+            val printOut = s"  ${1 + w}) Weight: ${wt.label}, " +
                 s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
             println(printOut)
           }
           case None => {
             val estimate = opt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
-            val printOut = s"  ${1 + w}) Weight: Uniform, " +
+            val printOut = s"  ${1 + w}) Weight: None, " +
                 s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
             println(printOut)
           }
@@ -1124,11 +981,7 @@ object EstimateCC {
       optRes: Vector[EstTuple] = Vector())(implicit calcConfig: CalcConfig): Unit = {
 
     def calcEstimates(): Vector[Vector[EstTuple]] = {
-      val signalTree = p sigDelims signalBins
-      val weights = None :: (List(
-        genWeights(p.sig, uniWeight(calcConfig))(signalTree),
-        genWeights(p.sig, biWeight(calcConfig))(signalTree),
-        genWeights(p.sig, pwWeight(calcConfig))(signalTree)).flatten map (x => Some(x)))
+      val weights = getWeights(calcConfig)(p, signalBins)
       val responseBins = calcConfig.initResponseBins
       val initBinTuple = (signalBins, responseBins)
       weights.indices.toVector map (w => {
@@ -1211,16 +1064,16 @@ object EstimateCC {
         if (calcConfig.srParameters("responseValues").isDefined) {
           val mi = buildTable(data, (sigBins, respBins)).mutualInformation
           val randMi = buildTable(data, (sigBins, respBins), true).mutualInformation
-          val calc = Calculation((sigBins,respBins),mi,randMi,randMi <= cutoff)
+          val calc = Calculation((sigBins, respBins), mi, randMi, randMi <= cutoff)
           Vector(calc)
         } else if (numConsecRandPos == calcConfig.numParameters("numConsecRandPos").toInt ||
-            !EstimateMI.binNumberIsAppropriate(calcConfig)(data, (sigBins,respBins))) {
+            !EstimateMI.binNumberIsAppropriate(calcConfig)(data, (sigBins, respBins))) {
           res
         } else {
           val mi = buildTable(data, (sigBins, respBins)).mutualInformation
           val randMi = buildTable(data, (sigBins, respBins), true).mutualInformation
           val newRespBins = EstimateMI.updateRespBinNumbers(calcConfig)(respBins)
-          val calc = Calculation((sigBins, respBins),mi,randMi,randMi <= cutoff)
+          val calc = Calculation((sigBins, respBins), mi, randMi, randMi <= cutoff)
           if (randMi > calcConfig.numParameters("cutoffValue"))
             varyRespBinsSize(newRespBins, numConsecRandPos + 1, res :+ calc)
           else varyRespBinsSize(newRespBins, 0, res :+ calc)
@@ -1241,7 +1094,7 @@ object EstimateCC {
     }
 
     val results = varySigBinsSize(calcConfig.initSignalBins)
-    IOFile.calculatedToFile(results,"no_regr_calc.dat")
+    IOFile.calculatedToFile(results, "no_regr_calc.dat")
     println((results filter (_.unBiased) map (_.mi)).max)
 
   }

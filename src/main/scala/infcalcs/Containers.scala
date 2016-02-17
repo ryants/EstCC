@@ -9,15 +9,6 @@ import scala.annotation.tailrec
  */
 
 /**
- * Case class that contains weights for modifying the signal distribution
- * for a particular [[DRData]] data set
- *
- * @param weights list of weights for each input bin
- * @param label
- */
-case class Weight(weights: List[Double], label: String)
-
-/**
  * Case class for holding a [[CTable]] instance and the inverse of its sample
  * size, resulting from a subsampling operation
  *
@@ -121,24 +112,28 @@ case class Calculation(
 case class Parameters(
     listParams: Map[String, List[Double]],
     numParams: Map[String, Double],
+    boolParams: Map[String, Boolean],
     stringParams: Map[String, String],
     sigRespParams: Map[String, Option[Vector[NTuple[Double]]]]) {
 
   /** Returns a new [[Parameters]] with updated listParams */
   def updateListParams(k: String, v: List[Double]) =
-    Parameters(listParams updated(k, v), numParams, stringParams, sigRespParams)
+    Parameters(listParams updated(k, v), numParams, boolParams, stringParams, sigRespParams)
 
   /** Returns a new [[Parameters]] with updated numParams */
   def updateNumParams(k: String, v: Double) =
-    Parameters(listParams, numParams updated(k, v), stringParams, sigRespParams)
+    Parameters(listParams, numParams updated(k, v), boolParams, stringParams, sigRespParams)
+
+  def updateBoolParams(k: String, v: Boolean) =
+    Parameters(listParams, numParams, boolParams updated(k, v), stringParams, sigRespParams)
 
   /** Returns a new [[Parameters]] with updated stringParams */
   def updateStringParams(k: String, v: String) =
-    Parameters(listParams, numParams, stringParams updated(k, v), sigRespParams)
+    Parameters(listParams, numParams, boolParams, stringParams updated(k, v), sigRespParams)
 
   /** Returns a new [[Parameters]] with updated sigRespParams */
   def updateSigRespParams(k: String, v: Option[Vector[NTuple[Double]]]) =
-    Parameters(listParams, numParams, stringParams, sigRespParams updated(k, v))
+    Parameters(listParams, numParams, boolParams, stringParams, sigRespParams updated(k, v))
 
   /** Returns a new [[Parameters]] with default parameters */
   def reset() = InfConfig.defaultParameters
@@ -148,6 +143,8 @@ case class Parameters(
     listParams.keys map { x => println(s"${x}\t${listParams(x).mkString(", ")}") }
     println()
     numParams.keys map (x => println(s"${x}\t${numParams(x)}"))
+    println()
+    boolParams.keys map (x => println(s"${x}\t${boolParams(x)}"))
     println()
     stringParams.keys map (x => println(s"${x}\t${stringParams(x)}"))
     println()

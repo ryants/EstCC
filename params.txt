@@ -15,12 +15,15 @@ uniSigmaNumber	5
 biMuNumber	5
 biSigmaNumber	5
 repsPerFraction	20
-pwUnifWeights   1
 sampleSizeTol   0.2
+avgEntriesPerBin    0
+
+logSpace	false
+outputRegData   false
+pwUniformWeight    false
+uniformWeight   true
 
 directory	./
 filePrefix	out
-logSpace	false
-outputRegData   false
 
 signalVals1	0,18,1 #signalVals[1-9]* and responseVals[1-9]* can also be specified

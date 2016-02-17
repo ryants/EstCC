@@ -3,7 +3,7 @@ package infcalcs.actors
 import akka.actor.Actor
 import infcalcs.EstTuple
 import infcalcs.EstimateCC.getWeights
-import infcalcs.OtherFuncs._
+import infcalcs.ParameterFuncs._
 import infcalcs._
 import infcalcs.exceptions.{InappropriateInitBinsException, ExcessActorException}
 

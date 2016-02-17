@@ -20,11 +20,11 @@ import infcalcs.tables.CTable
   * - Because the channel capacity depends on the input distribution, various
   * input weights are generated to determine which input weightings yield the
   * highest mutual information between input and output. Input weights are
-  * generated using the functions [[infcalcs.EstimateCC.uniWeight]] and
-  * [[infcalcs.EstimateCC.biWeight]], which allow weighting of the input distribution
+  * generated using the functions [[infcalcs.EstimateCC.genUnimodalWeights]] and
+  * [[infcalcs.EstimateCC.genBimodalWeights]], which allow weighting of the input distribution
   * according to unimodal and bimodal Gaussian distributions, respectively,
   * as well as discrete piecewise distributions with uniform probability using
-  * the [[infcalcs.EstimateCC.pwWeight]].
+  * the [[infcalcs.EstimateCC.genPieceWiseUniformWeights]].
   *
   * - Mutual information is calculated for each proposed input weighting
   * by the function [[infcalcs.EstimateMI.genEstimatesMult]].

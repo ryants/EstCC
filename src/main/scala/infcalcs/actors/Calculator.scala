@@ -29,8 +29,8 @@ class Calculator(implicit calcConfig: CalcConfig) extends Actor {
 
       if (EstCC.appConfig.verbose) {
         w match {
-          case Some(Weight(o, l)) => println(s"${l}\tI = ${getDataEstimate(opt.estimates)._1}")
-          case None => println(s"Uniform\tI = ${getDataEstimate(opt.estimates)._1}")
+          case Some(wt) => println(s"${wt.label}\tI = ${getDataEstimate(opt.estimates)._1}")
+          case None => println(s"None\tI = ${getDataEstimate(opt.estimates)._1}")
         }
 
       }

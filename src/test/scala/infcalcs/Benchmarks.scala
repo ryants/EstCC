@@ -2,7 +2,6 @@ package infcalcs
 
 import tables.CTable
 import CTBuild.buildTable
-import EstimateCC.testWeights
 import org.scalameter.api._
 
 import scala.util.Random
@@ -23,7 +22,9 @@ class Benchmarks extends Bench.LocalTime {
   }
 
   val binPair = (Vector(20),Vector(20))
-  val weight = Weight(testWeights("test",List(0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025)), "test")
+  val weight = CustomWeight("test",
+    List(0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025, 0.05, 0.1,
+      0.025, 0.025, 0.05, 0.1, 0.025, 0.025, 0.05, 0.1, 0.025, 0.025))
 
   val dataSizes: Gen[Int] = Gen.range("dataSize")(100000,1000000,100000)
 

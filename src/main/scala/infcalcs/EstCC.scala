@@ -1,6 +1,6 @@
 package infcalcs
 
-import OtherFuncs._
+import ParameterFuncs._
 import EstimateCC.{
 estimateCC,
 estimateCCVerbose,

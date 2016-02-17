@@ -40,6 +40,7 @@ class CalcConfig(val parameters: Parameters) {
 
   lazy val listParameters = parameters.listParams
   lazy val numParameters = parameters.numParams
+  lazy val boolParameters = parameters.boolParams
   lazy val stringParameters = parameters.stringParams
   lazy val srParameters = parameters.sigRespParams
 
@@ -81,10 +82,6 @@ class CalcConfig(val parameters: Parameters) {
 
   lazy val initBinTuples = (initSignalBins, initResponseBins)
 
-  //confirm that bin dimensions correspond to data dimensions
-  //  assert((signalBins map (x => x.length)).foldLeft(true)((x,y) => x && y== sigDim))
-  //  assert((responseBins map (x => x.length)).foldLeft(true)((x,y) => x && y== respDim))
-
   lazy val fracList = ({
     for {
       f <- listParameters("sampleFractions")
@@ -99,6 +96,6 @@ class CalcConfig(val parameters: Parameters) {
 
   lazy val outF = if (stringParameters("filePrefix").trim.isEmpty) None else Some(stringParameters("filePrefix"))
 
-  lazy val outputRegData = stringParameters("outputRegData").toBoolean
+  lazy val outputRegData = boolParameters("outputRegData")
 
 }

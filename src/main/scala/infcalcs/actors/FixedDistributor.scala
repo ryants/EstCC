@@ -1,6 +1,6 @@
 package infcalcs.actors
 
-import infcalcs.OtherFuncs._
+import infcalcs.ParameterFuncs._
 import infcalcs.exceptions._
 import infcalcs.{EstCC, CalcConfig, DRData}
 

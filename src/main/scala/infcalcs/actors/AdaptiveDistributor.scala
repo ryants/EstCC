@@ -1,7 +1,7 @@
 package infcalcs.actors
 
 import infcalcs.EstimateCC._
-import infcalcs.OtherFuncs._
+import infcalcs.ParameterFuncs._
 import infcalcs._
 import infcalcs.exceptions._
 

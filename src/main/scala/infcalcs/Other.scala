@@ -91,7 +91,7 @@ object MathFuncs {
 }
 
 /** Contains a handful of utility functions. */
-object OtherFuncs {
+object ParameterFuncs {
 
   /**
    * Parses strings specifying list or range parameters.
@@ -180,73 +180,34 @@ object OtherFuncs {
    */
   @tailrec
   @throws(classOf[exceptions.IllegalParameterException])
-  def updateParameters(l: List[Pair[String]], p: Parameters = InfConfig.defaultParameters): Parameters = {
+  def updateParameters(l: List[Pair[String]], p: Parameters = InfConfig.defaultParameters): Parameters =
     if (l.isEmpty) p
     else {
-      // Check if listParams contains the current key
-      if (p.listParams contains l.head._1)
-        updateParameters(l.tail,
-          Parameters(
-            p.listParams updated(l.head._1, stringToSList(l.head._2).get),
-            p.numParams,
-            p.stringParams,
-            p.sigRespParams))
-      // Check if numParams contains the current key
+      val (k, v) = l.head
+      if (p.listParams contains k)
+        updateParameters(l.tail, p updateListParams (k, stringToSList(v).get))
       else if (p.numParams contains l.head._1)
-        updateParameters(l.tail,
-          Parameters(
-            p.listParams,
-            p.numParams updated(l.head._1, l.head._2.toDouble),
-            p.stringParams,
-            p.sigRespParams))
-      // Check if stringParams contains the current key
+        updateParameters(l.tail, p updateNumParams (k, v.toDouble))
+      else if (p.boolParams contains l.head._1)
+        updateParameters(l.tail, p updateBoolParams (k, v.toBoolean))
       else if (p.stringParams contains l.head._1)
-        updateParameters(l.tail,
-          Parameters(
-            p.listParams,
-            p.numParams,
-            p.stringParams updated(l.head._1, l.head._2),
-            p.sigRespParams))
-      // Check if *values needs to be updated
+        updateParameters(l.tail, p updateStringParams (k, v))
       else if (l.head._1 matches ".*Vals[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
-            Parameters(
-              p.listParams,
-              p.numParams,
-              p.stringParams,
-              p.sigRespParams updated
-                  ("responseValues", stringToValList(l.head._2, p.sigRespParams("responseValues")))))
+            p updateSigRespParams ("responseValues", stringToValList(v, p sigRespParams "responseValues")))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
-            Parameters(
-              p.listParams,
-              p.numParams,
-              p.stringParams,
-              p.sigRespParams updated
-                  ("signalValues", stringToValList(l.head._2, p.sigRespParams("signalValues")))))
-        else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
-      // Check if *bins needs to be updated
+            p updateSigRespParams ("signalValues", stringToValList(v, p sigRespParams "signalValues")))
+        else throw new IllegalParameterException(s"illegal parameter: $k}")
       else if (l.head._1 matches ".*Bins[0-9]*")
         if (l.head._1 matches "^resp.*")
           updateParameters(l.tail,
-            Parameters(
-              p.listParams,
-              p.numParams,
-              p.stringParams,
-              p.sigRespParams updated
-                  ("responseBins", stringToValList(l.head._2, p.sigRespParams("responseBins")))))
+            p updateSigRespParams ("responseBins", stringToValList(v, p sigRespParams "responseBins")))
         else if (l.head._1 matches "^sig.*")
           updateParameters(l.tail,
-            Parameters(
-              p.listParams,
-              p.numParams,
-              p.stringParams,
-              p.sigRespParams updated
-                  ("signalBins", stringToValList(l.head._2, p.sigRespParams("signalBins")))))
-        else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
-      // The key was not found! Throw an exception
-      else throw new IllegalParameterException(s"illegal parameter: ${l.head._1}")
+            p updateSigRespParams ("signalBins", stringToValList(v, p sigRespParams "signalBins")))
+        else throw new IllegalParameterException(s"illegal parameter: $k")
+      else throw new IllegalParameterException(s"illegal parameter: $k")
     }
-  }
 }

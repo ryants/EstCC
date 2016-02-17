@@ -24,16 +24,20 @@ object InfConfig {
       "biMuNumber" -> 5,
       "biSigmaNumber" -> 5,
       "repsPerFraction" -> 20,
-      "pwUnifWeights" -> 1, //pwUnifWeights takes either 1 or 0
       "sampleSizeTol" -> 0.2, //tolerable variation in sample size (this value times the smallest spacing between sampleFractions entries)
       "avgEntriesPerBin" -> 0) //0 means bin number is bounded only by number of unique values in data set
+
+  val boolParams: Map[String, Boolean] =
+    Map("logSpace" -> false,
+      "outputRegData" -> false,
+      "uniformWeight" -> true,
+      "pwUniformWeight" -> false
+    )
 
   /** Parameters that have string values. */
   val stringParams: Map[String, String] =
     Map("directory" -> "./",
-      "filePrefix" -> "out",
-      "logSpace" -> "false",
-      "outputRegData" -> "false"
+      "filePrefix" -> "out"
     )
 
   /** (Optional) Parameters denoting specific signal or response values */
@@ -43,6 +47,6 @@ object InfConfig {
 
   /** Instance of [[Parameters]] containing default parameter values. */
   val defaultParameters: Parameters =
-    Parameters(listParams, numParams, stringParams, srParams)
+    Parameters(listParams, numParams, boolParams, stringParams, srParams)
 
 }

@@ -643,10 +643,13 @@ object EstimateMI {
     val table = buildTableWithWeight(data, binPair, wts)
     val probTree = buildTree(buildOrderedNodeList(table.generateCtPos()))
 
+    val rpf = calcConfig.numParameters("repsPerFraction").toInt
+
     val (invFracs, tables) = {
-      val fracTuples: List[(Double, Int)] = (1.0, 0) :: (for {
+      val fracTuples: List[(Double, Int)] =
+        ((0 until rpf).toList map (x => (1.0, x))) ::: (for {
         f <- data.fracs.toList
-        n <- 0 until calcConfig.numParameters("repsPerFraction").toInt
+        n <- 0 until rpf
       } yield (f, n))
 
       (fracTuples map { x =>

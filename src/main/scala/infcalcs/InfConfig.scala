@@ -27,6 +27,7 @@ object InfConfig {
       "numFractions" -> 5, //number of fractions for subsampling (uniformly distributed in inverse sample space)
       "avgEntriesPerBin" -> 0) //0 means bin number is bounded only by number of unique values in data set
 
+  /** Parameters that have boolean values. */
   val boolParams: Map[String, Boolean] =
     Map("logSpace" -> false,
       "outputRegData" -> false,

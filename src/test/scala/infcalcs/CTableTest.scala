@@ -83,7 +83,7 @@ class CTableTest extends FlatSpec with Matchers {
 
   it should "throw an AssertionError if it has negative entries" in {
     val table = Vector(Vector(0.0, 1.0, -1.0), Vector(2.0, 3.0, 4.0))
-    a[AssertionError] should be thrownBy {
+    a[IllegalArgumentException] should be thrownBy {
       new ContingencyTable(table)
     }
   }

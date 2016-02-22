@@ -1,5 +1,3 @@
-import infcalcs.tables.CTable
-
 /** Information theory calculations.
   *
   * This package implements calculation of information-theoretic quantities, in
@@ -11,7 +9,7 @@ import infcalcs.tables.CTable
   *
   * The steps in the channel capacity calculation are outlined below. For more
   * details on the theory underlying the approach taken, see the supplementary
-  * information for Suderman, Bachman et al. (2015).
+  * information for Suderman, Bachman et al. (2016).
   *
   * - In the top-level main function, [[infcalcs.EstCC]], command-line arguments are
   * parsed and the data and configuration parameters are loaded into a [[infcalcs.CalcConfig]]
@@ -26,7 +24,7 @@ import infcalcs.tables.CTable
   * as well as discrete piecewise distributions with uniform probability using
   * the [[infcalcs.EstimateCC.genPieceWiseUniformWeights]].
   *
-  * - Mutual information is calculated for each proposed input weighting
+  * - Mutual information is estimated for each proposed input weighting
   * by the function [[infcalcs.EstimateMI.genEstimatesMult]].
   *
   * - For each weighting, the algorithm tries a wide variety of bin

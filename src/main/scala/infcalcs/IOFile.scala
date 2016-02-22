@@ -117,9 +117,11 @@ object IOFile {
   }
 
   /**
+   * Writes [[Calculation]] data to file in the event that the
+   * estimator is not used in favor of naive calculation
    *
-   * @param cs
-   * @param f
+   * @param cs [[Calculation]] instances
+   * @param f file name
    */
   def calculatedToFile(cs: Vector[Calculation], f: String): Unit = {
 
@@ -163,9 +165,12 @@ object IOFile {
     writer.write(s"# Weight String: ${wtString}")
     writer.newLine()
 
-    def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
-    def getRandDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).randDataEstimate
-    def getCoD(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).coeffOfDetermination
+    def getDataEstimate(est: Option[Estimates]) =
+      (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
+    def getRandDataEstimate(est: Option[Estimates]) =
+      (est getOrElse Estimates((0.0,0.0),Nil,0.0)).randDataEstimate
+    def getCoD(est: Option[Estimates]) =
+      (est getOrElse Estimates((0.0,0.0),Nil,0.0)).coeffOfDetermination
 
     val lines =
       for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +

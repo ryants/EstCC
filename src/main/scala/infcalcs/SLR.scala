@@ -10,7 +10,7 @@ import MathFuncs.avg
  * regression line, along with estimates of the standard error and 95%
  * confidence interval of both the slope and the intercept.
  */
-class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
+class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String = "") {
 
   require(xList.length == yList.length)
 
@@ -58,9 +58,6 @@ class SLR(val xList: Seq[Double], val yList: Seq[Double], val label: String) {
     val ssRes = (yList.indices map (x => math.pow((yList(x) - regLine(xList(x))),2))).sum
     1-(ssRes/ssTot)
   }
-
-  /** Alternative constructor: takes x and y data but applies an empty label. */
-  def this(xList: Seq[Double], yList: Seq[Double]) = this(xList, yList, "")
 
   /**
    * Writes the regression data to a file.

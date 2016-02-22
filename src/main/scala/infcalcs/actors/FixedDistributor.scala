@@ -1,6 +1,5 @@
 package infcalcs.actors
 
-import infcalcs.ParameterFuncs._
 import infcalcs.exceptions._
 import infcalcs.{EstCC, CalcConfig, DRData}
 
@@ -17,7 +16,9 @@ import infcalcs.{EstCC, CalcConfig, DRData}
  */
 class FixedDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distributor(p)(calcConfig) {
 
+  /** Fixed number of signal bins */
   val sb = signalBins
+
   val wts = weights
 
   def receive = {

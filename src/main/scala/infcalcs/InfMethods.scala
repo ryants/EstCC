@@ -1,14 +1,14 @@
 package infcalcs
 
 import exceptions._
-import tables.{CTable, ContingencyTable}
+import infcalcs.tables.{CTable, ContingencyTable}
 
 import annotation.tailrec
 import math._
 import Tree._
 
 import scala.util.Random
-import Orderings._
+
 
 /** Contains methods for building contingency tables from data. */
 object CTBuild {
@@ -63,16 +63,6 @@ object CTBuild {
   /**
    * Returns the index of the bin for insertion of a value into the table.
    *
-   * This function is used to populate the contingency table once the bin
-   * boundaries have been determined. Note that if for some reason this
-   * function is called with a value that is greater than the maximum of the
-   * dataset (i.e., higher than the upper bound of the highest bin), it will
-   * nevertheless return the index of the highest bin.
-   *
-   * Note also that if there is more than one bin with the same boundary
-   * (as can happen if there are many identical values subdivided among more
-   * than one bin), this function will return the lower-index bin.
-   *
    * @param value The number to be inserted.
    * @param dim The binary tree specifying the bounds of each bin.
    * @return The index of the bin that should contain the value.
@@ -81,8 +71,10 @@ object CTBuild {
 
     @tailrec
     def trace(tree: Tree[Bin] = dim): Bin =
-      if (value > tree.maxVal.max) throw new ValueOutOfBoundsException(("value is larger than maximum in tree"))
-      else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
+      if (tree.isEmpty)
+        throw new EmptyTreeException("cannot search an empty tree")
+      else if (value > tree.maxVal.get.max)
+        throw new ValueOutOfBoundsException(("value is larger than maximum in tree"))
       else {
         val bin = tree.value.get
         if (value > bin.lowerBound && value <= bin.max) bin
@@ -142,18 +134,20 @@ object CTBuild {
   }
 
   /**
-   * Method for constructing contingency table with original weighting on
-   * the rows from a set of n-dim data points.
+   * Method for constructing contingency table from a set of n-dim data points.
+   *
+   * Note: no weight is applied to the data
    *
    * @param data container for dose-response data
    * @param nb one-dimensional bin numbers for row and column values resp.
+   * @param randomize shuffles the data to produce a table with randomized data
    *
    * @return contingency table for ordered pair data points
    */
   def buildTable(
       data: DRData,
       nb: Pair[NTuple[Int]],
-      randomize: Boolean = false): ContingencyTable[Int] = {
+      randomize: Boolean = false): CTable[Int] = {
 
     val (rd, sigKey) = (data sigDelims nb._1, data sigKey nb._1)
     val (cd, respKey) = (data respDelims nb._2, data respKey nb._2)
@@ -175,10 +169,7 @@ object CTBuild {
       else {
         val rIndex = findVectIndex(p.head._1, rd, sigKey)
         val cIndex = findVectIndex(p.head._2, cd, respKey)
-        if (rIndex < 0 || cIndex < 0) {
-          throw new Exception(
-            "negative indices" + println(rIndex, cIndex) + println(p.head))
-        } else if (rIndex >= tDimR || cIndex >= tDimC) {
+        if (rIndex >= tDimR || cIndex >= tDimC) {
           throw new Exception(
             "index out of bounds" + println(rIndex, cIndex) + println(p.head))
         }
@@ -220,17 +211,6 @@ object EstimateMI {
   import Orderings._
 
   /**
-   * Checks if each row vector in a matrix has the same sum.
-   *
-   * Used for testing contingency tables to see if every input (row) value has
-   * the same number of observations associated with it.
-   */
-  def isUniform(t: Vector[Vector[Double]]): Boolean = {
-    val rsums = t map (_.sum)
-    !(rsums exists (_ != rsums.head))
-  }
-
-  /**
    * Checks that there are fewer (or an equal number of) bins than nonzero
    * [[CalcConfig.lowerAvgEntryLimit]] for the lowest fraction of jackknifed
    * data in both dimensions, OR checks that the number of unique values in
@@ -263,11 +243,25 @@ object EstimateMI {
           binPair._2.product <= p.numUniqueRespVals * minSample
   }
 
+  /**
+   * Generates a new [[infcalcs.tables.ContingencyTable]] from a [[Tree]] of [[CtPos]] instances.
+   *
+   * This function is a way to generate integer-based [[infcalcs.tables.ContingencyTable]] instances
+   * with a specified number of entries, given some probability distribution over
+   * two dimensions.  Generally the probability distribution is obtained from a previous
+   * [[infcalcs.tables.ContingencyTable]] that was created using the [[CTBuild.buildTable]] method.
+   *
+   * @param size total number of entries in the new [[infcalcs.tables.ContingencyTable]]
+   * @param rows rows in the new [[infcalcs.tables.ContingencyTable]]
+   * @param cols columns in the new [[infcalcs.tables.ContingencyTable]]
+   * @param t [[Tree]] of [[CtPos]] instances that defines the probability distribution
+   * @return
+   */
   def resample(size: Int, rows: Int, cols: Int, t: Tree[CtPos]): ContingencyTable[Int] = {
 
     @tailrec
     def findCtPos(value: Double, tree: Tree[CtPos] = t): CtPos =
-      if (value > tree.maxVal.cumProb) throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.cumProb}}) in tree"))
+      if (value > tree.maxVal.get.cumProb) throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.get.cumProb}}) in tree"))
       else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
       else {
         val ctPos = tree.value.get
@@ -291,26 +285,36 @@ object EstimateMI {
       builder(table, is)
     }
 
-    //need to make CtPos dummy instances to search tree
     val randomNumbers = (0 until size).toList map (_ => Random.nextDouble())
     val coords = randomNumbers map (x => findCtPos(x, t).coord)
     buildSampledTable(coords)
 
   }
 
+  /**
+   * Builds a [[infcalcs.tables.ContingencyTable]] with or without some specified weight
+   *
+   * @param data data points entered into table
+   * @param binPair bins for data points
+   * @param wts [[Weight]] wrapped in Option monad
+   * @param rand specifies if data should be shuffled to destroy information
+   * @return
+   */
   def buildTableWithWeight(
       data: DRData,
       binPair: Pair[NTuple[Int]],
       wts: Option[Weight],
-      rand: Boolean = false) = wts match {
-    case Some(w) => w weightTable buildTable(data, binPair, rand)
-    case None => buildTable(data, binPair, rand)
-  }
+      rand: Boolean = false): CTable[Double] =
+    wts match {
+      case Some(w) => w weightTable buildTable(data, binPair, rand)
+      case None => buildTable(data, binPair, rand).cTableWithDoubles
+    }
+
 
   /**
    * Returns resampled and randomized contingency tables for estimation of MI.
    *
-   * The data structure returned by this function contains all of the
+   * The data structures returned by this function contains all of the
    * information required to calculate the MI for a single pair of bin sizes,
    * including contingency tables for randomly subsampled datasets (for
    * unbiased estimation of MI at each bin size) and randomly shuffled
@@ -318,27 +322,12 @@ object EstimateMI {
    *
    * Resampling of the dataset is performed using the [[resample]] method.
    *
-   * The return value is a tuple containing:
-   * - a list of the inverse sample sizes for each resampling fraction. This
-   * list has length (repsPerFraction * number of fractions) + 1. The extra
-   * entry in the list (the + 1 in the expression) is due to the inclusion
-   * of the full dataset (with fraction 1.0) in the list of sampling
-   * fractions.
-   * - a list of contingency tables for subsamples of the data, length as for
-   * the inverse sample size list.
-   * - a list of lists of randomized contingency tables. Because there are
-   * numRandTables randomized tables used for every estimate, the outer list
-   * contains numRandTables entries; each entry consists of
-   * (repsPerFraction * number of fractions) + 1 randomized contingency
-   * tables.
-   * - a list of string labels for output and logging purposes, length as for
-   * the inverse sample size list.
-   *
+   * @param calcConfig
    * @param binPair Pair of tuples containing the numbers of row and column bins.
    * @param data The input/output dataset.
    * @param wts An optional weights vector to be applied to the rows.
    *
-   * @return (inverse sample sizes, CTs, randomized CTs, labels)
+   * @return ([[RegData]], [[RegDataRand]])
    */
   def buildRegData(calcConfig: CalcConfig)(
       binPair: Pair[NTuple[Int]],
@@ -397,7 +386,8 @@ object EstimateMI {
    * one for each of numRandTables rounds of randomization. Because linear
    * regression may fail on the randomized data, some entries in the list may be None.
    *
-   * @param r RegData structure as returned by [[buildRegData]].
+   * @param calcConfig
+   * @param r ([[RegData]], [[RegDataRand]]) structure as returned by [[buildRegData]].
    * @return (regression on original data, list of regressions on random data)
    */
   def calcMultRegs(calcConfig: CalcConfig)
@@ -418,8 +408,8 @@ object EstimateMI {
    * the list of regression lines forming the second entry in the tuple
    * passed as an argument.
    *
-   * @param regs (regression, list of regressions), eg, as from [[calcMultRegs]]
-   * @return list of (intercept, intercept 95% conf interval)
+   * @param regs (regression, list of regressions), as from [[calcMultRegs]]
+   * @return [[Estimates]] instance
    */
   def multIntercepts(regs: (SLR, List[Option[SLR]])): Estimates = {
     // Retrieves intercept and associated conf. interval for a regression model
@@ -446,11 +436,11 @@ object EstimateMI {
    * results by calling [[multIntercepts]].
    *
    * @param calcConfig
-   * @param pl
-   * @param binPair
-   * @param numConsecRandPos
-   * @param res
-   * @param wts
+   * @param pl [[DRData]]
+   * @param binPair specified bin configuration
+   * @param wts [[Weight]] wrapped in Option
+   * @param numConsecRandPos tracks number of biased estimates
+   * @param res results
    * @return
    */
   @tailrec
@@ -488,7 +478,7 @@ object EstimateMI {
   }
 
   /**
-   * An imperative equivalent to [[genEstimatesMult]]
+   * An imperative alternative to [[genEstimatesMult]]
    *
    * @param calcConfig
    * @param pl
@@ -589,14 +579,14 @@ object EstimateMI {
   /**
    * Returns the MI estimate that is maximized for real but not randomized data.
    *
-   * Takes a list of MI estimates for a range of bin sizes, extracted by
+   * Takes a list of [[EstTuple]] instances for a range of bin sizes, extracted by
    * linear regression for both real and randomized data (eg, as provided by
    * [[genEstimatesMult]]) and finds the bin size/MI combination that maximizes
    * the mutual information while still maintaining the estimated MI of the
    * randomized data below the cutoff specified by the "cutoffValue"
    * parameter.
    *
-   * @param d List of (bin size combo, list of (intercept, conf. int.))
+   * @param d vector of [[EstTuple]] instances
    * @return Entry from the list d the optimizes the MI estimate.
    */
   def optMIMult(calcConfig: CalcConfig)(d: Vector[EstTuple]): EstTuple = {
@@ -698,11 +688,12 @@ object EstimateCC {
   /**
    * Generates list of unimodal (Gaussian) weights.
    *
-   * @param bounds Binary tree specifying bin bounds.
+   * @param calcConfig
+   * @param bounds Binary [[Tree]] of [[Bin]] instances
    * @param in The input dataset.
-   * @return List of weights drawn from a unimodal Gaussian.
+   * @return List of [[GWeight]] instances
    */
-  def genUnimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[Weight] =
+  def genUnimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[GWeight] =
 
     if (calcConfig.numParameters("uniMuNumber").toInt == 0) Nil
     else {
@@ -727,18 +718,19 @@ object EstimateCC {
         i <- uSigFracList
       } yield (mu, (i * (mu - minVal) / 3.0) min (i * (maxVal - mu) / 3.0))
 
-      wtParams map (p => GWeight(p, bounds, in))
+      wtParams map (p => GWeight(p, bounds))
 
     }
 
   /**
    * Generates list of bimodal weights.
    *
-   * @param bounds Binary tree specifying bin bounds.
+   * @param calcConfig
+   * @param bounds Binary [[Tree]] of [[Bin]] instances
    * @param in The input dataset.
-   * @return List of weights drawn from bimodal Gaussians.
+   * @return List of [[BWeight]] instances
    */
-  def genBimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[Weight] =
+  def genBimodalWeights(calcConfig: CalcConfig)(bounds: Tree[Bin], in: List[Double]): List[BWeight] =
 
     if (calcConfig.numParameters("biMuNumber") < 3) Nil
     else {
@@ -773,7 +765,7 @@ object EstimateCC {
         w <- calcConfig.listParameters("biPeakWeights")
       } yield (p, s, w)
 
-      wtParams map (x => BWeight(x._1, x._2, x._3, bounds, in))
+      wtParams map (x => BWeight(x._1, x._2, x._3, bounds))
 
     }
 
@@ -781,10 +773,11 @@ object EstimateCC {
    * Generates a set of piece-wise functions to create uniform weighting from
    * bin i to bin j with all outer bins (<i and >j) weighted to 0
    *
-   * @param bounds Binary tree specifying bin bounds.
-   * @return List of piece-wise weights
+   * @param calcConfig
+   * @param bounds Binary [[Tree]] of [[Bin]] instances
+   * @return List of [[PWeight]] instances
    */
-  def genPieceWiseUniformWeights(calcConfig: CalcConfig)(bounds: Tree[Bin]): List[Weight] =
+  def genPieceWiseUniformWeights(calcConfig: CalcConfig)(bounds: Tree[Bin]): List[PWeight] =
     if (!calcConfig.boolParameters("pwUniformWeight")) {
       Nil
     } else {
@@ -810,8 +803,7 @@ object EstimateCC {
    * the marginal distributions for the n independent random variables
    * representing the signal.  These are used to produce a joint
    * distribution (see [[Weight.makeJoint]]) in order to construct a list of
-   * weights corresponding to the structure of the contingency table as
-   * seen in [[CTBuild]].
+   * weights corresponding to the structure of the data set.
    *
    * @param sig list of ordered tuples (signal values)
    * @param weightFunc function determining calculation of weight distribution
@@ -827,6 +819,13 @@ object EstimateCC {
     }
   }
 
+  /**
+   * Similar to [[genWeights1]] but with a different weight function signature
+   *
+   * @param sig
+   * @param weightFunc
+   * @return
+   */
   def genWeights2(
       sig: Vector[NTuple[Double]],
       weightFunc: Tree[Bin] => List[Weight]): NTuple[Tree[Bin]] => List[Weight] =
@@ -835,7 +834,13 @@ object EstimateCC {
       w.transpose.toList map (x => Weight.makeJoint(x.toVector))
     }
 
-
+  /**
+   * Constructs a joint uniform distribution [[Weight]] for all dimensions in signal space
+   *
+   * @param calcConfig
+   * @param t
+   * @return
+   */
   def genUniformWeight(calcConfig: CalcConfig)(t: NTuple[Tree[Bin]]): Option[Weight] =
     if (calcConfig.boolParameters("uniformWeight"))
       Some(Weight.makeJoint(t map (x => UWeight(x))))
@@ -857,14 +862,12 @@ object EstimateCC {
    * stdout
    *
    * @param p
-   * @param fp
    * @param index
    * @return Channel capacity estimate for given list of weights
    */
   def estimateCCVerbose(
       p: DRData,
-      fp: Option[String],
-      index: Int)(implicit calcConfig: CalcConfig): Unit = {
+      index: Int = 0)(implicit calcConfig: CalcConfig): Unit = {
 
     def calcEstimates(binPair: Pair[NTuple[Int]], wts: List[Option[Weight]], index: Int): Vector[Vector[EstTuple]] = {
 
@@ -876,7 +879,7 @@ object EstimateCC {
 
         estimates = estimates :+ estimate
 
-        fp match {
+        calcConfig.outF match {
           case Some(f) =>
             IOFile.estimatesToFileMult(estimate, s"${f}_${w}_${index}.dat")
           case None =>
@@ -954,9 +957,12 @@ object EstimateCC {
   /**
    * Estimates the channel capacity for a [[DRData]] given a [[CalcConfig]]
    *
+   * This function generates a list of [[Weight]] instances to apply to the data
+   * and iterates over signal and response bin numbers as specified in by the
+   * configuration parameters to estimate the maximum mutual information.
+   *
    * @param p
    * @param signalBins
-   * @param fp
    * @param index
    * @param numConsecBiasedSigEst
    * @param optRes
@@ -967,7 +973,6 @@ object EstimateCC {
   def estimateCC(
       p: DRData,
       signalBins: NTuple[Int],
-      fp: Option[String],
       index: Int = 0,
       numConsecBiasedSigEst: Int = 0,
       optRes: Vector[EstTuple] = Vector())(implicit calcConfig: CalcConfig): Unit = {
@@ -981,7 +986,7 @@ object EstimateCC {
           p,
           initBinTuple,
           weights(w))
-        fp match {
+        calcConfig.outF match {
           case Some(x) => IOFile.estimatesToFileMult(estimates, s"${x}_${w}_${index}.dat")(calcConfig)
           case _ =>
         }
@@ -1025,16 +1030,24 @@ object EstimateCC {
       //increasing numConsecLowerProd depends on both total bin number and decreasing MI estimates
       if (optRes.length > 0) {
         if (incrCriterion)
-          estimateCC(p, newSignalBins, fp, index + 1, numConsecBiasedSigEst + 1, optRes :+ maxOpt)(calcConfig)
+          estimateCC(p, newSignalBins, index + 1, numConsecBiasedSigEst + 1, optRes :+ maxOpt)(calcConfig)
         else
-          estimateCC(p, newSignalBins, fp, index + 1, 0, optRes :+ maxOpt)(calcConfig)
+          estimateCC(p, newSignalBins, index + 1, 0, optRes :+ maxOpt)(calcConfig)
       } else {
-        estimateCC(p, newSignalBins, fp, index + 1, 0, optRes :+ maxOpt)(calcConfig)
+        estimateCC(p, newSignalBins, index + 1, 0, optRes :+ maxOpt)(calcConfig)
       }
 
     }
   }
 
+  /**
+   * Calculates the mutual information for a set of data with no weights
+   * and without the linear regression estimator
+   *
+   * @param data
+   * @param calcConfig
+   * @return
+   */
   def calculateWithoutEstimator(data: DRData)
       (implicit calcConfig: CalcConfig): Unit = {
 

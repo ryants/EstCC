@@ -9,9 +9,6 @@ object MathFuncs {
 
   import math.sqrt
 
-  /** Returns double truncated to nearest hundredth */
-  def roundFrac(d: Double) = "%.2f" format d
-
   /**
    * Converts frequencies to probabilities by normalizing each count by the
    * vector sum.
@@ -24,6 +21,12 @@ object MathFuncs {
     }
   }
 
+  /**
+   * Computes the mean of a sequence of doubles
+   *
+   * @param t
+   * @return
+   */
   def avg(t: Seq[Double]): Double = t.sum / t.length.toDouble
 
   /**
@@ -165,7 +168,6 @@ object ParameterFuncs {
     }
   }
 
-  //TODO assert binning parameters (spacing, numconsec) cannot have 0 value entries
   /**
    * Updates a set of configuration parameters with a list of key/value pairs.
    *
@@ -212,6 +214,7 @@ object ParameterFuncs {
     }
 }
 
+/** Defines orderings for various case classes employed in [[Tree]] searches */
 object Orderings {
 
   implicit object CtPosOrdering extends Ordering[CtPos] {

@@ -78,8 +78,8 @@ class MultiVarTest extends FlatSpec with Matchers {
     val d = Vector(Vector(0.0))
     val d2 = Vector(Vector(0.0, 1.0), Vector(1.0))
     val r = Vector(Vector(0.0), Vector(1.0))
-    an [AssertionError] should be thrownBy new DRData(testConfig)(d, r)
-    an [AssertionError] should be thrownBy new DRData(testConfig)(d2, r)
+    an [IllegalArgumentException] should be thrownBy new DRData(testConfig)(d, r)
+    an [IllegalArgumentException] should be thrownBy new DRData(testConfig)(d2, r)
   }
 
   it should "produce a tree for each signal or response variable" in {

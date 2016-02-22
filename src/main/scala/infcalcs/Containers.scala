@@ -1,7 +1,6 @@
 package infcalcs
 
-import infcalcs.tables.{ContingencyTable, CTable}
-import scala.annotation.tailrec
+import infcalcs.tables.CTable
 
 /**
  * Created by ryansuderman on 8/25/15.
@@ -15,7 +14,7 @@ import scala.annotation.tailrec
  * @param values list of entries in bin
  * @param lowerBound bin can contain values above this count (non-inclusive)
  */
-case class Bin(index: Int, values: List[Double], lowerBound: Double){
+case class Bin(index: Int, values: List[Double], lowerBound: Double) {
 
   lazy val count = values.length
   lazy val max = values.max
@@ -23,7 +22,7 @@ case class Bin(index: Int, values: List[Double], lowerBound: Double){
 }
 
 /**
- * Case class that contains the cumulative probability of a particular bin in a
+ * Case class that contains the cumulative probability of a particular location in a
  * contingency table
  *
  * @param coord (row,col) location in a contingency table
@@ -33,7 +32,7 @@ case class Bin(index: Int, values: List[Double], lowerBound: Double){
 case class CtPos(coord: Pair[Int], cumProb: Double, lowerBound: Double)
 
 /**
- * Case class for holding a [[CTable]] instance and the inverse of its sample
+ * Case class for holding a [[infcalcs.tables.CTable]] instance and the inverse of its sample
  * size, resulting from a subsampling operation
  *
  * @param inv
@@ -48,11 +47,15 @@ case class SubCalc(inv: Double, table: CTable[Double])
  * @param subCalcs
  * @param label
  */
-case class RegData(subCalcs: Vector[SubCalc], label: String){
+case class RegData(subCalcs: Vector[SubCalc], label: String) {
 
   lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.mutualInformation))).unzip
 
-  def calculateRegression: SLR = new SLR(invVals,miVals,label)
+  /**
+   * Calculates simple linear regression between inverse sample size and
+   * mutualInformation
+   */
+  def calculateRegression: SLR = new SLR(invVals, miVals, label)
 
 }
 
@@ -63,18 +66,23 @@ case class RegData(subCalcs: Vector[SubCalc], label: String){
  * @param subCalcs
  * @param label
  */
-case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String){
+case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String) {
 
   lazy val trans = subCalcs.transpose
   lazy val invVals = trans map (_ map (_.inv))
   lazy val miVals = trans map (_ map (_.table.mutualInformation))
 
+  /**
+   * Calculates simple linear regression between inverse sample size and
+   * mutualInformation but is wrapped in the Option monad to
+   * accommodate estimates that are not numeric
+   */
   def calculateRegression: List[Option[SLR]] = {
     trans.indices.toList map { x =>
-        val slrLabel = label + s"rand${x}"
-      val slr = new SLR(invVals(x),miVals(x),slrLabel)
+      val slrLabel = label + s"rand${x}"
+      val slr = new SLR(invVals(x), miVals(x), slrLabel)
       if (slr.intercept.isNaN) {
-        IOFile.regDataToFile((invVals(x),miVals(x)),s"regData_NaNint_${slrLabel}.dat")
+        IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${slrLabel}.dat")
         None
       }
       else Some(slr)
@@ -130,6 +138,7 @@ case class Calculation(
  *
  * @param listParams parameters that have list values
  * @param numParams parameters that have numeric values
+ * @param boolParams parameters that have boolean values
  * @param stringParams parameters that have string values
  * @param sigRespParams (optional) parameters governing signal/response space
  */

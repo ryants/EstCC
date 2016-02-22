@@ -1,9 +1,6 @@
 package infcalcs.actors
 
 import akka.actor.Actor
-import infcalcs.EstTuple
-import infcalcs.EstimateCC.getWeights
-import infcalcs.ParameterFuncs._
 import infcalcs._
 import infcalcs.exceptions.{InappropriateInitBinsException, ExcessActorException}
 
@@ -21,13 +18,19 @@ import infcalcs.exceptions.{InappropriateInitBinsException, ExcessActorException
  */
 abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends Actor {
 
+  /** Results sent back from [[Calculator]] instances */
   var estList: Array[EstTuple] = Array()
 
+  /** Tracks the number of signal bins for calculations */
   var signalBins: NTuple[Int] = calcConfig.initSignalBins
-  var weights = getWeights(calcConfig)(p, signalBins)
+
+  /** List of weights to try for a particular number of signal bins */
+  var weights = EstimateCC.getWeights(calcConfig)(p, signalBins)
+
   var totalCalculations = weights.length
 
   var sent = 0
+
   var received = 0
 
   var sigIndex = 0
@@ -42,6 +45,12 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
 
   def updateEstList(r: Result) = estList = estList :+ r.res
 
+  /**
+   * Initializes some number of [[Calculator]] instances to calculate
+   * mutual information estimates
+   *
+   * @param init
+   */
   def initializeCalculators(init: Init) =
     if (!EstimateMI.binNumberIsAppropriate(calcConfig)(p, (calcConfig.initBinTuples)))
       throw new InappropriateInitBinsException("initial bin numbers are too large")
@@ -61,6 +70,9 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
       }
     }
 
+  /**
+   * Stops actor-based estimation of the channel capacity and outputs final result
+   */
   def stopCalculation() = {
     if (EstCC.appConfig.verbose) {
       println(s"Stop criterion reached with ${signalBins.product} total bins")

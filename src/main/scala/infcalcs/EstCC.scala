@@ -8,7 +8,7 @@ calculateWithoutEstimator
 }
 import IOFile.{loadList, importParameters}
 import akka.actor.{ActorSystem, Props}
-import infcalcs.actors.{AdaptiveDistributor, Init, Calculator, FixedDistributor}
+import infcalcs.actors.{AdaptiveDistributor, Init, FixedDistributor}
 
 /**
  * Top-level main function for channel capacity calculation.
@@ -21,13 +21,11 @@ import infcalcs.actors.{AdaptiveDistributor, Init, Calculator, FixedDistributor}
  */
 object EstCC extends App with CLOpts {
 
-  //TODO implement logging whose verbosity is controlled by the -v flag
   val appConfig = parser.parse(args, Config()) getOrElse {
     System.exit(0)
     new Config()
   }
 
-  // Get config info
   val dataFile = appConfig.dataFile
   val paramFile = if (appConfig.paramFile == "") None else Some(appConfig.paramFile)
   val rawParameters = importParameters(paramFile)
@@ -37,7 +35,6 @@ object EstCC extends App with CLOpts {
     println("\nVerbose mode\n")
   }
 
-  //TODO inject appConfig into calcConfig for use in actors (avoid global variable)
   implicit val calcConfig = CalcConfig(parameters)
   val p = loadList(dataFile)
 
@@ -54,14 +51,14 @@ object EstCC extends App with CLOpts {
   // Calculate and output estimated mutual information values given calculated weights
   if (appConfig.cores > 1) {
     val system = ActorSystem("EstCC")
-    val numActors = appConfig.cores - 1
+    val numCalculators = appConfig.cores - 1
     val distributor =
-      if (calcConfig.srParameters("signalValues").isDefined)
+      if (calcConfig.defSigVals)
         system actorOf (Props(new FixedDistributor(p)), "dist")
       else
         system actorOf (Props(new AdaptiveDistributor(p)), "dist")
-    distributor ! Init(numActors)
+    distributor ! Init(numCalculators)
     system.awaitTermination()
-  } else if (appConfig.verbose) estimateCCVerbose(p, calcConfig.outF, 0)
-  else estimateCC(p, calcConfig.initSignalBins, calcConfig.outF)
+  } else if (appConfig.verbose) estimateCCVerbose(p)
+  else estimateCC(p, calcConfig.initSignalBins)
 }

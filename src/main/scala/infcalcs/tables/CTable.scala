@@ -1,9 +1,6 @@
 package infcalcs.tables
 
 import infcalcs._
-
-import scala.annotation.tailrec
-
 import scala.annotation.tailrec
 
 /** A mixin for implementing contingency tables. */

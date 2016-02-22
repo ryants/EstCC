@@ -20,8 +20,9 @@ class DRData(calcConfig: CalcConfig)
 
   val numObs = sig.length
 
-  Predef.assert(numObs == resp.length)
-  Predef.assert(checkSize(sig) == 1 && checkSize(resp) == 1)
+  require(numObs == resp.length, "each signal must have a corresponding response")
+  require(checkSize(sig) == 1 && checkSize(resp) == 1,
+    "all signals and responses must have consistent dimensionality")
 
   val zippedVals = (sig, resp).zipped.toVector
 
@@ -42,6 +43,7 @@ class DRData(calcConfig: CalcConfig)
 
   lazy val isEmpty: Boolean = numObs == 0
 
+  /** List of fractions for subsampling the data set */
   val fracs = genSubFracs()
 
   val repsPerFrac = 0 until calcConfig.numParameters("repsPerFraction").toInt
@@ -52,7 +54,7 @@ class DRData(calcConfig: CalcConfig)
   } yield f)
 
   /**
-   * Generates fractions for subsampling the data which are uniformaly distributed
+   * Generates fractions for subsampling the data which are uniformly distributed
    * in inverse sample space
    */
   private def genSubFracs() = {
@@ -85,13 +87,9 @@ class DRData(calcConfig: CalcConfig)
   /**
    * Returns binary tree giving the values delimiting the bounds of each bin.
    *
-   * The tree returned by this function has numBins nodes; the value
-   * associated with each node represents the maximum data value contained in
-   * that bin, ie, the upper inclusive bin bound.
-   *
    * @param v The list of doubles to be partitioned.
    * @param numBins The number of bins to divide the list into.
-   * @return Binary tree containing the maximum value in each bin.
+   * @return Binary tree of [[Bin]] instances.
    */
   private def getBinDelims(v: Vector[Double], numBins: Int): Tree[Bin] = {
     val delimList = CTBuild.partitionList(v, numBins)
@@ -100,10 +98,6 @@ class DRData(calcConfig: CalcConfig)
 
   /**
    * Calculates bin delimiters for arbitrary dimensioned data points
-   *
-   * @note calling this function when a discrete value set is provided for the
-   *       data results in delimiter calculation from the set of values, not the
-   *       provided bin number
    *
    * @param values determines if explicit value sets are present for data
    * @param data data points

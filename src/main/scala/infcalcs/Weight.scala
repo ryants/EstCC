@@ -9,31 +9,55 @@ import scala.math.Numeric
 /**
  * Created by ryansuderman on 2/15/16.
  */
+
+/** Mixin that defines key aspects of a novel probability function */
 trait Weight {
 
+  /** Raw weights to be applied to data. */
   val weights: List[Double]
+
+  /** Unique label identifying the weighting function. */
   val label: String
 
+  /**
+   * Applies the weights to a [[infcalcs.tables.CTable]], generating a new [[infcalcs.tables.CTable]]
+   *
+   * Note that the weights must be normalized to the existing distribution
+   * of data among the row dimension of the contingency table using the
+   * [[Weight.reWeight]] function
+   *
+   * @param ct
+   * @tparam A
+   * @return
+   */
   def weightTable[A: Numeric](ct: CTable[A]): CTable[Double] = {
+    require(ct.table.length == weights.length, "number of rows must equal number of weights")
+
     val e = implicitly[Numeric[A]]
     import e.mkNumericOps
     val rowProbs = (0 until ct.rows).toList map (x => ct.table(x).sum.toDouble / ct.numSamples.toDouble)
     val reWeight = Weight.reWeight(weights, rowProbs)
-    val newTable = Weight.weightSignalData(ct.table, reWeight)
+    val newTable = ct.table.indices.toVector map (v => ct.table(v) map (x =>
+      x.toDouble * reWeight(v)))
     new ContingencyTable[Double](newTable)
   }
 
 }
 
-case class GWeight(p: Pair[Double], bt: Tree[Bin], vs: List[Double]) extends Weight {
+/**
+ * [[Weight]] whose weights are generated from a Gaussian probability distribution
+ *
+ * @param p (mu, sigma) for calculating the Gaussian probability
+ * @param bt [[Tree]] of [[Bin]] instances defining signal space
+ */
+case class GWeight(p: Pair[Double], bt: Tree[Bin]) extends Weight {
 
   import MathFuncs.intUniG
 
   val label = "G(%1.2f,%1.2f)" format(p._1, p._2)
 
-  /** Raw weights */
   val weights = {
-    val minVal = vs.min
+    val minVal = bt.minVal.get.values.min
     val boundList = bt.toList
     val firstTerm = Weight.calcWeight(intUniG(p._1, p._2), minVal, boundList.head.max)
     Weight.testWeights(label, firstTerm +: {
@@ -44,14 +68,24 @@ case class GWeight(p: Pair[Double], bt: Tree[Bin], vs: List[Double]) extends Wei
 
 }
 
+/**
+ * [[Weight]] whose weights are bimodal and derived from the sum of two Gaussian
+ * probability distributions
+ *
+ * @param p1 (mu, sigma) for the first Gaussian
+ * @param p2 (mu, sigma) for the second Gaussian
+ * @param w relative weight of the first Gaussian to the second (must be between 0 and 1)
+ * @param bt [[Tree]] of [[Bin]] instances defining signal space
+ */
 case class BWeight(
     p1: Pair[Double],
     p2: Pair[Double],
     w: Double,
-    bt: Tree[Bin],
-    vs: List[Double]) extends Weight {
+    bt: Tree[Bin]) extends Weight {
 
   import MathFuncs.intBiG
+
+  require(w < 1 && 0 < w, "bimodal scaling factor must be between 0 and 1")
 
   val label = {
     val gauss1 = "G1(%1.2f,%1.2f)" format(p1._1, p1._2)
@@ -60,7 +94,7 @@ case class BWeight(
   }
 
   val weights = {
-    val minVal = vs.min
+    val minVal = bt.minVal.get.values.min
     val boundList = bt.toList
     val firstTerm = Weight.calcWeight(intBiG(p1, p2, (w, 1 - w)), minVal, boundList.head.max)
     Weight.testWeights(label, firstTerm +: {
@@ -71,6 +105,13 @@ case class BWeight(
 
 }
 
+/**
+ * [[Weight]] whose weights are uniformly distributed over interior bins,
+ * and exterior bins are weighted to be 0
+ *
+ * @param b (low, high) all bins below 'low' and above 'high' are weighted to 0
+ * @param bt [[Tree]] of [[Bin]] instances defining signal space
+ */
 case class PWeight(b: Pair[Int], bt: Tree[Bin]) extends Weight {
 
   val label = "PWU(%d, %d)" format(b._1, b._2)
@@ -85,6 +126,11 @@ case class PWeight(b: Pair[Int], bt: Tree[Bin]) extends Weight {
 
 }
 
+/**
+ * [[Weight]] whose weights are distributed uniformly over all bins
+ *
+ * @param bt [[Tree]] of [[Bin]] instances defining signal space
+ */
 case class UWeight(bt: Tree[Bin]) extends Weight {
 
   val label = "Uniform"
@@ -97,10 +143,17 @@ case class UWeight(bt: Tree[Bin]) extends Weight {
 
 }
 
+/**
+ * [[Weight]] whose weights are defined by the user
+ *
+ * @param label
+ * @param wts list of doubles to serve as weights
+ */
 case class CustomWeight(label: String, wts: List[Double]) extends Weight {
   val weights = Weight.testWeights(label, wts)
 }
 
+/** Companion object to [[Weight]] trait. */
 object Weight {
 
   /**
@@ -155,28 +208,6 @@ object Weight {
 
 
     helper(newW.reverse, oldW.reverse)
-  }
-
-  /**
-   * Multiplies the values in each row of a contingency table by a weight.
-   *
-   * The length of 'wts' should equal length of 't'. Note that after
-   * multiplication by the weight values the entries in the contingency table
-   * are rounded to the nearest integer.
-   *
-   * @param t A contingency table, as a matrix of integers.
-   * @param wts List of weights.
-   * @return The weighted contingency table, as a matrix of integers.
-   */
-  def weightSignalData[A: Numeric](
-      t: Vector[Vector[A]],
-      wts: List[Double]): Vector[Vector[Double]] = {
-
-    val n = implicitly[Numeric[A]]
-    import n.mkNumericOps
-    require(t.length == wts.length, "number of rows must equal number of weights")
-    t.indices.toVector map (v => t(v) map (x =>
-      x.toDouble * wts(v)))
   }
 
   /**

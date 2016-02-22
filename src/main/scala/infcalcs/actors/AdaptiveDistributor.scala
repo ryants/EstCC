@@ -1,11 +1,8 @@
 package infcalcs.actors
 
 import infcalcs.EstimateCC._
-import infcalcs.ParameterFuncs._
 import infcalcs._
 import infcalcs.exceptions._
-
-import scala.collection.mutable.{HashMap => MHashMap}
 
 /**
  * Created by ryansuderman on 9/18/15.
@@ -22,12 +19,19 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
 
   var numCalculators = 0
 
+  /**
+   * Tracks consecutive number of signal bins for which all mutual information
+   * estimates were biased (see [[stopCriterion]])
+   */
   var numConsecBiasedSigEst = 0
 
+  /** Tracks whether or not all mutual information estimates given some defined signal bins */
   var allBiased = true
 
+  /** Number of biased estimates per given some defined signal bins */
   var numBiasedPerBin = 0
 
+  /** Weight index of next calculation */
   def wtIndex = sent - (totalCalculations - weights.length)
 
   def receive = {
@@ -90,6 +94,9 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
     }
   }
 
+  /**
+   * Updates the number of signal bins for the next iteration of the adaptive control algorithm
+   */
   def updateSignalBins() = {
     allBiased = true
     numBiasedPerBin = 0
@@ -100,14 +107,19 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
     totalCalculations = totalCalculations + weights.length
   }
 
-  def stopCriterion() = {
+  /**
+   * Method for determining if the adaptive control algorithm has met its stop criterion
+   *
+   * @return
+   */
+  def stopCriterion(): Boolean = {
     //checks if incrementing signal bins is appropriate
     val nextSignalBins = EstimateMI.updateSigBinNumbers(calcConfig)(signalBins)
-    val binNumberIsNotAppropriate = !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (nextSignalBins,calcConfig.initResponseBins))
+    val binNumberIsNotAppropriate = !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (nextSignalBins, calcConfig.initResponseBins))
     val criterion = numConsecBiasedSigEst >= calcConfig.numParameters("numConsecBiasedSigEst").toInt ||
         binNumberIsNotAppropriate
 
-    if (EstCC.appConfig.verbose && criterion){
+    if (EstCC.appConfig.verbose && criterion) {
       println(s"Number of consecutive optimal estimates with lower total bins: ${numConsecBiasedSigEst}")
 
       if (!binNumberIsNotAppropriate) println(s"Signal bin limit has not been reached")

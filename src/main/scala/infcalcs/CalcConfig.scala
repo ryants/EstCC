@@ -1,12 +1,10 @@
 package infcalcs
 
-import java.util.Date
-
 /**
  * Created by ryansuderman on 9/9/15.
  */
 
-/** Companion object for [[CalcConfig]]*/
+/** Companion object for [[CalcConfig]] */
 object CalcConfig {
 
   /**
@@ -18,10 +16,7 @@ object CalcConfig {
   def apply(p: Parameters) = new CalcConfig(p)
 
   /**
-   * Default constructor
-   *
-   * Uses default [[Parameters]] and date as a seed for instantiating
-   * a new Mersenne Twister
+   * Constructor that uses the default parameters from [[InfConfig]]
    *
    * @return
    */
@@ -35,8 +30,6 @@ object CalcConfig {
  * @param parameters
  */
 class CalcConfig(val parameters: Parameters) {
-
-  def this() = this(InfConfig.defaultParameters)
 
   lazy val listParameters = parameters.listParams
   lazy val numParameters = parameters.numParams
@@ -60,7 +53,6 @@ class CalcConfig(val parameters: Parameters) {
   require(defRespVals || !listParameters("respBinSpacing").isEmpty)
   require(defSigVals || !listParameters("sigBinSpacing").isEmpty)
 
-  // Determine number of response bins if values not specified
   lazy val initResponseBins: NTuple[Int] = srParameters("responseValues") match {
     case None => listParameters("respBinSpacing").toVector map (_.toInt)
     case Some(x) => {
@@ -70,7 +62,6 @@ class CalcConfig(val parameters: Parameters) {
     }
   }
 
-  // Determine number of signal bins if values not specified
   lazy val initSignalBins: NTuple[Int] = srParameters("signalValues") match {
     case None => listParameters("sigBinSpacing").toVector map (_.toInt)
     case Some(x) => {
@@ -84,7 +75,9 @@ class CalcConfig(val parameters: Parameters) {
 
   lazy val lowerAvgEntryLimit = numParameters("avgEntriesPerBin")
 
-  lazy val outF = if (stringParameters("filePrefix").trim.isEmpty) None else Some(stringParameters("filePrefix"))
+  lazy val outF =
+    if (stringParameters("filePrefix").trim.isEmpty) None
+    else Some(stringParameters("filePrefix"))
 
   lazy val outputRegData = boolParameters("outputRegData")
 

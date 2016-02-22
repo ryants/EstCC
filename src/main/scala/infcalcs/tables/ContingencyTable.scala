@@ -1,6 +1,12 @@
 package infcalcs.tables
 
-/** Class for building a contingency table from scratch. */
+/**
+ * Class for building a contingency table from scratch
+ *
+ * @param t two dimensional table of values
+ * @param n
+ * @tparam A
+ */
 class ContingencyTable[A](t: Vector[Vector[A]])(implicit n: Numeric[A]) extends CTable[A] {
 
   lazy val rows = table.length
@@ -8,6 +14,6 @@ class ContingencyTable[A](t: Vector[Vector[A]])(implicit n: Numeric[A]) extends 
 
   lazy val table = t
 
-  Predef.assert(table forall (x => x forall (y => n.gteq(y,n.zero))),this.toString)
+  require(table forall (x => x forall (y => n.gteq(y,n.zero))), "all entries greater than or equal to zero")
 
 }

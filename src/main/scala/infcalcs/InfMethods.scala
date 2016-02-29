@@ -98,7 +98,7 @@ object CTBuild {
   @tailrec
   def keyFromDimLengths(
       dLs: Vector[Int],
-      acc: Vector[NTuple[Int]]): Vector[NTuple[Int]] = {
+      acc: Vector[NTuple[Int]] = Vector(Vector())): Vector[NTuple[Int]] = {
     if (dLs.isEmpty) acc
     else {
       val newAcc = for {

@@ -19,6 +19,9 @@ case class Bin(index: Int, values: List[Double], lowerBound: Double) {
   lazy val count = values.length
   lazy val max = values.max
 
+  override def toString = s"(${lowerBound}, ${values.max}]"
+
+
 }
 
 /**

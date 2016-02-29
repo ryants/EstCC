@@ -10,6 +10,7 @@ object IOFile {
   import java.io.FileWriter
   import java.io.File
   import scala.io.Source.fromFile
+  import scala.language.implicitConversions
 
   /**
    * Loads a 2D data table from a file as a matrix of Doubles.
@@ -213,15 +214,15 @@ object IOFile {
       s: String): Unit = {
 
     val dLPair = (dPair._1 map (_.toList.toVector), dPair._2 map (_.toList.toVector))
-    val sIndices = CTBuild.keyFromDimLengths(dLPair._1 map (_.length), Vector(Vector()))
-    val rIndices = CTBuild.keyFromDimLengths(dLPair._2 map (_.length), Vector(Vector()))
+    val sIndices = CTBuild.keyFromDimLengths(dLPair._1 map (_.length))
+    val rIndices = CTBuild.keyFromDimLengths(dLPair._2 map (_.length))
 
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_delims.dat")))
 
     writer.write("# Signal Delimiters")
     writer.newLine()
     for (x <- sIndices) {
-      val delim = (0 until x.length) map (y => dLPair._1(y)(x(y)))
+      val delim: Vector[String] = x.indices.toVector map (y => dLPair._1(y)(x(y)).toString)
       val dString = delim.mkString("\\s")
       writer.write(s"${dString}\t${kPair._1(x)}")
       writer.newLine()

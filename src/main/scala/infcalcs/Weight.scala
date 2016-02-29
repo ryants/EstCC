@@ -222,7 +222,7 @@ object Weight {
    */
   def makeJoint(wv: Vector[Weight]): Weight = {
     val dimLengths = wv map (x => x.weights.length)
-    val i = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
+    val i = CTBuild.keyFromDimLengths(dimLengths)
 
     val wND: List[Double] =
       testWeights(

@@ -138,7 +138,7 @@ class DRData(calcConfig: CalcConfig)
   private def keys(
       trees: NTuple[Tree[Bin]]): Map[NTuple[Int], Int] = {
     val dimLengths = trees map (_.toList.length)
-    val vtups = CTBuild.keyFromDimLengths(dimLengths, Vector(Vector()))
+    val vtups = CTBuild.keyFromDimLengths(dimLengths)
     (vtups.indices map (x => (vtups(x), x))).toMap
   }
 

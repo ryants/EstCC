@@ -162,6 +162,24 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="infcalcs.MathFuncs#avg" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="avg(t:Seq[Double]):Double"></a>
+      <a id="avg(Seq[Double]):Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">avg</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.MathFuncs$@avg(t:Seq[Double]):Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Computes the mean of a sequence of doubles
+</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -243,18 +261,18 @@
               
         </dd></dl></div>
     </li><li name="infcalcs.MathFuncs#freqToProb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="freqToProb:TraversableOnce[Int]=&gt;TraversableOnce[Double]"></a>
-      <a id="freqToProb:(TraversableOnce[Int])⇒TraversableOnce[Double]"></a>
+      <a id="freqToProb[A](implicitn:Numeric[A]):TraversableOnce[A]=&gt;TraversableOnce[Double]"></a>
+      <a id="freqToProb[A](Numeric[A]):(TraversableOnce[A])⇒TraversableOnce[Double]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">freqToProb</span><span class="result">: (<span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="scala.Int">Int</span>]) ⇒ <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+        <span class="name">freqToProb</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="n">n: <span class="extype" name="scala.Numeric">Numeric</span>[<span class="extype" name="infcalcs.MathFuncs.freqToProb.A">A</span>]</span>)</span><span class="result">: (<span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="infcalcs.MathFuncs.freqToProb.A">A</span>]) ⇒ <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<span class="extype" name="scala.Double">Double</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.MathFuncs$@freqToProb:TraversableOnce[Int]=&gt;TraversableOnce[Double]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.MathFuncs$@freqToProb[A](implicitn:Numeric[A]):TraversableOnce[A]=&gt;TraversableOnce[Double]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -351,23 +369,6 @@ function for evaluating the CDF of the Gaussian at a point x.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.MathFuncs#logb" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="logb(b:Int):Double=&gt;Double"></a>
-      <a id="logb(Int):(Double)⇒Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">logb</span><span class="params">(<span name="b">b: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: (<span class="extype" name="scala.Double">Double</span>) ⇒ <span class="extype" name="scala.Double">Double</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.MathFuncs$@logb(b:Int):Double=&gt;Double" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Returns the base b logarithm of a number.</p>
     </li><li name="infcalcs.MathFuncs#meanAndConf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="meanAndConf(ls:Iterable[Double]):infcalcs.Pair[Double]"></a>
       <a id="meanAndConf(Iterable[Double]):Pair[Double]"></a>
@@ -439,23 +440,6 @@ around the mean assuming normally distributed data.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.MathFuncs#roundFrac" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="roundFrac(d:Double):String"></a>
-      <a id="roundFrac(Double):String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">roundFrac</span><span class="params">(<span name="d">d: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.MathFuncs$@roundFrac(d:Double):String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Returns double truncated to nearest hundredth</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

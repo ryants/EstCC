@@ -56,9 +56,9 @@ estimates for each attempted bin size, and
 <a href="#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">EstimateMI.genEstimatesMult</a> and finds the bin size and mutual information that
 maximizes the mutual information for the real but not the randomized
 datasets.</p><p>Other important methods include:
-- <a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
+- <a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
 tables
-- <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
+- <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
 regression.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
@@ -173,55 +173,81 @@ regression.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#buildRegData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData"></a>
-      <a id="buildRegData(CalcConfig)(Pair[NTuple[Int]],DRData,Int,Option[Weight]):RegData"></a>
+    </li><li name="infcalcs.EstimateMI#binNumberIsAppropriate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="binNumberIsAppropriate(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]]):Boolean"></a>
+      <a id="binNumberIsAppropriate(CalcConfig)(DRData,Pair[NTuple[Int]]):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">buildRegData</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span></span>, <span name="wts">wts: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a></span>
+        <span class="name">binNumberIsAppropriate</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateMI$@binNumberIsAppropriate(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]]):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Returns resampled and randomized contingency tables for estimation of MI.</p><div class="fullcomment"><div class="comment cmt"><p>Returns resampled and randomized contingency tables for estimation of MI.</p><p>The data structure returned by this function contains all of the
-information required to calculate the MI for a single pair of bin sizes,
-including contingency tables for randomly subsampled datasets (for
-unbiased estimation of MI at each bin size) and randomly shuffled
-contingency tables (for selection of the appropriate bin size).</p><p>Resampling of the dataset is performed using the <a href="#subSample(calcConfig:infcalcs.CalcConfig)(frac:Double,t:infcalcs.tables.ContTable,weights:Option[infcalcs.Weight]):infcalcs.tables.ConstructedTable" class="extmbr" name="infcalcs.EstimateMI#subSample">subSample</a> method.</p><p>The return value is a tuple containing:
-- a list of the inverse sample sizes for each resampling fraction. This
-list has length (repsPerFraction * number of fractions) + 1. The extra
-entry in the list (the + 1 in the expression) is due to the inclusion
-of the full dataset (with fraction 1.0) in the list of sampling
-fractions.
-- a list of contingency tables for subsamples of the data, length as for
-the inverse sample size list.
-- a list of lists of randomized contingency tables. Because there are
-numRandTables randomized tables used for every estimate, the outer list
-contains numRandTables entries; each entry consists of
-(repsPerFraction * number of fractions) + 1 randomized contingency
-tables.
-- a list of string labels for output and logging purposes, length as for
-the inverse sample size list.
-</p></div><dl class="paramcmts block"><dt class="param">binPair</dt><dd class="cmt"><p>Pair of tuples containing the numbers of row and column bins.</p></dd><dt class="param">data</dt><dd class="cmt"><p>The input/output dataset.</p></dd><dt class="param">seed</dt><dd class="cmt"><p>PRNG seed</p></dd><dt class="param">wts</dt><dd class="cmt"><p>An optional weights vector to be applied to the rows.</p></dd><dt>returns</dt><dd class="cmt"><p>(inverse sample sizes, CTs, randomized CTs, labels)</p></dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#calcMultRegs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])"></a>
-      <a id="calcMultRegs(CalcConfig)(RegData):(SLR,List[Option[SLR]])"></a>
+      <p class="shortcomment cmt">Checks that there are fewer (or an equal number of) bins than nonzero
+<a href="CalcConfig.html#lowerAvgEntryLimit:Double" class="extmbr" name="infcalcs.CalcConfig#lowerAvgEntryLimit">CalcConfig.lowerAvgEntryLimit</a> for the lowest fraction of jackknifed
+data in both dimensions, OR checks that the number of unique values in
+each dimension is lower than the number of bins in the respective dimensions
+</p>
+    </li><li name="infcalcs.EstimateMI#buildRegData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)"></a>
+      <a id="buildRegData(CalcConfig)(Pair[NTuple[Int]],DRData,Option[Weight]):(RegData,RegDataRand)"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">calcMultRegs</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="r">r: <a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a></span>)</span><span class="result">: (<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>]])</span>
+        <span class="name">buildRegData</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="wts">wts: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result">: (<a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a>, <a href="RegDataRand.html" class="extype" name="infcalcs.RegDataRand">RegDataRand</a>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateMI$@buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns resampled and randomized contingency tables for estimation of MI.</p><div class="fullcomment"><div class="comment cmt"><p>Returns resampled and randomized contingency tables for estimation of MI.</p><p>The data structures returned by this function contains all of the
+information required to calculate the MI for a single pair of bin sizes,
+including contingency tables for randomly subsampled datasets (for
+unbiased estimation of MI at each bin size) and randomly shuffled
+contingency tables (for selection of the appropriate bin size).</p><p>Resampling of the dataset is performed using the <a href="#resample(size:Int,rows:Int,cols:Int,t:infcalcs.Tree[infcalcs.CtPos]):infcalcs.tables.ContingencyTable[Int]" class="extmbr" name="infcalcs.EstimateMI#resample">resample</a> method.
+</p></div><dl class="paramcmts block"><dt class="param">binPair</dt><dd class="cmt"><p>Pair of tuples containing the numbers of row and column bins.</p></dd><dt class="param">data</dt><dd class="cmt"><p>The input/output dataset.</p></dd><dt class="param">wts</dt><dd class="cmt"><p>An optional weights vector to be applied to the rows.</p></dd><dt>returns</dt><dd class="cmt"><p>(<a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a>, <a href="RegDataRand.html" class="extype" name="infcalcs.RegDataRand">RegDataRand</a>)</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateMI#buildTableWithWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="buildTableWithWeight(data:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],rand:Boolean):infcalcs.tables.CTable[Double]"></a>
+      <a id="buildTableWithWeight(DRData,Pair[NTuple[Int]],Option[Weight],Boolean):CTable[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">buildTableWithWeight</span><span class="params">(<span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="wts">wts: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="rand">rand: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateMI$@buildTableWithWeight(data:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],rand:Boolean):infcalcs.tables.CTable[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Builds a <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> with or without some specified weight
+</p><div class="fullcomment"><div class="comment cmt"><p>Builds a <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> with or without some specified weight
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>data points entered into table</p></dd><dt class="param">binPair</dt><dd class="cmt"><p>bins for data points</p></dd><dt class="param">wts</dt><dd class="cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> wrapped in Option monad</p></dd><dt class="param">rand</dt><dd class="cmt"><p>specifies if data should be shuffled to destroy information</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateMI#calcMultRegs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])"></a>
+      <a id="calcMultRegs(CalcConfig)((RegData,RegDataRand)):(SLR,List[Option[SLR]])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">calcMultRegs</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="r">r: (<a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a>, <a href="RegDataRand.html" class="extype" name="infcalcs.RegDataRand">RegDataRand</a>)</span>)</span><span class="result">: (<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>]])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateMI$@calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -230,29 +256,9 @@ subsampled or randomized dataset vs. the inverse sample size. Returns
 results as a tuple: the first entry in the tuple contains the regression
 line (as an instance of <a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>) for the original dataset; the second
 entry in the tuple contains a list of regression lines (<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a> objects),
-one for each of numRandTables rounds of randomization. The regression
-lines for the randomized datasets are obtained by calling <a href="#calcRandRegs(r:infcalcs.RegData):List[Option[infcalcs.SLR]]" class="extmbr" name="infcalcs.EstimateMI#calcRandRegs">calcRandRegs</a>.
-Because linear regression may fail on the randomized data, some entries in
-the list may be None.
-</p></div><dl class="paramcmts block"><dt class="param">r</dt><dd class="cmt"><p>RegDataMult structure, eg as returned by <a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">buildRegData</a>.</p></dd><dt>returns</dt><dd class="cmt"><p>(regression on original data, list of regressions on random data)</p></dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#calcRandRegs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="calcRandRegs(r:infcalcs.RegData):List[Option[infcalcs.SLR]]"></a>
-      <a id="calcRandRegs(RegData):List[Option[SLR]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">calcRandRegs</span><span class="params">(<span name="r">r: <a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a></span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@calcRandRegs(r:infcalcs.RegData):List[Option[infcalcs.SLR]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Calculates regression model for randomized data.</p><div class="fullcomment"><div class="comment cmt"><p>Calculates regression model for randomized data.</p><p>Note Option monad present to accommodate failed intercept calculations.
-</p></div><dl class="paramcmts block"><dt class="param">r</dt><dd class="cmt"><p>(inverse sample sizes, CTs, randomized CTs, labels)</p></dd><dt>returns</dt><dd class="cmt"><p>Regression line, None if regression failed.</p></dd></dl></div>
+one for each of numRandTables rounds of randomization. Because linear
+regression may fail on the randomized data, some entries in the list may be None.
+</p></div><dl class="paramcmts block"><dt class="param">r</dt><dd class="cmt"><p>(<a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a>, <a href="RegDataRand.html" class="extype" name="infcalcs.RegDataRand">RegDataRand</a>) structure as returned by <a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">buildRegData</a>.</p></dd><dt>returns</dt><dd class="cmt"><p>(regression on original data, list of regressions on random data)</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -311,27 +317,27 @@ the list may be None.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="infcalcs.EstimateMI#finalEstimation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalEstimation(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight])(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
-      <a id="finalEstimation(Pair[NTuple[Int]],DRData,Int,Option[Weight])(CalcConfig):Unit"></a>
+      <a id="finalEstimation(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight])(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
+      <a id="finalEstimation(Pair[NTuple[Int]],DRData,Option[Weight])(CalcConfig):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">finalEstimation</span><span class="params">(<span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span></span>, <span name="wts">wts: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">finalEstimation</span><span class="params">(<span name="binPair">binPair: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="wts">wts: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@finalEstimation(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight])(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateMI$@finalEstimation(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight])(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Takes the pair of n-dimensional bin number vectors resulting in maximal
 mutual information in order to estimate all relevant quantities as defined
-in <a href="tables/ContTable.html#ctVals:Map[String,Double]" class="extmbr" name="infcalcs.tables.ContTable#ctVals">tables.ContTable.ctVals</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Takes the pair of n-dimensional bin number vectors resulting in maximal
+in <a href="tables/CTable.html#ctVals:Map[String,Double]" class="extmbr" name="infcalcs.tables.CTable#ctVals">tables.CTable.ctVals</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Takes the pair of n-dimensional bin number vectors resulting in maximal
 mutual information in order to estimate all relevant quantities as defined
-in <a href="tables/ContTable.html#ctVals:Map[String,Double]" class="extmbr" name="infcalcs.tables.ContTable#ctVals">tables.ContTable.ctVals</a>.  These data are outputted to an information file
-</p></div><dl class="paramcmts block"><dt class="param">binPair</dt><dd class="cmt"><p>pair of n-dimensional bin number vectors</p></dd><dt class="param">data</dt><dd class="cmt"><p><a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></p></dd><dt class="param">seed</dt><dd class="cmt"><p>initializes PRNG</p></dd><dt class="param">wts</dt><dd class="cmt"><p>optional <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> depending on which weight resulted in
+in <a href="tables/CTable.html#ctVals:Map[String,Double]" class="extmbr" name="infcalcs.tables.CTable#ctVals">tables.CTable.ctVals</a>.  These data are outputted to an information file
+</p></div><dl class="paramcmts block"><dt class="param">binPair</dt><dd class="cmt"><p>pair of n-dimensional bin number vectors</p></dd><dt class="param">data</dt><dd class="cmt"><p><a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></p></dd><dt class="param">wts</dt><dd class="cmt"><p>optional <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> depending on which weight resulted in
            maximal mutual information</p></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
@@ -376,16 +382,16 @@ in <a href="tables/ContTable.html#ctVals:Map[String,Double]" class="extmbr" name
 which define the response bin spacing and the number of biased calculations before
 reaching a stop criterion.  For each set of bin sizes given, this function:
 - builds the randomized and resampled contingency tables by calling
-<a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">buildRegData</a>
+<a href="#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">buildRegData</a>
 - estimates the unbiased mutual information for the resampled and/or
-randomized datasets by linear regression, by calling <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">calcMultRegs</a>
+randomized datasets by linear regression, by calling <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">calcMultRegs</a>
 - extracts the intercepts and confidence intervals from the regression
 results by calling <a href="#multIntercepts(regs:(infcalcs.SLR,List[Option[infcalcs.SLR]])):infcalcs.Estimates" class="extmbr" name="infcalcs.EstimateMI#multIntercepts">multIntercepts</a>.
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+</p></div><dl class="paramcmts block"><dt class="param">pl</dt><dd class="cmt"><p><a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></p></dd><dt class="param">binPair</dt><dd class="cmt"><p>specified bin configuration</p></dd><dt class="param">wts</dt><dd class="cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> wrapped in Option</p></dd><dt class="param">numConsecRandPos</dt><dd class="cmt"><p>tracks number of biased estimates</p></dd><dt class="param">res</dt><dd class="cmt"><p>results</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@tailrec</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#genEstimatesMultImp" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="infcalcs.EstimateMI#genEstimatesMultImp" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="genEstimatesMultImp(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],wts:Option[infcalcs.Weight]):Vector[infcalcs.EstTuple]"></a>
       <a id="genEstimatesMultImp(CalcConfig)(DRData,NTuple[Int],Option[Weight]):Vector[EstTuple]"></a>
       <h4 class="signature">
@@ -401,9 +407,8 @@ results by calling <a href="#multIntercepts(regs:(infcalcs.SLR,List[Option[infca
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">An imperative equivalent to <a href="#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a></p><div class="fullcomment"><div class="comment cmt"><p>An imperative equivalent to <a href="#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a></p><p>Not currently used in code, but could be useful for outputting information
-on the fly in verbose mode
-</p></div></div>
+      <p class="shortcomment cmt">An imperative alternative to <a href="#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a>
+</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -438,25 +443,6 @@ on the fly in verbose mode
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#invSS" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="invSS[T](f:Double,ds:Vector[T]):Double"></a>
-      <a id="invSS[T](Double,Vector[T]):Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">invSS</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Double">Double</span></span>, <span name="ds">ds: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="infcalcs.EstimateMI.invSS.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@invSS[T](f:Double,ds:Vector[T]):Double" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Calculates the inverse sample size for subsampling data
-</p><div class="fullcomment"><div class="comment cmt"><p>Calculates the inverse sample size for subsampling data
-</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>fraction of data to sample</p></dd><dt class="param">ds</dt><dd class="cmt"><p>data set to sample from</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -500,80 +486,6 @@ data sets
                 <span class="name">@tailrec</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#isUniform" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="isUniform(t:Vector[Vector[Int]]):Boolean"></a>
-      <a id="isUniform(Vector[Vector[Int]]):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isUniform</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@isUniform(t:Vector[Vector[Int]]):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Checks if each row vector in a matrix has the same sum.</p><div class="fullcomment"><div class="comment cmt"><p>Checks if each row vector in a matrix has the same sum.</p><p>Used for testing contingency tables to see if every input (row) value has
-the same number of observations associated with it.
-</p></div></div>
-    </li><li name="infcalcs.EstimateMI#makeUniform" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="makeUniform(t:Vector[Vector[Int]]):Vector[Vector[Int]]"></a>
-      <a id="makeUniform(Vector[Vector[Int]]):Vector[Vector[Int]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeUniform</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@makeUniform(t:Vector[Vector[Int]]):Vector[Vector[Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Re-weights rows in a matrix to have approximately equal sums across rows.</p><div class="fullcomment"><div class="comment cmt"><p>Re-weights rows in a matrix to have approximately equal sums across rows.</p><p>Empty rows with no observations (sums of 0) remain empty after weighting.
-</p></div><dl class="paramcmts block"><dt class="param">t</dt><dd class="cmt"><p>A 2D matrix of Ints (e.g., a contingency table)</p></dd><dt>returns</dt><dd class="cmt"><p>A re-weighted matrix.</p></dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#moreRespBinsLeft" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="moreRespBinsLeft(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,respBins:infcalcs.NTuple[Int]):Boolean"></a>
-      <a id="moreRespBinsLeft(CalcConfig)(DRData,NTuple[Int]):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">moreRespBinsLeft</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="respBins">respBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@moreRespBinsLeft(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,respBins:infcalcs.NTuple[Int]):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Identical to <a href="#moreSigBinsLeft(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,sigBins:infcalcs.NTuple[Int]):Boolean" class="extmbr" name="infcalcs.EstimateMI#moreSigBinsLeft">moreSigBinsLeft</a> but for response bin space
-</p>
-    </li><li name="infcalcs.EstimateMI#moreSigBinsLeft" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="moreSigBinsLeft(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,sigBins:infcalcs.NTuple[Int]):Boolean"></a>
-      <a id="moreSigBinsLeft(CalcConfig)(DRData,NTuple[Int]):Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">moreSigBinsLeft</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="sigBins">sigBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@moreSigBinsLeft(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,sigBins:infcalcs.NTuple[Int]):Boolean" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Checks that there are fewer (or an equal number of) bins than unique data entries
-for the lowest fraction of jackknifed data in each dimension
-</p>
     </li><li name="infcalcs.EstimateMI#multIntercepts" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="multIntercepts(regs:(infcalcs.SLR,List[Option[infcalcs.SLR]])):infcalcs.Estimates"></a>
       <a id="multIntercepts((SLR,List[Option[SLR]])):Estimates"></a>
@@ -593,7 +505,7 @@ for the lowest fraction of jackknifed data in each dimension
       <p class="shortcomment cmt">Returns intercepts and confidence intervals given multiple regression data.</p><div class="fullcomment"><div class="comment cmt"><p>Returns intercepts and confidence intervals given multiple regression data.</p><p>The list of intercepts and intervals returned will be the same length as
 the list of regression lines forming the second entry in the tuple
 passed as an argument.
-</p></div><dl class="paramcmts block"><dt class="param">regs</dt><dd class="cmt"><p>(regression, list of regressions), eg, as from <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">calcMultRegs</a></p></dd><dt>returns</dt><dd class="cmt"><p>list of (intercept, intercept 95% conf interval)</p></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">regs</dt><dd class="cmt"><p>(regression, list of regressions), as from <a href="#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">calcMultRegs</a></p></dd><dt>returns</dt><dd class="cmt"><p><a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a> instance</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -661,34 +573,34 @@ passed as an argument.
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Returns the MI estimate that is maximized for real but not randomized data.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the MI estimate that is maximized for real but not randomized data.</p><p>Takes a list of MI estimates for a range of bin sizes, extracted by
+      <p class="shortcomment cmt">Returns the MI estimate that is maximized for real but not randomized data.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the MI estimate that is maximized for real but not randomized data.</p><p>Takes a list of <a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a> instances for a range of bin sizes, extracted by
 linear regression for both real and randomized data (eg, as provided by
 <a href="#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">genEstimatesMult</a>) and finds the bin size/MI combination that maximizes
 the mutual information while still maintaining the estimated MI of the
 randomized data below the cutoff specified by the &quot;cutoffValue&quot;
 parameter.
-</p></div><dl class="paramcmts block"><dt class="param">d</dt><dd class="cmt"><p>List of (bin size combo, list of (intercept, conf. int.))</p></dd><dt>returns</dt><dd class="cmt"><p>Entry from the list d the optimizes the MI estimate.</p></dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#subSample" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="subSample(calcConfig:infcalcs.CalcConfig)(frac:Double,t:infcalcs.tables.ContTable,weights:Option[infcalcs.Weight]):infcalcs.tables.ConstructedTable"></a>
-      <a id="subSample(CalcConfig)(Double,ContTable,Option[Weight]):ConstructedTable"></a>
+</p></div><dl class="paramcmts block"><dt class="param">d</dt><dd class="cmt"><p>vector of <a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a> instances</p></dd><dt>returns</dt><dd class="cmt"><p>Entry from the list d the optimizes the MI estimate.</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateMI#resample" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="resample(size:Int,rows:Int,cols:Int,t:infcalcs.Tree[infcalcs.CtPos]):infcalcs.tables.ContingencyTable[Int]"></a>
+      <a id="resample(Int,Int,Int,Tree[CtPos]):ContingencyTable[Int]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">subSample</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="frac">frac: <span class="extype" name="scala.Double">Double</span></span>, <span name="t">t: <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">ContTable</a></span>, <span name="weights">weights: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a></span>
+        <span class="name">resample</span><span class="params">(<span name="size">size: <span class="extype" name="scala.Int">Int</span></span>, <span name="rows">rows: <span class="extype" name="scala.Int">Int</span></span>, <span name="cols">cols: <span class="extype" name="scala.Int">Int</span></span>, <span name="t">t: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="CtPos.html" class="extype" name="infcalcs.CtPos">CtPos</a>]</span>)</span><span class="result">: <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">ContingencyTable</a>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@subSample(calcConfig:infcalcs.CalcConfig)(frac:Double,t:infcalcs.tables.ContTable,weights:Option[infcalcs.Weight]):infcalcs.tables.ConstructedTable" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateMI$@resample(size:Int,rows:Int,cols:Int,t:infcalcs.Tree[infcalcs.CtPos]):infcalcs.tables.ContingencyTable[Int]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Resample a fraction of data by modifying the contingency table.</p><div class="fullcomment"><div class="comment cmt"><p>Resample a fraction of data by modifying the contingency table.</p><p>Resamples the data by decrementing (nonzero) counts in the contingency table at
-randomly chosen indices. After shrinking the number of observations, the
-rows are re-weighted to be uniform using <a href="#makeUniform(t:Vector[Vector[Int]]):Vector[Vector[Int]]" class="extmbr" name="infcalcs.EstimateMI#makeUniform">EstimateMI.makeUniform</a>.
-Finally, an optional weights vector is applied to the rows.
-</p></div><dl class="paramcmts block"><dt class="param">frac</dt><dd class="cmt"><p>Fraction of the observations to keep in the resampled table.</p></dd><dt class="param">t</dt><dd class="cmt"><p>The contingency table to be resampled.</p></dd><dt class="param">weights</dt><dd class="cmt"><p>Weights to be applied to rows after resampling (if any).</p></dd><dt>returns</dt><dd class="cmt"><p>The resampled contingency table.</p></dd></dl></div>
+      <p class="shortcomment cmt">Generates a new <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> from a <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="CtPos.html" class="extype" name="infcalcs.CtPos">CtPos</a> instances.</p><div class="fullcomment"><div class="comment cmt"><p>Generates a new <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> from a <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="CtPos.html" class="extype" name="infcalcs.CtPos">CtPos</a> instances.</p><p>This function is a way to generate integer-based <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> instances
+with a specified number of entries, given some probability distribution over
+two dimensions.  Generally the probability distribution is obtained from a previous
+<a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a> that was created using the <a href="CTBuild$.html#buildTable(data:infcalcs.DRData,nb:infcalcs.Pair[infcalcs.NTuple[Int]],randomize:Boolean):infcalcs.tables.CTable[Int]" class="extmbr" name="infcalcs.CTBuild#buildTable">CTBuild.buildTable</a> method.
+</p></div><dl class="paramcmts block"><dt class="param">size</dt><dd class="cmt"><p>total number of entries in the new <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a></p></dd><dt class="param">rows</dt><dd class="cmt"><p>rows in the new <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a></p></dd><dt class="param">cols</dt><dd class="cmt"><p>columns in the new <a href="tables/ContingencyTable.html" class="extype" name="infcalcs.tables.ContingencyTable">infcalcs.tables.ContingencyTable</a></p></dd><dt class="param">t</dt><dd class="cmt"><p><a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="CtPos.html" class="extype" name="infcalcs.CtPos">CtPos</a> instances that defines the probability distribution</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -723,26 +635,6 @@ Finally, an optional weights vector is applied to the rows.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateMI#updateIndices" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="updateIndices(indices:IndexedSeq[(infcalcs.Pair[Int],Int)],index:Int):IndexedSeq[(infcalcs.Pair[Int],Int)]"></a>
-      <a id="updateIndices(IndexedSeq[(Pair[Int],Int)],Int):IndexedSeq[(Pair[Int],Int)]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">updateIndices</span><span class="params">(<span name="indices">indices: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[(<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Int">Int</span>], <span class="extype" name="scala.Int">Int</span>)]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[(<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Int">Int</span>], <span class="extype" name="scala.Int">Int</span>)]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateMI$@updateIndices(indices:IndexedSeq[(infcalcs.Pair[Int],Int)],index:Int):IndexedSeq[(infcalcs.Pair[Int],Int)]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Updates a data structure tracking non-zero values in a <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a>
-</p><div class="fullcomment"><div class="comment cmt"><p>Updates a data structure tracking non-zero values in a <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a>
-</p></div><dl class="paramcmts block"><dt class="param">indices</dt><dd class="cmt"><p>a Seq of <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> coordinates and the associated value</p></dd><dt class="param">index</dt><dd class="cmt"><p>corresponds to an element of indices whose value is to be
-             decreased by one or removed if less than 1</p></dd><dt>returns</dt><dd class="cmt"><p>an updated Seq</p></dd></dl></div>
     </li><li name="infcalcs.EstimateMI#updateRespBinNumbers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="updateRespBinNumbers(calcConfig:infcalcs.CalcConfig)(respBinTuple:infcalcs.NTuple[Int]):infcalcs.NTuple[Int]"></a>
       <a id="updateRespBinNumbers(CalcConfig)(NTuple[Int]):NTuple[Int]"></a>

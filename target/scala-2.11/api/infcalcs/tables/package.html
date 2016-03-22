@@ -66,57 +66,41 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="infcalcs.tables.ConstructedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ConstructedTableextendsContTable"></a>
-      <a id="ConstructedTable:ConstructedTable"></a>
+              <ol><li name="infcalcs.tables.CTable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CTable[A]extendsAnyRef"></a>
+      <a id="CTable[A]:CTable[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ConstructedTable.html"><span class="name">ConstructedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.tables.ContTable">ContTable</a></span>
+        <a href="CTable.html"><span class="name">CTable</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#infcalcs.tables.package@ConstructedTableextendsContTable" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Class for building a contingency table from scratch.</p>
-    </li><li name="infcalcs.tables.ContTable" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="ContTableextendsAnyRef"></a>
-      <a id="ContTable:ContTable"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ContTable.html"><span class="name">ContTable</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#infcalcs.tables.package@ContTableextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../index.html#infcalcs.tables.package@CTable[A]extendsAnyRef" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">A mixin for implementing contingency tables.</p>
-    </li><li name="infcalcs.tables.ImportedTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ImportedTableextendsContTable"></a>
-      <a id="ImportedTable:ImportedTable"></a>
+    </li><li name="infcalcs.tables.ContingencyTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ContingencyTable[A]extendsCTable[A]"></a>
+      <a id="ContingencyTable[A]:ContingencyTable[A]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="ImportedTable.html"><span class="name">ImportedTable</span></a><span class="result"> extends <a href="ContTable.html" class="extype" name="infcalcs.tables.ContTable">ContTable</a></span>
+        <a href="ContingencyTable.html"><span class="name">ContingencyTable</span></a><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="infcalcs.tables.ContingencyTable.A">A</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#infcalcs.tables.package@ImportedTableextendsContTable" title="Permalink" target="_top">
+      <a href="../../index.html#infcalcs.tables.package@ContingencyTable[A]extendsCTable[A]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Class for reading contingency tables from a file.</p>
+      <p class="shortcomment cmt">Class for building a contingency table from scratch
+</p>
     </li></ol>
             </div>
 

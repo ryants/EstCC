@@ -52,32 +52,32 @@ particular estimates of mutual information and channel capacity for
 continuous variables.</p><p>For information on building, testing, and using the code, see the README
 file.</p><p>The steps in the channel capacity calculation are outlined below. For more
 details on the theory underlying the approach taken, see the supplementary
-information for Suderman, Bachman et al. (2015).</p><p>- In the top-level main function, <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">infcalcs.EstCC</a>, command-line arguments are
+information for Suderman, Bachman et al. (2016).</p><p>- In the top-level main function, <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">infcalcs.EstCC</a>, command-line arguments are
 parsed and the data and configuration parameters are loaded into a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">infcalcs.CalcConfig</a>
 object.</p><p>- Because the channel capacity depends on the input distribution, various
 input weights are generated to determine which input weightings yield the
 highest mutual information between input and output. Input weights are
-generated using the functions <a href="EstimateCC$.html#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">infcalcs.EstimateCC.uniWeight</a> and
-<a href="EstimateCC$.html#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">infcalcs.EstimateCC.biWeight</a>, which allow weighting of the input distribution
+generated using the functions <a href="EstimateCC$.html#genUnimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.GWeight]" class="extmbr" name="infcalcs.EstimateCC#genUnimodalWeights">infcalcs.EstimateCC.genUnimodalWeights</a> and
+<a href="EstimateCC$.html#genBimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.BWeight]" class="extmbr" name="infcalcs.EstimateCC#genBimodalWeights">infcalcs.EstimateCC.genBimodalWeights</a>, which allow weighting of the input distribution
 according to unimodal and bimodal Gaussian distributions, respectively,
 as well as discrete piecewise distributions with uniform probability using
-the <a href="EstimateCC$.html#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">infcalcs.EstimateCC.pwWeight</a>.</p><p>- Mutual information is calculated for each proposed input weighting
+the <a href="EstimateCC$.html#genPieceWiseUniformWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin]):List[infcalcs.PWeight]" class="extmbr" name="infcalcs.EstimateCC#genPieceWiseUniformWeights">infcalcs.EstimateCC.genPieceWiseUniformWeights</a>.</p><p>- Mutual information is estimated for each proposed input weighting
 by the function <a href="EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">infcalcs.EstimateMI.genEstimatesMult</a>.</p><p>- For each weighting, the algorithm tries a wide variety of bin
 numbers/sizes to arrive at an estimate that is not biased by the bin size.</p><p>- For each unique combination of input/output bin sizes, the algorithm
 builds the contingency tables for the raw data as well as for randomly
 selected subsamples of the data. These contingency tables are generated
-by <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">infcalcs.EstimateMI.buildRegData</a>.</p><p>- After calculating the mutual information for each contingency table
-(implemented in <a href="tables/ContTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.tables.ContTable#mutualInformation">infcalcs.tables.ContTable.mutualInformation</a>) the unbiased mutual
+by <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">infcalcs.EstimateMI.buildRegData</a>.</p><p>- After calculating the mutual information for each contingency table
+(implemented in <a href="tables/CTable.html#mutualInformation:Double" class="extmbr" name="infcalcs.tables.CTable#mutualInformation">infcalcs.tables.CTable.mutualInformation</a>) the unbiased mutual
 information is estimated by performing a linear regression of the mutual
 information of each subsampled dataset against the inverse sample size;
 the intercept of the linear regression is the unbiased mutual
 information estimate. The regression calculation is performed by
-<a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
+<a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
 of MI, identical MI calculations are performed on shuffled datasets of
 varying sizes. The function <a href="EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">infcalcs.EstimateMI.optMIMult</a> then selects the MI
 estimate that maximizes the MI estimate for real data while keeping the
 the MI estimate for randomized data below the cutoff specified in the
-configuration.</p><p>- <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">infcalcs.EstimateCC.estimateCC</a> then reports the channel capacity estimate
+configuration.</p><p>- <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">infcalcs.EstimateCC.estimateCC</a> then reports the channel capacity estimate
 as the maximum mutual information estimate obtained for all of the input
 weightings tested.
 </p></div><div class="toggleContainer block">
@@ -121,7 +121,48 @@ weightings tested.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="infcalcs.CLOpts" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="infcalcs.BWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BWeightextendsWeightwithProductwithSerializable"></a>
+      <a id="BWeight:BWeight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="BWeight.html"><span class="name">BWeight</span></a><span class="params">(<span name="p1">p1: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="p2">p2: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="w">w: <span class="extype" name="scala.Double">Double</span></span>, <span name="bt">bt: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result"> extends <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@BWeightextendsWeightwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are bimodal and derived from the sum of two Gaussian
+probability distributions
+</p><div class="fullcomment"><div class="comment cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are bimodal and derived from the sum of two Gaussian
+probability distributions
+</p></div><dl class="paramcmts block"><dt class="param">p1</dt><dd class="cmt"><p>(mu, sigma) for the first Gaussian</p></dd><dt class="param">p2</dt><dd class="cmt"><p>(mu, sigma) for the second Gaussian</p></dd><dt class="param">w</dt><dd class="cmt"><p>relative weight of the first Gaussian to the second (must be between 0 and 1)</p></dd><dt class="param">bt</dt><dd class="cmt"><p><a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances defining signal space</p></dd></dl></div>
+    </li><li name="infcalcs.Bin" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BinextendsProductwithSerializable"></a>
+      <a id="Bin:Bin"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Bin.html"><span class="name">Bin</span></a><span class="params">(<span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="values">values: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="lowerBound">lowerBound: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@BinextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class representing a discrete entity in one dimension of a contingency table,
+(equivalent to a histogram bin).</p><div class="fullcomment"><div class="comment cmt"><p>Case class representing a discrete entity in one dimension of a contingency table,
+(equivalent to a histogram bin).
+</p></div><dl class="paramcmts block"><dt class="param">index</dt><dd class="cmt"><p>bin number</p></dd><dt class="param">values</dt><dd class="cmt"><p>list of entries in bin</p></dd><dt class="param">lowerBound</dt><dd class="cmt"><p>bin can contain values above this count (non-inclusive)</p></dd></dl></div>
+    </li><li name="infcalcs.CLOpts" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="CLOptsextendsAnyRef"></a>
       <a id="CLOpts:CLOpts"></a>
       <h4 class="signature">
@@ -158,6 +199,24 @@ weightings tested.
       <p class="shortcomment cmt">Class passed to numerous functions and methods that contains configuration
 information for channel capacity estimation
 </p>
+    </li><li name="infcalcs.Calculation" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CalculationextendsProductwithSerializable"></a>
+      <a id="Calculation:Calculation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Calculation.html"><span class="name">Calculation</span></a><span class="params">(<span name="pairBinTuple">pairBinTuple: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="mi">mi: <span class="extype" name="scala.Double">Double</span></span>, <span name="randMi">randMi: <span class="extype" name="scala.Double">Double</span></span>, <span name="unBiased">unBiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@CalculationextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class for storing calculations without regression estimator
+</p>
     </li><li name="infcalcs.Config" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ConfigextendsProductwithSerializable"></a>
       <a id="Config:Config"></a>
@@ -167,7 +226,7 @@ information for channel capacity estimation
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Config.html"><span class="name">Config</span></a><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Config.html"><span class="name">Config</span></a><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="noReg">noReg: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@ConfigextendsProductwithSerializable" title="Permalink" target="_top">
@@ -178,6 +237,46 @@ information for channel capacity estimation
 command line options for channel capacity calculation.</p><div class="fullcomment"><div class="comment cmt"><p>Case class whose fields comprise the required and optional
 command line options for channel capacity calculation.</p><p>For more details see the usage text with the flag &quot;--help&quot;
 </p></div></div>
+    </li><li name="infcalcs.CtPos" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CtPosextendsProductwithSerializable"></a>
+      <a id="CtPos:CtPos"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CtPos.html"><span class="name">CtPos</span></a><span class="params">(<span name="coord">coord: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="cumProb">cumProb: <span class="extype" name="scala.Double">Double</span></span>, <span name="lowerBound">lowerBound: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@CtPosextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class that contains the cumulative probability of a particular location in a
+contingency table
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains the cumulative probability of a particular location in a
+contingency table
+</p></div><dl class="paramcmts block"><dt class="param">coord</dt><dd class="cmt"><p>(row,col) location in a contingency table</p></dd><dt class="param">cumProb</dt><dd class="cmt"><p>cumulative probability</p></dd><dt class="param">lowerBound</dt><dd class="cmt"><p>lower bound on probability (non-inclusive)</p></dd></dl></div>
+    </li><li name="infcalcs.CustomWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CustomWeightextendsWeightwithProductwithSerializable"></a>
+      <a id="CustomWeight:CustomWeight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="CustomWeight.html"><span class="name">CustomWeight</span></a><span class="params">(<span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="wts">wts: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result"> extends <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@CustomWeightextendsWeightwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are defined by the user
+</p><div class="fullcomment"><div class="comment cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are defined by the user
+</p></div><dl class="paramcmts block"><dt class="param">wts</dt><dd class="cmt"><p>list of doubles to serve as weights</p></dd></dl></div>
     </li><li name="infcalcs.DRData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DRDataextendsAnyRef"></a>
       <a id="DRData:DRData"></a>
@@ -209,7 +308,7 @@ Vector would have elements of length 2.)
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="EstTuple.html"><span class="name">EstTuple</span></a><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a></span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="EstTuple.html"><span class="name">EstTuple</span></a><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@EstTupleextendsProductwithSerializable" title="Permalink" target="_top">
@@ -220,8 +319,8 @@ Vector would have elements of length 2.)
 particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
 </p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains all mutual information estimates for a
 particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
-</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd></dl></div>
-    </li><li name="infcalcs.Estimates" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl></div>
+    </li><li name="infcalcs.Estimates" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstimatesextendsProductwithSerializable"></a>
       <a id="Estimates:Estimates"></a>
       <h4 class="signature">
@@ -230,15 +329,35 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Estimates.html"><span class="name">Estimates</span></a><span class="params">(<span name="dataEstimate">dataEstimate: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Estimates.html"><span class="name">Estimates</span></a><span class="params">(<span name="dataEstimate">dataEstimate: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="coeffOfDetermination">coeffOfDetermination: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@EstimatesextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Case class denoting the actual mutual information estimate from the randomized estimates
-</p>
+      <p class="shortcomment cmt">Case class with the actual and randomized mutual information estimates.</p><div class="fullcomment"><div class="comment cmt"><p>Case class with the actual and randomized mutual information estimates.
+Also includes the coefficient of determination for the actual linear fit
+</p></div></div>
+    </li><li name="infcalcs.GWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="GWeightextendsWeightwithProductwithSerializable"></a>
+      <a id="GWeight:GWeight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="GWeight.html"><span class="name">GWeight</span></a><span class="params">(<span name="p">p: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="bt">bt: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result"> extends <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@GWeightextendsWeightwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are generated from a Gaussian probability distribution
+</p><div class="fullcomment"><div class="comment cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are generated from a Gaussian probability distribution
+</p></div><dl class="paramcmts block"><dt class="param">p</dt><dd class="cmt"><p>(mu, sigma) for calculating the Gaussian probability</p></dd><dt class="param">bt</dt><dd class="cmt"><p><a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances defining signal space</p></dd></dl></div>
     </li><li name="infcalcs.NTuple" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NTuple[T]=Vector[T]"></a>
       <a id="NTuple[T]:NTuple[T]"></a>
@@ -256,6 +375,45 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
       </a>
     </span>
       <p class="shortcomment cmt">An n-tuple (for clarity)</p>
+    </li><li name="infcalcs.Node" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Node[T]extendsTree[T]withProductwithSerializable"></a>
+      <a id="Node[T]:Node[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Node.html"><span class="name">Node</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="index">index: <span class="extype" name="scala.Int">Int</span></span>, <span name="value">value: <span class="extype" name="scala.Some">Some</span>[<span class="extype" name="infcalcs.Node.T">T</span>]</span>, <span name="left">left: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<span class="extype" name="infcalcs.Node.T">T</span>]</span>, <span name="right">right: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<span class="extype" name="infcalcs.Node.T">T</span>]</span>)</span><span class="result"> extends <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<span class="extype" name="infcalcs.Node.T">T</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@Node[T]extendsTree[T]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A node representing the head of a subtree in a binary tree.</p><div class="fullcomment"><div class="comment cmt"><p>A node representing the head of a subtree in a binary tree.
+</p></div><dl class="paramcmts block"><dt class="param">index</dt><dd class="cmt"><p>position in tree</p></dd><dt class="param">value</dt><dd class="cmt"><p>value of the <a href="Node.html" class="extype" name="infcalcs.Node">Node</a></p></dd><dt class="param">left</dt><dd class="cmt"><p>left sub<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a></p></dd><dt class="param">right</dt><dd class="cmt"><p>right sub <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a></p></dd></dl></div>
+    </li><li name="infcalcs.PWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="PWeightextendsWeightwithProductwithSerializable"></a>
+      <a id="PWeight:PWeight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PWeight.html"><span class="name">PWeight</span></a><span class="params">(<span name="b">b: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="bt">bt: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result"> extends <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@PWeightextendsWeightwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are uniformly distributed over interior bins,
+and exterior bins are weighted to be 0
+</p><div class="fullcomment"><div class="comment cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are uniformly distributed over interior bins,
+and exterior bins are weighted to be 0
+</p></div><dl class="paramcmts block"><dt class="param">b</dt><dd class="cmt"><p>(low, high) all bins below 'low' and above 'high' are weighted to 0</p></dd><dt class="param">bt</dt><dd class="cmt"><p><a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances defining signal space</p></dd></dl></div>
     </li><li name="infcalcs.Pair" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Pair[T]=(T,T)"></a>
       <a id="Pair[T]:Pair[T]"></a>
@@ -282,7 +440,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Parameters.html"><span class="name">Parameters</span></a><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="Parameters.html"><span class="name">Parameters</span></a><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="boolParams">boolParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@ParametersextendsProductwithSerializable" title="Permalink" target="_top">
@@ -292,8 +450,8 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
       <p class="shortcomment cmt">Case class holding the calculation parameters as denoted by the <a href="InfConfig$.html" class="extype" name="infcalcs.InfConfig">InfConfig</a>
 object and optional paramter file.</p><div class="fullcomment"><div class="comment cmt"><p>Case class holding the calculation parameters as denoted by the <a href="InfConfig$.html" class="extype" name="infcalcs.InfConfig">InfConfig</a>
 object and optional paramter file.
-</p></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl></div>
-    </li><li name="infcalcs.RegData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+</p></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">boolParams</dt><dd class="cmt"><p>parameters that have boolean values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl></div>
+    </li><li name="infcalcs.RegData" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="RegDataextendsProductwithSerializable"></a>
       <a id="RegData:RegData"></a>
       <h4 class="signature">
@@ -302,18 +460,35 @@ object and optional paramter file.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RegData.html"><span class="name">RegData</span></a><span class="params">(<span name="iss">iss: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="subContTables">subContTables: <span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]</span>, <span name="randContTableVect">randContTableVect: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]]</span>, <span name="labels">labels: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RegData.html"><span class="name">RegData</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@RegDataextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Case class holding all the necessary <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> data for performing the linear
-regression estimates with an arbitrary numbers of randomizations
-</p><div class="fullcomment"><div class="comment cmt"><p>Case class holding all the necessary <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> data for performing the linear
-regression estimates with an arbitrary numbers of randomizations
-</p></div><dl class="paramcmts block"><dt class="param">iss</dt><dd class="cmt"><p>list of inverse sample sizes</p></dd><dt class="param">subContTables</dt><dd class="cmt"><p>subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vector</p></dd><dt class="param">randContTableVect</dt><dd class="cmt"><p>vector of randomized subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vectors</p></dd></dl></div>
+      <p class="shortcomment cmt">Case class holding all the necessary <a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a> data for performing the linear
+regression estimates
+</p>
+    </li><li name="infcalcs.RegDataRand" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RegDataRandextendsProductwithSerializable"></a>
+      <a id="RegDataRand:RegDataRand"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RegDataRand.html"><span class="name">RegDataRand</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@RegDataRandextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Same as <a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a> but holds arbitrary numbers of <a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a> instances
+for randomization purposes
+</p>
     </li><li name="infcalcs.SLR" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SLRextendsAnyRef"></a>
       <a id="SLR:SLR"></a>
@@ -334,27 +509,90 @@ regression estimates with an arbitrary numbers of randomizations
 regression line, along with estimates of the standard error and 95%
 confidence interval of both the slope and the intercept.
 </p></div></div>
-    </li><li name="infcalcs.Weight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="WeightextendsProductwithSerializable"></a>
-      <a id="Weight:Weight"></a>
+    </li><li name="infcalcs.SubCalc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SubCalcextendsProductwithSerializable"></a>
+      <a id="SubCalc:SubCalc"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="Weight.html"><span class="name">Weight</span></a><span class="params">(<span name="weights">weights: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="SubCalc.html"><span class="name">SubCalc</span></a><span class="params">(<span name="inv">inv: <span class="extype" name="scala.Double">Double</span></span>, <span name="table">table: <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@WeightextendsProductwithSerializable" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.package@SubCalcextendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Case class that contains weights for modifying the signal distribution
-for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> data set
-</p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains weights for modifying the signal distribution
-for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> data set
-</p></div><dl class="paramcmts block"><dt class="param">weights</dt><dd class="cmt"><p>list of weights for each input bin</p></dd></dl></div>
+      <p class="shortcomment cmt">Case class for holding a <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">infcalcs.tables.CTable</a> instance and the inverse of its sample
+size, resulting from a subsampling operation
+</p>
+    </li><li name="infcalcs.Tree" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="Tree[+T]extendsAnyRef"></a>
+      <a id="Tree[+T]:Tree[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Tree.html"><span class="name">Tree</span></a><span class="tparams">[<span name="T">+T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@Tree[+T]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Abstract binary tree definition that defines the methods and properties of each node in the
+tree: regular nodes are implemented by the class <a href="Node.html" class="extype" name="infcalcs.Node">Node</a>, while empty
+nodes (indicating that their parent is a terminal node) are implemented by
+the singleton object <a href="EmptyTree$.html" class="extype" name="infcalcs.EmptyTree">EmptyTree</a>.</p><div class="fullcomment"><div class="comment cmt"><p>Abstract binary tree definition that defines the methods and properties of each node in the
+tree: regular nodes are implemented by the class <a href="Node.html" class="extype" name="infcalcs.Node">Node</a>, while empty
+nodes (indicating that their parent is a terminal node) are implemented by
+the singleton object <a href="EmptyTree$.html" class="extype" name="infcalcs.EmptyTree">EmptyTree</a>.</p><p>Implemented by the class <a href="Node.html" class="extype" name="infcalcs.Node">Node</a> and the object <a href="EmptyTree$.html" class="extype" name="infcalcs.EmptyTree">EmptyTree</a>.
+A binary tree for a set of numbers (Doubles) is constructed by first
+obtaining an ordered (but unconnected) list of <a href="Node.html" class="extype" name="infcalcs.Node">Node</a> instances using the
+function <a href="Tree$.html#buildOrderedNodeList[A](l:List[A])(implicito:Ordering[A]):List[infcalcs.Node[A]]" class="extmbr" name="infcalcs.Tree#buildOrderedNodeList">Tree.buildOrderedNodeList</a>. The ordered list of Nodes returned by
+this function can then be passed to the function <a href="Tree$.html#buildTree[A](l:List[infcalcs.Node[A]]):infcalcs.Tree[A]" class="extmbr" name="infcalcs.Tree#buildTree">Tree.buildTree</a> to return an
+instance of <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> containing the binary tree.
+</p></div></div>
+    </li><li name="infcalcs.UWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="UWeightextendsWeightwithProductwithSerializable"></a>
+      <a id="UWeight:UWeight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UWeight.html"><span class="name">UWeight</span></a><span class="params">(<span name="bt">bt: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result"> extends <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@UWeightextendsWeightwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are distributed uniformly over all bins
+</p><div class="fullcomment"><div class="comment cmt"><p><a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> whose weights are distributed uniformly over all bins
+</p></div><dl class="paramcmts block"><dt class="param">bt</dt><dd class="cmt"><p><a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances defining signal space</p></dd></dl></div>
+    </li><li name="infcalcs.Weight" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="WeightextendsAnyRef"></a>
+      <a id="Weight:Weight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="Weight.html"><span class="name">Weight</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@WeightextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Mixin that defines key aspects of a novel probability function</p>
     </li></ol>
             </div>
 
@@ -396,6 +634,23 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
       </a>
     </span>
       <p class="shortcomment cmt">Companion object for <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></p>
+    </li><li name="infcalcs.EmptyTree" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyTree"></a>
+      <a id="EmptyTree:EmptyTree"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="EmptyTree$.html"><span class="name">EmptyTree</span></a><span class="result"> extends <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<span class="extype" name="scala.Nothing">Nothing</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@EmptyTree" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Singleton object representing a nonexistent child of a terminal node.</p>
     </li><li name="infcalcs.EstCC" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstCC"></a>
       <a id="EstCC:EstCC"></a>
@@ -434,13 +689,11 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Contains functions for generating signal weights and estimating the channel capacity.</p><div class="fullcomment"><div class="comment cmt"><p>Contains functions for generating signal weights and estimating the channel capacity.</p><p>Most importantly are the <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">EstimateCC.estimateCC</a> and <a href="EstimateCC$.html#estimateCCVerbose(p:infcalcs.DRData,fp:Option[String],index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCCVerbose">EstimateCC.estimateCCVerbose</a>
-functions which are used in the <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a> main object to estimate the channel capacity.</p><p>The weighting functions <a href="EstimateCC$.html#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and <a href="EstimateCC$.html#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a> generate
+      <p class="shortcomment cmt">Contains functions for generating signal weights and estimating the channel capacity.</p><div class="fullcomment"><div class="comment cmt"><p>Contains functions for generating signal weights and estimating the channel capacity.</p><p>Most importantly are the <a href="EstimateCC$.html#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">EstimateCC.estimateCC</a> and <a href="EstimateCC$.html#estimateCCVerbose(p:infcalcs.DRData,index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCCVerbose">EstimateCC.estimateCCVerbose</a>
+functions which are used in the <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a> main object to estimate the channel capacity.</p><p>The weighting functions <a href="EstimateCC$.html#genUnimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.GWeight]" class="extmbr" name="infcalcs.EstimateCC#genUnimodalWeights">EstimateCC.genUnimodalWeights</a> and <a href="EstimateCC$.html#genBimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.BWeight]" class="extmbr" name="infcalcs.EstimateCC#genBimodalWeights">EstimateCC.genBimodalWeights</a> generate
 weights for unimodal and bimodal Gaussian-based probability density functions and
-<a href="EstimateCC$.html#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">EstimateCC.pwWeight</a> produces discrete piecewise probability mass functions by
-iteratively selecting signal values to omit from the mutual information estimation.
-These values are then aggregated into a list of <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> by the
-<a href="EstimateCC$.html#genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#genWeights">EstimateCC.genWeights</a> function used for channel capacity estimation.</p></div></div>
+<a href="EstimateCC$.html#genPieceWiseUniformWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin]):List[infcalcs.PWeight]" class="extmbr" name="infcalcs.EstimateCC#genPieceWiseUniformWeights">EstimateCC.genPieceWiseUniformWeights</a> produces discrete piecewise probability mass functions by
+iteratively selecting signal values to omit from the mutual information estimation.</p></div></div>
     </li><li name="infcalcs.EstimateMI" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstimateMI"></a>
       <a id="EstimateMI:EstimateMI"></a>
@@ -464,9 +717,9 @@ estimates for each attempted bin size, and
 <a href="EstimateMI$.html#genEstimatesMult(calcConfig:infcalcs.CalcConfig)(pl:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]],wts:Option[infcalcs.Weight],numConsecRandPos:Int,res:Vector[infcalcs.EstTuple]):Vector[infcalcs.EstTuple]" class="extmbr" name="infcalcs.EstimateMI#genEstimatesMult">EstimateMI.genEstimatesMult</a> and finds the bin size and mutual information that
 maximizes the mutual information for the real but not the randomized
 datasets.</p><p>Other important methods include:
-- <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,seed:Int,wts:Option[infcalcs.Weight]):infcalcs.RegData" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
+- <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
 tables
-- <a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:infcalcs.RegData):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
+- <a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
 regression.
 </p></div></div>
     </li><li name="infcalcs.IOFile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -521,48 +774,74 @@ data to and from files.</p>
       </a>
     </span>
       <p class="shortcomment cmt">Contains a handful of useful mathematical functions.</p>
-    </li><li name="infcalcs.OtherFuncs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="OtherFuncs"></a>
-      <a id="OtherFuncs:OtherFuncs"></a>
+    </li><li name="infcalcs.Orderings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Orderings"></a>
+      <a id="Orderings:Orderings"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="OtherFuncs$.html"><span class="name">OtherFuncs</span></a>
+        <a href="Orderings$.html"><span class="name">Orderings</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@OtherFuncs" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.package@Orderings" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Defines orderings for various case classes employed in <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> searches</p>
+    </li><li name="infcalcs.ParameterFuncs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ParameterFuncs"></a>
+      <a id="ParameterFuncs:ParameterFuncs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ParameterFuncs$.html"><span class="name">ParameterFuncs</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@ParameterFuncs" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Contains a handful of utility functions.</p>
-    </li><li name="infcalcs.TreeDef" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="TreeDef"></a>
-      <a id="TreeDef:TreeDef"></a>
+    </li><li name="infcalcs.Tree" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Tree"></a>
+      <a id="Tree:Tree"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="TreeDef$.html"><span class="name">TreeDef</span></a>
+        <a href="Tree$.html"><span class="name">Tree</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@TreeDef" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.package@Tree" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Implementation of binary trees containing Double values at each node.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation of binary trees containing Double values at each node.</p><p>The trait <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> defines the methods and properties of each node in the
-tree: regular nodes are implemented by the class <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a>, while empty
-nodes (indicating that their parent is a terminal node) are implemented by
-the singleton object <a href="TreeDef$$EmptyTree$.html" class="extype" name="infcalcs.TreeDef.EmptyTree">TreeDef.EmptyTree</a>.</p><p>A binary tree for a set of numbers (Doubles) is constructed by first
-obtaining an ordered (but unconnected) list of <a href="TreeDef$$Node.html" class="extype" name="infcalcs.TreeDef.Node">TreeDef.Node</a> instances using the
-function <a href="TreeDef$.html#buildOrderedNodeList(l:List[Double]):List[infcalcs.TreeDef.Node]" class="extmbr" name="infcalcs.TreeDef#buildOrderedNodeList">TreeDef.buildOrderedNodeList</a>. The ordered list of Nodes returned by
-this function can then be passed to the function <a href="TreeDef$.html#buildTree(l:List[infcalcs.TreeDef.Node]):infcalcs.TreeDef.Tree" class="extmbr" name="infcalcs.TreeDef#buildTree">TreeDef.buildTree</a> to return an
-instance of <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">TreeDef.Tree</a> containing the binary tree.
-</p></div></div>
+      <p class="shortcomment cmt">Companion object to the <a href="Tree.html" class="extype" name="infcalcs.Tree">infcalcs.Tree</a> trait.</p>
+    </li><li name="infcalcs.Weight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Weight"></a>
+      <a id="Weight:Weight"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Weight$.html"><span class="name">Weight</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@Weight" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Companion object to <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> trait.</p>
     </li><li name="infcalcs.actors" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="actors"></a>
       <a id="actors:actors"></a>

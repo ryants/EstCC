@@ -82,7 +82,27 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Created by ryansuderman on 9/17/15.</p>
+      <p class="shortcomment cmt">Throws an exception when the parameters governing the numbers of bins
+are incorrectly configured
+</p>
+    </li><li name="infcalcs.exceptions.EmptyTreeException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyTreeExceptionextendsException"></a>
+      <a id="EmptyTreeException:EmptyTreeException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="EmptyTreeException.html"><span class="name">EmptyTreeException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.exceptions.package@EmptyTreeExceptionextendsException" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Throws an exception when an <a href="../EmptyTree$.html" class="extype" name="infcalcs.EmptyTree">infcalcs.EmptyTree</a> is searched
+</p>
     </li><li name="infcalcs.exceptions.ExcessActorException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ExcessActorExceptionextendsException"></a>
       <a id="ExcessActorException:ExcessActorException"></a>
@@ -99,7 +119,9 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Created by ryansuderman on 9/18/15.</p>
+      <p class="shortcomment cmt">Throws an exception when the number of actors to be created
+exceeds the total number of possible mutual information calculations
+</p>
     </li><li name="infcalcs.exceptions.IllegalParameterException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="IllegalParameterExceptionextendsException"></a>
       <a id="IllegalParameterException:IllegalParameterException"></a>
@@ -116,7 +138,28 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Created by ryansuderman on 9/17/15.</p>
+      <p class="shortcomment cmt">Thrown when unknown parameters or parameter configurations are present in the
+parameter file
+</p>
+    </li><li name="infcalcs.exceptions.InappropriateInitBinsException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InappropriateInitBinsExceptionextendsException"></a>
+      <a id="InappropriateInitBinsException:InappropriateInitBinsException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InappropriateInitBinsException.html"><span class="name">InappropriateInitBinsException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.exceptions.package@InappropriateInitBinsExceptionextendsException" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Thrown when the initial number of bins are too large;
+see <a href="../EstimateMI$.html#binNumberIsAppropriate(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,binPair:infcalcs.Pair[infcalcs.NTuple[Int]]):Boolean" class="extmbr" name="infcalcs.EstimateMI#binNumberIsAppropriate">infcalcs.EstimateMI.binNumberIsAppropriate</a>
+</p>
     </li><li name="infcalcs.exceptions.LowProbException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LowProbExceptionextendsException"></a>
       <a id="LowProbException:LowProbException"></a>
@@ -133,7 +176,28 @@
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Created by ryansuderman on 9/17/15.</p>
+      <p class="shortcomment cmt">Thrown when the sum of weights in some <a href="../Weight.html" class="extype" name="infcalcs.Weight">infcalcs.Weight</a> defined over some window
+of signal space is less than some specified threshold; see <a href="../Weight$.html#testWeights(msg:String,wts:List[Double],threshold:Double):List[Double]" class="extmbr" name="infcalcs.Weight#testWeights">infcalcs.Weight.testWeights</a>
+</p>
+    </li><li name="infcalcs.exceptions.ValueOutOfBoundsException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ValueOutOfBoundsExceptionextendsException"></a>
+      <a id="ValueOutOfBoundsException:ValueOutOfBoundsException"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ValueOutOfBoundsException.html"><span class="name">ValueOutOfBoundsException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#infcalcs.exceptions.package@ValueOutOfBoundsExceptionextendsException" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Thrown when searching a <a href="../Tree.html" class="extype" name="infcalcs.Tree">infcalcs.Tree</a> and the value searched for is
+greater than the maximum value in the <a href="../Tree.html" class="extype" name="infcalcs.Tree">infcalcs.Tree</a>
+</p>
     </li></ol>
             </div>
 

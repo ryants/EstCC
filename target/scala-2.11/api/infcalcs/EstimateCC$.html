@@ -49,13 +49,11 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Contains functions for generating signal weights and estimating the channel capacity.</p><p>Most importantly are the <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">EstimateCC.estimateCC</a> and <a href="#estimateCCVerbose(p:infcalcs.DRData,fp:Option[String],index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCCVerbose">EstimateCC.estimateCCVerbose</a>
-functions which are used in the <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a> main object to estimate the channel capacity.</p><p>The weighting functions <a href="#uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#uniWeight">EstimateCC.uniWeight</a> and <a href="#biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#biWeight">EstimateCC.biWeight</a> generate
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Contains functions for generating signal weights and estimating the channel capacity.</p><p>Most importantly are the <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">EstimateCC.estimateCC</a> and <a href="#estimateCCVerbose(p:infcalcs.DRData,index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCCVerbose">EstimateCC.estimateCCVerbose</a>
+functions which are used in the <a href="EstCC$.html" class="extype" name="infcalcs.EstCC">EstCC</a> main object to estimate the channel capacity.</p><p>The weighting functions <a href="#genUnimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.GWeight]" class="extmbr" name="infcalcs.EstimateCC#genUnimodalWeights">EstimateCC.genUnimodalWeights</a> and <a href="#genBimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.BWeight]" class="extmbr" name="infcalcs.EstimateCC#genBimodalWeights">EstimateCC.genBimodalWeights</a> generate
 weights for unimodal and bimodal Gaussian-based probability density functions and
-<a href="#pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#pwWeight">EstimateCC.pwWeight</a> produces discrete piecewise probability mass functions by
-iteratively selecting signal values to omit from the mutual information estimation.
-These values are then aggregated into a list of <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> by the
-<a href="#genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#genWeights">EstimateCC.genWeights</a> function used for channel capacity estimation.</p></div><div class="toggleContainer block">
+<a href="#genPieceWiseUniformWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin]):List[infcalcs.PWeight]" class="extmbr" name="infcalcs.EstimateCC#genPieceWiseUniformWeights">EstimateCC.genPieceWiseUniformWeights</a> produces discrete piecewise probability mass functions by
+iteratively selecting signal values to omit from the mutual information estimation.</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -168,41 +166,25 @@ These values are then aggregated into a list of <a href="Weight.html" class="ext
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#biWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]"></a>
-      <a id="biWeight(CalcConfig)(Tree,List[Double]):List[Weight]"></a>
+    </li><li name="infcalcs.EstimateCC#calculateWithoutEstimator" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="calculateWithoutEstimator(data:infcalcs.DRData)(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
+      <a id="calculateWithoutEstimator(DRData)(CalcConfig):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">biWeight</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>, <span name="in">in: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
+        <span class="name">calculateWithoutEstimator</span><span class="params">(<span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@biWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateCC$@calculateWithoutEstimator(data:infcalcs.DRData)(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Generates list of bimodal weights.</p><div class="fullcomment"><div class="comment cmt"><p>Generates list of bimodal weights.
-</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary tree specifying bin bounds.</p></dd><dt class="param">in</dt><dd class="cmt"><p>The input dataset.</p></dd><dt>returns</dt><dd class="cmt"><p>List of weights drawn from bimodal Gaussians.</p></dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#calcWeight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="calcWeight(func:Double=&gt;Double,lb:Double,hb:Double):Double"></a>
-      <a id="calcWeight((Double)⇒Double,Double,Double):Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">calcWeight</span><span class="params">(<span name="func">func: (<span class="extype" name="scala.Double">Double</span>) ⇒ <span class="extype" name="scala.Double">Double</span></span>, <span name="lb">lb: <span class="extype" name="scala.Double">Double</span></span>, <span name="hb">hb: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@calcWeight(func:Double=&gt;Double,lb:Double,hb:Double):Double" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Given a function, finds the difference in its evaluation of two numbers.</p>
+      <p class="shortcomment cmt">Calculates the mutual information for a set of data with no weights
+and without the linear regression estimator
+</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -261,46 +243,47 @@ These values are then aggregated into a list of <a href="Weight.html" class="ext
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="infcalcs.EstimateCC#estimateCC" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
-      <a id="estimateCC(DRData,NTuple[Int],Option[String],Int,Int,Vector[EstTuple])(CalcConfig):Unit"></a>
+      <a id="estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
+      <a id="estimateCC(DRData,NTuple[Int],Int,Int,Vector[EstTuple])(CalcConfig):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">estimateCC</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="signalBins">signalBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="fp">fp: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="numConsecBiasedSigEst">numConsecBiasedSigEst: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="optRes">optRes: <span class="extype" name="scala.Vector">Vector</span>[<a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a>] = <span class="symbol">Vector()</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">estimateCC</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="signalBins">signalBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="numConsecBiasedSigEst">numConsecBiasedSigEst: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>, <span name="optRes">optRes: <span class="extype" name="scala.Vector">Vector</span>[<a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a>] = <span class="symbol">Vector()</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateCC$@estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Estimates the channel capacity for a <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> given a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a>
-</p><div class="fullcomment"><div class="comment cmt"><p>Estimates the channel capacity for a <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> given a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a>
+      <p class="shortcomment cmt">Estimates the channel capacity for a <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> given a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></p><div class="fullcomment"><div class="comment cmt"><p>Estimates the channel capacity for a <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> given a <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></p><p>This function generates a list of <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> instances to apply to the data
+and iterates over signal and response bin numbers as specified in by the
+configuration parameters to estimate the maximum mutual information.
 </p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@tailrec</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="infcalcs.EstimateCC#estimateCCVerbose" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="estimateCCVerbose(p:infcalcs.DRData,fp:Option[String],index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
-      <a id="estimateCCVerbose(DRData,Option[String],Int)(CalcConfig):Unit"></a>
+      <a id="estimateCCVerbose(p:infcalcs.DRData,index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit"></a>
+      <a id="estimateCCVerbose(DRData,Int)(CalcConfig):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">estimateCCVerbose</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="fp">fp: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">estimateCCVerbose</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="index">index: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@estimateCCVerbose(p:infcalcs.DRData,fp:Option[String],index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateCC$@estimateCCVerbose(p:infcalcs.DRData,index:Int)(implicitcalcConfig:infcalcs.CalcConfig):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">An imperative equivalent to <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">estimateCC</a> for pretty-printing of calculation status to
+      <p class="shortcomment cmt">An imperative equivalent to <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">estimateCC</a> for pretty-printing of calculation status to
 stdout
-</p><div class="fullcomment"><div class="comment cmt"><p>An imperative equivalent to <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],fp:Option[String],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">estimateCC</a> for pretty-printing of calculation status to
+</p><div class="fullcomment"><div class="comment cmt"><p>An imperative equivalent to <a href="#estimateCC(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int],index:Int,numConsecBiasedSigEst:Int,optRes:Vector[infcalcs.EstTuple])(implicitcalcConfig:infcalcs.CalcConfig):Unit" class="extmbr" name="infcalcs.EstimateCC#estimateCC">estimateCC</a> for pretty-printing of calculation status to
 stdout
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Channel capacity estimate for given list of weights</p></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -326,29 +309,121 @@ stdout
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#genWeights" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]"></a>
-      <a id="genWeights(Vector[NTuple[Double]],(Tree,List[Double])⇒List[Weight]):(NTuple[Tree])⇒List[Weight]"></a>
+    </li><li name="infcalcs.EstimateCC#genBimodalWeights" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genBimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.BWeight]"></a>
+      <a id="genBimodalWeights(CalcConfig)(Tree[Bin],List[Double]):List[BWeight]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">genWeights</span><span class="params">(<span name="sig">sig: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="weightFunc">weightFunc: (<a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result">: (<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a>]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
+        <span class="name">genBimodalWeights</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>, <span name="in">in: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="BWeight.html" class="extype" name="infcalcs.BWeight">BWeight</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstimateCC$@genBimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.BWeight]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Generates list of bimodal weights.</p><div class="fullcomment"><div class="comment cmt"><p>Generates list of bimodal weights.
+</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances</p></dd><dt class="param">in</dt><dd class="cmt"><p>The input dataset.</p></dd><dt>returns</dt><dd class="cmt"><p>List of <a href="BWeight.html" class="extype" name="infcalcs.BWeight">BWeight</a> instances</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateCC#genPieceWiseUniformWeights" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genPieceWiseUniformWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin]):List[infcalcs.PWeight]"></a>
+      <a id="genPieceWiseUniformWeights(CalcConfig)(Tree[Bin]):List[PWeight]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genPieceWiseUniformWeights</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="PWeight.html" class="extype" name="infcalcs.PWeight">PWeight</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateCC$@genPieceWiseUniformWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin]):List[infcalcs.PWeight]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Generates a set of piece-wise functions to create uniform weighting from
+bin i to bin j with all outer bins (<i and >j) weighted to 0
+</i></p><div class="fullcomment"><div class="comment cmt"><p>Generates a set of piece-wise functions to create uniform weighting from
+bin i to bin j with all outer bins (<i and >j) weighted to 0
+</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances</p></dd><dt>returns</dt><dd class="cmt"><p>List of <a href="PWeight.html" class="extype" name="infcalcs.PWeight">PWeight</a> instances</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateCC#genUniformWeight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="genUniformWeight(calcConfig:infcalcs.CalcConfig)(t:infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]):Option[infcalcs.Weight]"></a>
+      <a id="genUniformWeight(CalcConfig)(NTuple[Tree[Bin]]):Option[Weight]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genUniformWeight</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="t">t: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateCC$@genUniformWeight(calcConfig:infcalcs.CalcConfig)(t:infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]):Option[infcalcs.Weight]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Constructs a joint uniform distribution <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> for all dimensions in signal space
+</p>
+    </li><li name="infcalcs.EstimateCC#genUnimodalWeights" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genUnimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.GWeight]"></a>
+      <a id="genUnimodalWeights(CalcConfig)(Tree[Bin],List[Double]):List[GWeight]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genUnimodalWeights</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>, <span name="in">in: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="GWeight.html" class="extype" name="infcalcs.GWeight">GWeight</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateCC$@genUnimodalWeights(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.Tree[infcalcs.Bin],in:List[Double]):List[infcalcs.GWeight]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Generates list of unimodal (Gaussian) weights.</p><div class="fullcomment"><div class="comment cmt"><p>Generates list of unimodal (Gaussian) weights.
+</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a> of <a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a> instances</p></dd><dt class="param">in</dt><dd class="cmt"><p>The input dataset.</p></dd><dt>returns</dt><dd class="cmt"><p>List of <a href="GWeight.html" class="extype" name="infcalcs.GWeight">GWeight</a> instances</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateCC#genWeights1" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genWeights1(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.Tree[infcalcs.Bin],List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]=&gt;List[infcalcs.Weight]"></a>
+      <a id="genWeights1(Vector[NTuple[Double]],(Tree[Bin],List[Double])⇒List[Weight]):(NTuple[Tree[Bin]])⇒List[Weight]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genWeights1</span><span class="params">(<span name="sig">sig: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="weightFunc">weightFunc: (<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>], <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result">: (<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateCC$@genWeights1(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.Tree[infcalcs.Bin],List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]=&gt;List[infcalcs.Weight]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Generates a list of weights for n-dim input data</p><div class="fullcomment"><div class="comment cmt"><p>Generates a list of weights for n-dim input data</p><p>Weights are generated for a n-dim input distribution by calculating
 the marginal distributions for the n independent random variables
 representing the signal.  These are used to produce a joint
-distribution (see <a href="#makeJoint(wv:Vector[infcalcs.Weight]):infcalcs.Weight" class="extmbr" name="infcalcs.EstimateCC#makeJoint">makeJoint</a>) in order to construct a list of
-weights corresponding to the structure of the contingency table as
-seen in <a href="CTBuild$.html" class="extype" name="infcalcs.CTBuild">CTBuild</a>.
+distribution (see <a href="Weight$.html#makeJoint(wv:Vector[infcalcs.Weight]):infcalcs.Weight" class="extmbr" name="infcalcs.Weight#makeJoint">Weight.makeJoint</a>) in order to construct a list of
+weights corresponding to the structure of the data set.
 </p></div><dl class="paramcmts block"><dt class="param">sig</dt><dd class="cmt"><p>list of ordered tuples (signal values)</p></dd><dt class="param">weightFunc</dt><dd class="cmt"><p>function determining calculation of weight distribution</p></dd><dt>returns</dt><dd class="cmt"><p>list of weights for a signal set of ordered tuples</p></dd></dl></div>
+    </li><li name="infcalcs.EstimateCC#genWeights2" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="genWeights2(sig:Vector[infcalcs.NTuple[Double]],weightFunc:infcalcs.Tree[infcalcs.Bin]=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]=&gt;List[infcalcs.Weight]"></a>
+      <a id="genWeights2(Vector[NTuple[Double]],(Tree[Bin])⇒List[Weight]):(NTuple[Tree[Bin]])⇒List[Weight]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genWeights2</span><span class="params">(<span name="sig">sig: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="weightFunc">weightFunc: (<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result">: (<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]]) ⇒ <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstimateCC$@genWeights2(sig:Vector[infcalcs.NTuple[Double]],weightFunc:infcalcs.Tree[infcalcs.Bin]=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]=&gt;List[infcalcs.Weight]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Similar to <a href="#genWeights1(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.Tree[infcalcs.Bin],List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]]=&gt;List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#genWeights1">genWeights1</a> but with a different weight function signature
+</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -375,7 +450,7 @@ seen in <a href="CTBuild$.html" class="extype" name="infcalcs.CTBuild">CTBuild</
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getWeights</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="signalBins">signalBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]]</span>
+        <span class="name">getWeights</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="p">p: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="signalBins">signalBins: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.EstimateCC$@getWeights(calcConfig:infcalcs.CalcConfig)(p:infcalcs.DRData,signalBins:infcalcs.NTuple[Int]):List[Option[infcalcs.Weight]]" title="Permalink" target="_top">
@@ -417,26 +492,6 @@ seen in <a href="CTBuild$.html" class="extype" name="infcalcs.CTBuild">CTBuild</
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#makeJoint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="makeJoint(wv:Vector[infcalcs.Weight]):infcalcs.Weight"></a>
-      <a id="makeJoint(Vector[Weight]):Weight"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">makeJoint</span><span class="params">(<span name="wv">wv: <span class="extype" name="scala.Vector">Vector</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result">: <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@makeJoint(wv:Vector[infcalcs.Weight]):infcalcs.Weight" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Generates signal weights for n-dim signal data</p><div class="fullcomment"><div class="comment cmt"><p>Generates signal weights for n-dim signal data</p><p>Given n marginal signal distributions and assuming independence
-between the distributions, a joint signal distribution is
-calculated and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a> is generated.
-</p></div><dl class="paramcmts block"><dt class="param">wv</dt><dd class="cmt"><p>vector of weights for signal distributions</p></dd><dt>returns</dt><dd class="cmt"><p>weight for joint distribution</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -454,27 +509,6 @@ calculated and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Wei
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#normWeight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="normWeight(bounds:infcalcs.TreeDef.Tree)(p:Double):Double"></a>
-      <a id="normWeight(Tree)(Double):Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">normWeight</span><span class="params">(<span name="bounds">bounds: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>)</span><span class="params">(<span name="p">p: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@normWeight(bounds:infcalcs.TreeDef.Tree)(p:Double):Double" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">This function is applied to raw weights in order to account for the
-uniform weight applied in the CTBuild object when building a contingency
-table (a sort of 'unweighting' of the uniformly weighted data prior to
-its uni/bi-modal weighting)
-</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -509,28 +543,6 @@ its uni/bi-modal weighting)
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#pwWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]"></a>
-      <a id="pwWeight(CalcConfig)(Tree,List[Double]):List[Weight]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">pwWeight</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>, <span name="in">in: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@pwWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Generates a set of piece-wise functions to create uniform weighting from
-bin i to bin j with all outer bins (<i and >j) weighted to 0
-</i></p><div class="fullcomment"><div class="comment cmt"><p>Generates a set of piece-wise functions to create uniform weighting from
-bin i to bin j with all outer bins (<i and >j) weighted to 0
-</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary tree specifying bin bounds.</p></dd><dt class="param">in</dt><dd class="cmt"><p>The input dataset (placeholder to accommodate <a href="#genWeights(sig:Vector[infcalcs.NTuple[Double]],weightFunc:(infcalcs.TreeDef.Tree,List[Double])=&gt;List[infcalcs.Weight]):infcalcs.NTuple[infcalcs.TreeDef.Tree]=&gt;List[infcalcs.Weight]" class="extmbr" name="infcalcs.EstimateCC#genWeights">genWeights</a>
-          function; not actually used in function).</p></dd><dt>returns</dt><dd class="cmt"><p>List of piece-wise weights</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -548,32 +560,6 @@ bin i to bin j with all outer bins (<i and >j) weighted to 0
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#testWeights" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="testWeights(msg:String,wts:List[Double],threshold:Double):List[Double]"></a>
-      <a id="testWeights(String,List[Double],Double):List[Double]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">testWeights</span><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="wts">wts: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="threshold">threshold: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.95</span></span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@testWeights(msg:String,wts:List[Double],threshold:Double):List[Double]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Determines whether the weights cover a sufficient range of the input space.</p><div class="fullcomment"><div class="comment cmt"><p>Determines whether the weights cover a sufficient range of the input space.</p><p>If the sum of the weights is above the threshold, the weights are
-returned; otherwise a <a href="exceptions/LowProbException.html" class="extype" name="infcalcs.exceptions.LowProbException">exceptions.LowProbException</a> is thrown containing the given
-message.
-</p></div><dl class="paramcmts block"><dt class="param">msg</dt><dd class="cmt"><p>String to pass to the exception if thrown.</p></dd><dt class="param">wts</dt><dd class="cmt"><p>The list of weights.</p></dd><dt class="param">threshold</dt><dd class="cmt"><p>The threshold to use to evaluate the weights.</p></dd><dt>returns</dt><dd class="cmt"><p>The list of weights.</p></dd></dl><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="classOf[exceptions.LowProbException]">...</span>
-    </span>)</span>
-              
-        </dd><dt>Exceptions thrown</dt><dd><span class="cmt"><p><a href="exceptions/LowProbException.html" class="extype" name="infcalcs.exceptions.LowProbException"><code>exceptions.LowProbException</code></a> if the sum of weights is less than the threshold</p></span></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -591,24 +577,6 @@ message.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="infcalcs.EstimateCC#uniWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]"></a>
-      <a id="uniWeight(CalcConfig)(Tree,List[Double]):List[Weight]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">uniWeight</span><span class="params">(<span name="calcConfig">calcConfig: <a href="CalcConfig.html" class="extype" name="infcalcs.CalcConfig">CalcConfig</a></span>)</span><span class="params">(<span name="bounds">bounds: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>, <span name="in">in: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstimateCC$@uniWeight(calcConfig:infcalcs.CalcConfig)(bounds:infcalcs.TreeDef.Tree,in:List[Double]):List[infcalcs.Weight]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Generates list of unimodal (Gaussian) weights.</p><div class="fullcomment"><div class="comment cmt"><p>Generates list of unimodal (Gaussian) weights.
-</p></div><dl class="paramcmts block"><dt class="param">bounds</dt><dd class="cmt"><p>Binary tree specifying bin bounds.</p></dd><dt class="param">in</dt><dd class="cmt"><p>The input dataset.</p></dd><dt>returns</dt><dd class="cmt"><p>List of weights drawn from a unimodal Gaussian.</p></dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

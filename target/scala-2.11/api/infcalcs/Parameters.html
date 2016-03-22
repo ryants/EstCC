@@ -45,13 +45,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Parameters</span><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Parameters</span><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="boolParams">boolParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class holding the calculation parameters as denoted by the <a href="InfConfig$.html" class="extype" name="infcalcs.InfConfig">InfConfig</a>
 object and optional paramter file.
-</p></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">boolParams</dt><dd class="cmt"><p>parameters that have boolean values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -91,7 +91,7 @@ object and optional paramter file.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.Parameters#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(listParams:Map[String,List[Double]],numParams:Map[String,Double],stringParams:Map[String,String],sigRespParams:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]):infcalcs.Parameters"></a>
+      <a id="&lt;init&gt;(listParams:Map[String,List[Double]],numParams:Map[String,Double],boolParams:Map[String,Boolean],stringParams:Map[String,String],sigRespParams:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]):infcalcs.Parameters"></a>
       <a id="&lt;init&gt;:Parameters"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,14 +99,14 @@ object and optional paramter file.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Parameters</span><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span>
+        <span class="name">Parameters</span><span class="params">(<span name="listParams">listParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="numParams">numParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Double">Double</span>]</span>, <span name="boolParams">boolParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Boolean">Boolean</span>]</span>, <span name="stringParams">stringParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sigRespParams">sigRespParams: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]]]]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Parameters@&lt;init&gt;(listParams:Map[String,List[Double]],numParams:Map[String,Double],stringParams:Map[String,String],sigRespParams:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]):infcalcs.Parameters" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.Parameters@&lt;init&gt;(listParams:Map[String,List[Double]],numParams:Map[String,Double],boolParams:Map[String,Boolean],stringParams:Map[String,String],sigRespParams:Map[String,Option[Vector[infcalcs.NTuple[Double]]]]):infcalcs.Parameters" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">listParams</dt><dd class="cmt"><p>parameters that have list values</p></dd><dt class="param">numParams</dt><dd class="cmt"><p>parameters that have numeric values</p></dd><dt class="param">boolParams</dt><dd class="cmt"><p>parameters that have boolean values</p></dd><dt class="param">stringParams</dt><dd class="cmt"><p>parameters that have string values</p></dd><dt class="param">sigRespParams</dt><dd class="cmt"><p>(optional) parameters governing signal/response space</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -184,6 +184,23 @@ object and optional paramter file.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="infcalcs.Parameters#boolParams" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="boolParams:Map[String,Boolean]"></a>
+      <a id="boolParams:Map[String,Boolean]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">boolParams</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Boolean">Boolean</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Parameters@boolParams:Map[String,Boolean]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">parameters that have boolean values</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -451,6 +468,23 @@ object and optional paramter file.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="infcalcs.Parameters#updateBoolParams" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="updateBoolParams(k:String,v:Boolean):infcalcs.Parameters"></a>
+      <a id="updateBoolParams(String,Boolean):Parameters"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">updateBoolParams</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="v">v: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="infcalcs.Parameters">Parameters</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Parameters@updateBoolParams(k:String,v:Boolean):infcalcs.Parameters" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="infcalcs.Parameters#updateListParams" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="updateListParams(k:String,v:List[Double]):infcalcs.Parameters"></a>
       <a id="updateListParams(String,List[Double]):Parameters"></a>

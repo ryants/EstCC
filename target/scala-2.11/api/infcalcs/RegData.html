@@ -45,13 +45,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">RegData</span><span class="params">(<span name="iss">iss: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="subContTables">subContTables: <span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]</span>, <span name="randContTableVect">randContTableVect: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]]</span>, <span name="labels">labels: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">RegData</span><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class holding all the necessary <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> data for performing the linear
-regression estimates with an arbitrary numbers of randomizations
-</p></div><dl class="paramcmts block"><dt class="param">iss</dt><dd class="cmt"><p>list of inverse sample sizes</p></dd><dt class="param">subContTables</dt><dd class="cmt"><p>subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vector</p></dd><dt class="param">randContTableVect</dt><dd class="cmt"><p>vector of randomized subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vectors</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class holding all the necessary <a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a> data for performing the linear
+regression estimates
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -90,8 +90,8 @@ regression estimates with an arbitrary numbers of randomizations
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="infcalcs.RegData#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(iss:Vector[Double],subContTables:Vector[infcalcs.tables.ConstructedTable],randContTableVect:Vector[Vector[infcalcs.tables.ConstructedTable]],labels:Vector[String]):infcalcs.RegData"></a>
+              <ol><li name="infcalcs.RegData#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(subCalcs:Vector[infcalcs.SubCalc],label:String):infcalcs.RegData"></a>
       <a id="&lt;init&gt;:RegData"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,14 +99,14 @@ regression estimates with an arbitrary numbers of randomizations
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">RegData</span><span class="params">(<span name="iss">iss: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="subContTables">subContTables: <span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]</span>, <span name="randContTableVect">randContTableVect: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]]</span>, <span name="labels">labels: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+        <span class="name">RegData</span><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.RegData@&lt;init&gt;(iss:Vector[Double],subContTables:Vector[infcalcs.tables.ConstructedTable],randContTableVect:Vector[Vector[infcalcs.tables.ConstructedTable]],labels:Vector[String]):infcalcs.RegData" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.RegData@&lt;init&gt;(subCalcs:Vector[infcalcs.SubCalc],label:String):infcalcs.RegData" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">iss</dt><dd class="cmt"><p>list of inverse sample sizes</p></dd><dt class="param">subContTables</dt><dd class="cmt"><p>subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vector</p></dd><dt class="param">randContTableVect</dt><dd class="cmt"><p>vector of randomized subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vectors</p></dd></dl></div>
+      
     </li></ol>
             </div>
 
@@ -184,6 +184,25 @@ regression estimates with an arbitrary numbers of randomizations
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="infcalcs.RegData#calculateRegression" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="calculateRegression:infcalcs.SLR"></a>
+      <a id="calculateRegression:SLR"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">calculateRegression</span><span class="result">: <a href="SLR.html" class="extype" name="infcalcs.SLR">SLR</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.RegData@calculateRegression:infcalcs.SLR" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Calculates simple linear regression between inverse sample size and
+mutualInformation
+</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -264,6 +283,23 @@ regression estimates with an arbitrary numbers of randomizations
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="infcalcs.RegData#invVals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="invVals:scala.collection.immutable.Vector[Double]"></a>
+      <a id="invVals:Vector[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">invVals</span><span class="result">: <span class="extype" name="scala.collection.immutable.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.RegData@invVals:scala.collection.immutable.Vector[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -281,36 +317,36 @@ regression estimates with an arbitrary numbers of randomizations
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.RegData#iss" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="iss:Vector[Double]"></a>
-      <a id="iss:Vector[Double]"></a>
+    </li><li name="infcalcs.RegData#label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="label:String"></a>
+      <a id="label:String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">iss</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+        <span class="name">label</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.RegData@iss:Vector[Double]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.RegData@label:String" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">list of inverse sample sizes</p>
-    </li><li name="infcalcs.RegData#labels" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="labels:Vector[String]"></a>
-      <a id="labels:Vector[String]"></a>
+      
+    </li><li name="infcalcs.RegData#miVals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="miVals:scala.collection.immutable.Vector[Double]"></a>
+      <a id="miVals:Vector[Double]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">labels</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">miVals</span><span class="result">: <span class="extype" name="scala.collection.immutable.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.RegData@labels:Vector[String]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.RegData@miVals:scala.collection.immutable.Vector[Double]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -366,40 +402,23 @@ regression estimates with an arbitrary numbers of randomizations
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.RegData#randContTableVect" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="randContTableVect:Vector[Vector[infcalcs.tables.ConstructedTable]]"></a>
-      <a id="randContTableVect:Vector[Vector[ConstructedTable]]"></a>
+    </li><li name="infcalcs.RegData#subCalcs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="subCalcs:Vector[infcalcs.SubCalc]"></a>
+      <a id="subCalcs:Vector[SubCalc]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">randContTableVect</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]]</span>
+        <span class="name">subCalcs</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.RegData@randContTableVect:Vector[Vector[infcalcs.tables.ConstructedTable]]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.RegData@subCalcs:Vector[infcalcs.SubCalc]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">vector of randomized subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vectors</p>
-    </li><li name="infcalcs.RegData#subContTables" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="subContTables:Vector[infcalcs.tables.ConstructedTable]"></a>
-      <a id="subContTables:Vector[ConstructedTable]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">subContTables</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.RegData@subContTables:Vector[infcalcs.tables.ConstructedTable]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">subsampled <a href="tables/ContTable.html" class="extype" name="infcalcs.tables.ContTable">tables.ContTable</a> vector</p>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

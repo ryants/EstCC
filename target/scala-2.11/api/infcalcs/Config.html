@@ -45,7 +45,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Config</span><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Config</span><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="noReg">noReg: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -91,7 +91,7 @@ command line options for channel capacity calculation.</p><p>For more details se
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.Config#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(verbose:Boolean,dataFile:String,paramFile:String,seed:Int,cores:Int):infcalcs.Config"></a>
+      <a id="&lt;init&gt;(verbose:Boolean,noReg:Boolean,dataFile:String,paramFile:String,seed:Int,cores:Int):infcalcs.Config"></a>
       <a id="&lt;init&gt;:Config"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,10 +99,10 @@ command line options for channel capacity calculation.</p><p>For more details se
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Config</span><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span>
+        <span class="name">Config</span><span class="params">(<span name="verbose">verbose: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="noReg">noReg: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="dataFile">dataFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="paramFile">paramFile: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="cores">cores: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Config@&lt;init&gt;(verbose:Boolean,dataFile:String,paramFile:String,seed:Int,cores:Int):infcalcs.Config" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.Config@&lt;init&gt;(verbose:Boolean,noReg:Boolean,dataFile:String,paramFile:String,seed:Int,cores:Int):infcalcs.Config" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -332,6 +332,23 @@ command line options for channel capacity calculation.</p><p>For more details se
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="infcalcs.Config#noReg" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="noReg:Boolean"></a>
+      <a id="noReg:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">noReg</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Config@noReg:Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>

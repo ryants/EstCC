@@ -92,23 +92,6 @@ confidence interval of both the slope and the intercept.
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.SLR#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(xList:Seq[Double],yList:Seq[Double]):infcalcs.SLR"></a>
-      <a id="&lt;init&gt;:SLR"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">SLR</span><span class="params">(<span name="xList">xList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="yList">yList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@&lt;init&gt;(xList:Seq[Double],yList:Seq[Double]):infcalcs.SLR" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Alternative constructor: takes x and y data but applies an empty label.</p>
-    </li><li name="infcalcs.SLR#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="&lt;init&gt;(xList:Seq[Double],yList:Seq[Double],label:String):infcalcs.SLR"></a>
       <a id="&lt;init&gt;:SLR"></a>
       <h4 class="signature">
@@ -117,7 +100,7 @@ confidence interval of both the slope and the intercept.
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SLR</span><span class="params">(<span name="xList">xList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="yList">yList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
+        <span class="name">SLR</span><span class="params">(<span name="xList">xList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="yList">yList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.SLR@&lt;init&gt;(xList:Seq[Double],yList:Seq[Double],label:String):infcalcs.SLR" title="Permalink" target="_top">
@@ -469,6 +452,23 @@ confidence interval of both the slope and the intercept.
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="infcalcs.SLR#rSquared" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rSquared:Double"></a>
+      <a id="rSquared:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rSquared</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.SLR@rSquared:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The coefficient of determination</p>
     </li><li name="infcalcs.SLR#regLine" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="regLine:Double=&gt;Double"></a>
       <a id="regLine:(Double)⇒Double"></a>
@@ -556,23 +556,24 @@ confidence interval of both the slope and the intercept.
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="infcalcs.SLR#toFile" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toFile(f:String):Unit"></a>
-      <a id="toFile(String):Unit"></a>
+      <a id="toFile(f:String,header:String):Unit"></a>
+      <a id="toFile(String,String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toFile</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">toFile</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="header">header: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@toFile(f:String):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.SLR@toFile(f:String,header:String):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Writes the regression data to a file.</p><div class="fullcomment"><div class="comment cmt"><p>Writes the regression data to a file.</p><p>Each datapoint is written to the file on its own line, with the x
-and y values separated by a space.
+and y values separated by a space. The third column contains the
+fitted values
 </p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The name of the file to write.</p></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>

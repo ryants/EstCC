@@ -163,24 +163,23 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="infcalcs.CTBuild#buildTable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="buildTable(eng:Option[cern.jet.random.engine.MersenneTwister])(data:infcalcs.DRData,nb:infcalcs.Pair[infcalcs.NTuple[Int]],weights:Option[infcalcs.Weight]):infcalcs.tables.ConstructedTable"></a>
-      <a id="buildTable(Option[MersenneTwister])(DRData,Pair[NTuple[Int]],Option[Weight]):ConstructedTable"></a>
+      <a id="buildTable(data:infcalcs.DRData,nb:infcalcs.Pair[infcalcs.NTuple[Int]],randomize:Boolean):infcalcs.tables.CTable[Int]"></a>
+      <a id="buildTable(DRData,Pair[NTuple[Int]],Boolean):CTable[Int]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">buildTable</span><span class="params">(<span name="eng">eng: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="cern.jet.random.engine.MersenneTwister">MersenneTwister</span>]</span>)</span><span class="params">(<span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="nb">nb: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="weights">weights: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="tables/ConstructedTable.html" class="extype" name="infcalcs.tables.ConstructedTable">ConstructedTable</a></span>
+        <span class="name">buildTable</span><span class="params">(<span name="data">data: <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="nb">nb: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="randomize">randomize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="scala.Int">Int</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@buildTable(eng:Option[cern.jet.random.engine.MersenneTwister])(data:infcalcs.DRData,nb:infcalcs.Pair[infcalcs.NTuple[Int]],weights:Option[infcalcs.Weight]):infcalcs.tables.ConstructedTable" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.CTBuild$@buildTable(data:infcalcs.DRData,nb:infcalcs.Pair[infcalcs.NTuple[Int]],randomize:Boolean):infcalcs.tables.CTable[Int]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Method for constructing contingency table from a set of n-dim data points
-</p><div class="fullcomment"><div class="comment cmt"><p>Method for constructing contingency table from a set of n-dim data points
-</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>container for dose-response data</p></dd><dt class="param">nb</dt><dd class="cmt"><p>one-dimensional bin numbers for row and column values resp.</p></dd><dt class="param">weights</dt><dd class="cmt"><p>pair of weights for varying signal distribution</p></dd><dt>returns</dt><dd class="cmt"><p>contingency table for ordered pair data points</p></dd></dl></div>
+      <p class="shortcomment cmt">Method for constructing contingency table from a set of n-dim data points.</p><div class="fullcomment"><div class="comment cmt"><p>Method for constructing contingency table from a set of n-dim data points.</p><p>Note: no weight is applied to the data
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>container for dose-response data</p></dd><dt class="param">nb</dt><dd class="cmt"><p>one-dimensional bin numbers for row and column values resp.</p></dd><dt class="param">randomize</dt><dd class="cmt"><p>shuffles the data to produce a table with randomized data</p></dd><dt>returns</dt><dd class="cmt"><p>contingency table for ordered pair data points</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -262,42 +261,36 @@
               
         </dd></dl></div>
     </li><li name="infcalcs.CTBuild#findIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="findIndex(value:Double,dim:infcalcs.TreeDef.Tree):Int"></a>
-      <a id="findIndex(Double,Tree):Int"></a>
+      <a id="findIndex(value:Double,dim:infcalcs.Tree[infcalcs.Bin]):Int"></a>
+      <a id="findIndex(Double,Tree[Bin]):Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">findIndex</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Double">Double</span></span>, <span name="dim">dim: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">findIndex</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Double">Double</span></span>, <span name="dim">dim: <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@findIndex(value:Double,dim:infcalcs.TreeDef.Tree):Int" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.CTBuild$@findIndex(value:Double,dim:infcalcs.Tree[infcalcs.Bin]):Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Returns the index of the bin for insertion of a value into the table.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the index of the bin for insertion of a value into the table.</p><p>This function is used to populate the contingency table once the bin
-boundaries have been determined. Note that if for some reason this
-function is called with a value that is greater than the maximum of the
-dataset (i.e., higher than the upper bound of the highest bin), it will
-nevertheless return the index of the highest bin.</p><p>Note also that if there is more than one bin with the same boundary
-(as can happen if there are many identical values subdivided among more
-than one bin), this function will return the lower-index bin.
+      <p class="shortcomment cmt">Returns the index of the bin for insertion of a value into the table.</p><div class="fullcomment"><div class="comment cmt"><p>Returns the index of the bin for insertion of a value into the table.
 </p></div><dl class="paramcmts block"><dt class="param">value</dt><dd class="cmt"><p>The number to be inserted.</p></dd><dt class="param">dim</dt><dd class="cmt"><p>The binary tree specifying the bounds of each bin.</p></dd><dt>returns</dt><dd class="cmt"><p>The index of the bin that should contain the value.</p></dd></dl></div>
     </li><li name="infcalcs.CTBuild#findVectIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="findVectIndex(tuple:infcalcs.NTuple[Double],binDelims:infcalcs.NTuple[infcalcs.TreeDef.Tree],m:Map[infcalcs.NTuple[Int],Int]):Int"></a>
-      <a id="findVectIndex(NTuple[Double],NTuple[Tree],Map[NTuple[Int],Int]):Int"></a>
+      <a id="findVectIndex(tuple:infcalcs.NTuple[Double],binDelims:infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]],m:Map[infcalcs.NTuple[Int],Int]):Int"></a>
+      <a id="findVectIndex(NTuple[Double],NTuple[Tree[Bin]],Map[NTuple[Int],Int]):Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">findVectIndex</span><span class="params">(<span name="tuple">tuple: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="binDelims">binDelims: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a>]</span>, <span name="m">m: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>], <span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+        <span class="name">findVectIndex</span><span class="params">(<span name="tuple">tuple: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="binDelims">binDelims: <a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]]</span>, <span name="m">m: <span class="extype" name="scala.Predef.Map">Map</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>], <span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@findVectIndex(tuple:infcalcs.NTuple[Double],binDelims:infcalcs.NTuple[infcalcs.TreeDef.Tree],m:Map[infcalcs.NTuple[Int],Int]):Int" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.CTBuild$@findVectIndex(tuple:infcalcs.NTuple[Double],binDelims:infcalcs.NTuple[infcalcs.Tree[infcalcs.Bin]],m:Map[infcalcs.NTuple[Int],Int]):Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -307,26 +300,6 @@ than one bin), this function will return the lower-index bin.
              contingency table</p></dd><dt class="param">binDelims</dt><dd class="cmt"><p>tuple of delimiting trees used to determine respective
                  bin indices</p></dd><dt class="param">m</dt><dd class="cmt"><p>mapping of bin indices, whose index is used for insertion into
          the contingency table</p></dd><dt>returns</dt><dd class="cmt"><p>index of 2D bin</p></dd></dl></div>
-    </li><li name="infcalcs.CTBuild#getBinDelims" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getBinDelims(v:Vector[Double],numBins:Int):infcalcs.TreeDef.Tree"></a>
-      <a id="getBinDelims(Vector[Double],Int):Tree"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getBinDelims</span><span class="params">(<span name="v">v: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="numBins">numBins: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="TreeDef$$Tree.html" class="extype" name="infcalcs.TreeDef.Tree">Tree</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@getBinDelims(v:Vector[Double],numBins:Int):infcalcs.TreeDef.Tree" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Returns binary tree giving the values delimiting the bounds of each bin.</p><div class="fullcomment"><div class="comment cmt"><p>Returns binary tree giving the values delimiting the bounds of each bin.</p><p>The tree returned by this function has numBins nodes; the value
-associated with each node represents the maximum data value contained in
-that bin, ie, the upper inclusive bin bound.
-</p></div><dl class="paramcmts block"><dt class="param">v</dt><dd class="cmt"><p>The list of doubles to be partitioned.</p></dd><dt class="param">numBins</dt><dd class="cmt"><p>The number of bins to divide the list into.</p></dd><dt>returns</dt><dd class="cmt"><p>Binary tree containing the maximum value in each bin.</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -387,7 +360,7 @@ that bin, ie, the upper inclusive bin bound.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">keyFromDimLengths</span><span class="params">(<span name="dLs">dLs: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="acc">acc: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>
+        <span class="name">keyFromDimLengths</span><span class="params">(<span name="dLs">dLs: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="acc">acc: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]] = <span class="symbol">Vector(Vector())</span></span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.CTBuild$@keyFromDimLengths(dLs:Vector[Int],acc:Vector[infcalcs.NTuple[Int]]):Vector[infcalcs.NTuple[Int]]" title="Permalink" target="_top">
@@ -454,18 +427,18 @@ for some arbitrary ndim data point
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="infcalcs.CTBuild#partitionList" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="partitionList(v:Vector[Double],numBins:Int):List[List[Double]]"></a>
-      <a id="partitionList(Vector[Double],Int):List[List[Double]]"></a>
+      <a id="partitionList(v:Vector[Double],numBins:Int):List[infcalcs.Bin]"></a>
+      <a id="partitionList(Vector[Double],Int):List[Bin]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">partitionList</span><span class="params">(<span name="v">v: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="numBins">numBins: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]]</span>
+        <span class="name">partitionList</span><span class="params">(<span name="v">v: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="numBins">numBins: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<a href="Bin.html" class="extype" name="infcalcs.Bin">Bin</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@partitionList(v:Vector[Double],numBins:Int):List[List[Double]]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.CTBuild$@partitionList(v:Vector[Double],numBins:Int):List[infcalcs.Bin]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -583,26 +556,6 @@ effectively collapsed into one bin
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.CTBuild#weightSignalData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="weightSignalData(t:Vector[Vector[Int]],wts:List[Double]):Vector[Vector[Int]]"></a>
-      <a id="weightSignalData(Vector[Vector[Int]],List[Double]):Vector[Vector[Int]]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">weightSignalData</span><span class="params">(<span name="t">t: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="wts">wts: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Int">Int</span>]]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.CTBuild$@weightSignalData(t:Vector[Vector[Int]],wts:List[Double]):Vector[Vector[Int]]" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Multiplies the values in each row of a contingency table by a weight.</p><div class="fullcomment"><div class="comment cmt"><p>Multiplies the values in each row of a contingency table by a weight.</p><p>The length of 'wts' should equal length of 't'. Note that after
-multiplication by the weight values the entries in the contingency table
-are rounded to the nearest integer.
-</p></div><dl class="paramcmts block"><dt class="param">t</dt><dd class="cmt"><p>A contingency table, as a matrix of integers.</p></dd><dt class="param">wts</dt><dd class="cmt"><p>List of weights.</p></dd><dt>returns</dt><dd class="cmt"><p>The weighted contingency table, as a matrix of integers.</p></dd></dl></div>
     </li></ol>
             </div>
 

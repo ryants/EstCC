@@ -45,7 +45,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Estimate</span><span class="params">(<span name="wt">wt: <span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="sigBins">sigBins: <a href="../package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="p">p: <a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span></span>, <span name="wIndex">wIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="sIndex">sIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Estimate</span><span class="params">(<span name="wt">wt: <span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="sigBins">sigBins: <a href="../package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="p">p: <a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="wIndex">wIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="sIndex">sIndex: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -90,7 +90,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.actors.Estimate#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(wt:Option[infcalcs.Weight],sigBins:infcalcs.NTuple[Int],p:infcalcs.DRData,seed:Int,wIndex:Int,sIndex:Int):infcalcs.actors.Estimate"></a>
+      <a id="&lt;init&gt;(wt:Option[infcalcs.Weight],sigBins:infcalcs.NTuple[Int],p:infcalcs.DRData,wIndex:Int,sIndex:Int):infcalcs.actors.Estimate"></a>
       <a id="&lt;init&gt;:Estimate"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -98,10 +98,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Estimate</span><span class="params">(<span name="wt">wt: <span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="sigBins">sigBins: <a href="../package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="p">p: <a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="seed">seed: <span class="extype" name="scala.Int">Int</span></span>, <span name="wIndex">wIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="sIndex">sIndex: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="name">Estimate</span><span class="params">(<span name="wt">wt: <span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="sigBins">sigBins: <a href="../package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="p">p: <a href="../DRData.html" class="extype" name="infcalcs.DRData">DRData</a></span>, <span name="wIndex">wIndex: <span class="extype" name="scala.Int">Int</span></span>, <span name="sIndex">sIndex: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../index.html#infcalcs.actors.Estimate@&lt;init&gt;(wt:Option[infcalcs.Weight],sigBins:infcalcs.NTuple[Int],p:infcalcs.DRData,seed:Int,wIndex:Int,sIndex:Int):infcalcs.actors.Estimate" title="Permalink" target="_top">
+      <a href="../../index.html#infcalcs.actors.Estimate@&lt;init&gt;(wt:Option[infcalcs.Weight],sigBins:infcalcs.NTuple[Int],p:infcalcs.DRData,wIndex:Int,sIndex:Int):infcalcs.actors.Estimate" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -361,23 +361,6 @@
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#infcalcs.actors.Estimate@sIndex:Int" title="Permalink" target="_top">
-        <img src="../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="infcalcs.actors.Estimate#seed" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="seed:Int"></a>
-      <a id="seed:Int"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">seed</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../index.html#infcalcs.actors.Estimate@seed:Int" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

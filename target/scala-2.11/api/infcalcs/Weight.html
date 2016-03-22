@@ -28,10 +28,12 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Class" src="../lib/class_big.png" />
+        <a href="Weight$.html" title="See companion object"><img alt="Trait/Object" src="../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>Weight</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
+        <h1><a href="Weight$.html" title="See companion object">Weight</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="Weight$.html" title="See companion object">object Weight</a>
+            | <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
           </div></span></h3><span class="permalink">
       <a href="../index.html#infcalcs.Weight" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
@@ -42,19 +44,20 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">Weight</span><span class="params">(<span name="weights">weights: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Weight</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class that contains weights for modifying the signal distribution
-for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRData</a> data set
-</p></div><dl class="paramcmts block"><dt class="param">weights</dt><dd class="cmt"><p>list of weights for each input bin</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Mixin that defines key aspects of a novel probability function</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">Known Subclasses</span>
+            <div class="subClasses hiddenContent"><a href="BWeight.html" class="extype" name="infcalcs.BWeight">BWeight</a>, <a href="CustomWeight.html" class="extype" name="infcalcs.CustomWeight">CustomWeight</a>, <a href="GWeight.html" class="extype" name="infcalcs.GWeight">GWeight</a>, <a href="PWeight.html" class="extype" name="infcalcs.PWeight">PWeight</a>, <a href="UWeight.html" class="extype" name="infcalcs.UWeight">UWeight</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -71,7 +74,7 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="infcalcs.Weight"><span>Weight</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="infcalcs.Weight"><span>Weight</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -88,34 +91,51 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="infcalcs.Weight#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(weights:List[Double],label:String):infcalcs.Weight"></a>
-      <a id="&lt;init&gt;:Weight"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">Weight</span><span class="params">(<span name="weights">weights: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Weight@&lt;init&gt;(weights:List[Double],label:String):infcalcs.Weight" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">weights</dt><dd class="cmt"><p>list of weights for each input bin</p></dd></dl></div>
-    </li></ol>
-            </div>
-
         
 
         
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li name="infcalcs.Weight#label" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="label:String"></a>
+      <a id="label:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">label</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Weight@label:String" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Unique label identifying the weighting function.</p>
+    </li><li name="infcalcs.Weight#weights" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="weights:List[Double]"></a>
+      <a id="weights:List[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">weights</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Weight@weights:List[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Raw weights to be applied to data.</p>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a>
       <a id="!=(Any):Boolean"></a>
@@ -224,6 +244,23 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Weight@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -264,6 +301,23 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Weight@hashCode():Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -281,23 +335,6 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.Weight#label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="label:String"></a>
-      <a id="label:String"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">label</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Weight@label:String" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -366,6 +403,23 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Weight@toString():String" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -435,23 +489,26 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.Weight#weights" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="weights:List[Double]"></a>
-      <a id="weights:List[Double]"></a>
+    </li><li name="infcalcs.Weight#weightTable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="weightTable[A](ct:infcalcs.tables.CTable[A])(implicitevidence$1:scala.math.Numeric[A]):infcalcs.tables.CTable[Double]"></a>
+      <a id="weightTable[A](CTable[A])(Numeric[A]):CTable[Double]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">weights</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+        <span class="name">weightTable</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="ct">ct: <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="infcalcs.Weight.weightTable.A">A</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.math.Numeric">Numeric</span>[<span class="extype" name="infcalcs.Weight.weightTable.A">A</span>]</span>)</span><span class="result">: <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">CTable</a>[<span class="extype" name="scala.Double">Double</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Weight@weights:List[Double]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.Weight@weightTable[A](ct:infcalcs.tables.CTable[A])(implicitevidence$1:scala.math.Numeric[A]):infcalcs.tables.CTable[Double]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">list of weights for each input bin</p>
+      <p class="shortcomment cmt">Applies the weights to a <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">infcalcs.tables.CTable</a>, generating a new <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">infcalcs.tables.CTable</a></p><div class="fullcomment"><div class="comment cmt"><p>Applies the weights to a <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">infcalcs.tables.CTable</a>, generating a new <a href="tables/CTable.html" class="extype" name="infcalcs.tables.CTable">infcalcs.tables.CTable</a></p><p>Note that the weights must be normalized to the existing distribution
+of data among the row dimension of the contingency table using the
+<a href="Weight$.html#reWeight(newW:List[Double],oldW:List[Double]):List[Double]" class="extmbr" name="infcalcs.Weight#reWeight">Weight.reWeight</a> function
+</p></div></div>
     </li></ol>
             </div>
 
@@ -461,15 +518,7 @@ for a particular <a href="DRData.html" class="extype" name="infcalcs.DRData">DRD
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

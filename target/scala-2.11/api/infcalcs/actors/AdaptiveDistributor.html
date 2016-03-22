@@ -203,7 +203,7 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Tracks whether or not all mutual information estimates given some defined signal bins</p>
     </li><li name="akka.actor.Actor#aroundPostRestart" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="aroundPostRestart(reason:Throwable):Unit"></a>
       <a id="aroundPostRestart(Throwable):Unit"></a>
@@ -396,7 +396,7 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
+      <p class="shortcomment cmt">Results sent back from <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> instances</p><div class="fullcomment"><div class="comment cmt"><p>Results sent back from <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> instances</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -470,7 +470,11 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
+      <p class="shortcomment cmt">Initializes some number of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> instances to calculate
+mutual information estimates
+</p><div class="fullcomment"><div class="comment cmt"><p>Initializes some number of <a href="Calculator.html" class="extype" name="infcalcs.actors.Calculator">Calculator</a> instances to calculate
+mutual information estimates
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -555,7 +559,7 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Number of biased estimates per given some defined signal bins</p>
     </li><li name="infcalcs.actors.AdaptiveDistributor#numCalculators" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="numCalculators:Int"></a>
       <a id="numCalculators:Int"></a>
@@ -589,7 +593,9 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Tracks consecutive number of signal bins for which all mutual information
+estimates were biased (see <a href="#stopCriterion():Boolean" class="extmbr" name="infcalcs.actors.AdaptiveDistributor#stopCriterion">stopCriterion</a>)
+</p>
     </li><li name="akka.actor.Actor#postRestart" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="postRestart(reason:Throwable):Unit"></a>
       <a id="postRestart(Throwable):Unit"></a>
@@ -868,7 +874,7 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
+      <p class="shortcomment cmt">Tracks the number of signal bins for calculations</p><div class="fullcomment"><div class="comment cmt"><p>Tracks the number of signal bins for calculations</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
     </li><li name="infcalcs.actors.Distributor#stopCalculation" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="stopCalculation():Unit"></a>
       <a id="stopCalculation():Unit"></a>
@@ -885,7 +891,9 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
+      <p class="shortcomment cmt">Stops actor-based estimation of the channel capacity and outputs final result
+</p><div class="fullcomment"><div class="comment cmt"><p>Stops actor-based estimation of the channel capacity and outputs final result
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
     </li><li name="infcalcs.actors.AdaptiveDistributor#stopCriterion" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stopCriterion():Boolean"></a>
       <a id="stopCriterion():Boolean"></a>
@@ -902,7 +910,8 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Method for determining if the adaptive control algorithm has met its stop criterion
+</p>
     </li><li name="akka.actor.Actor#supervisorStrategy" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="supervisorStrategy:akka.actor.SupervisorStrategy"></a>
       <a id="supervisorStrategy:SupervisorStrategy"></a>
@@ -1021,7 +1030,8 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Updates the number of signal bins for the next iteration of the adaptive control algorithm
+</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -1100,14 +1110,14 @@ to determine the optimal number of bins for signal space
         <span class="kind">var</span>
       </span>
       <span class="symbol">
-        <span class="name">weights</span><span class="result">: <span class="extype" name="scala.collection.immutable.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]]</span>
+        <span class="name">weights</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Option">Option</span>[<a href="../Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]]</span>
       </span>
       </h4><span class="permalink">
       <a href="../../index.html#infcalcs.actors.AdaptiveDistributor@weights:List[Option[infcalcs.Weight]]" title="Permalink" target="_top">
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
+      <p class="shortcomment cmt">List of weights to try for a particular number of signal bins</p><div class="fullcomment"><div class="comment cmt"><p>List of weights to try for a particular number of signal bins</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Distributor.html" class="extype" name="infcalcs.actors.Distributor">Distributor</a></dd></dl></div>
     </li><li name="infcalcs.actors.AdaptiveDistributor#wtIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="wtIndex:Int"></a>
       <a id="wtIndex:Int"></a>
@@ -1124,7 +1134,7 @@ to determine the optimal number of bins for signal space
         <img src="../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Weight index of next calculation</p>
     </li></ol>
             </div>
 

@@ -45,13 +45,13 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a></span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class that contains all mutual information estimates for a
 particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
-</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -91,7 +91,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.EstTuple#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:infcalcs.Estimates,weight:Option[infcalcs.Weight]):infcalcs.EstTuple"></a>
+      <a id="&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.Estimates],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTuple"></a>
       <a id="&lt;init&gt;:EstTuple"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -99,14 +99,14 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a></span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>)</span>
+        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:infcalcs.Estimates,weight:Option[infcalcs.Weight]):infcalcs.EstTuple" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTuple@&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.Estimates],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTuple" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -225,18 +225,18 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="infcalcs.EstTuple#estimates" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="estimates:infcalcs.Estimates"></a>
-      <a id="estimates:Estimates"></a>
+      <a id="estimates:Option[infcalcs.Estimates]"></a>
+      <a id="estimates:Option[Estimates]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">estimates</span><span class="result">: <a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a></span>
+        <span class="name">estimates</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@estimates:infcalcs.Estimates" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTuple@estimates:Option[infcalcs.Estimates]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -383,6 +383,23 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="infcalcs.EstTuple#unbiased" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unbiased:Boolean"></a>
+      <a id="unbiased:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unbiased</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.EstTuple@unbiased:Boolean" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">true if estimate is not biased</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

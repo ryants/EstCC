@@ -45,11 +45,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Estimates</span><span class="params">(<span name="dataEstimate">dataEstimate: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Estimates</span><span class="params">(<span name="dataEstimate">dataEstimate: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="coeffOfDetermination">coeffOfDetermination: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class denoting the actual mutual information estimate from the randomized estimates
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class with the actual and randomized mutual information estimates.
+Also includes the coefficient of determination for the actual linear fit
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -90,7 +91,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="infcalcs.Estimates#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(dataEstimate:infcalcs.Pair[Double],randDataEstimate:List[infcalcs.Pair[Double]]):infcalcs.Estimates"></a>
+      <a id="&lt;init&gt;(dataEstimate:infcalcs.Pair[Double],randDataEstimate:List[infcalcs.Pair[Double]],coeffOfDetermination:Double):infcalcs.Estimates"></a>
       <a id="&lt;init&gt;:Estimates"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -98,10 +99,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Estimates</span><span class="params">(<span name="dataEstimate">dataEstimate: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>)</span>
+        <span class="name">Estimates</span><span class="params">(<span name="dataEstimate">dataEstimate: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="randDataEstimate">randDataEstimate: <span class="extype" name="scala.List">List</span>[<a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>]]</span>, <span name="coeffOfDetermination">coeffOfDetermination: <span class="extype" name="scala.Double">Double</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.Estimates@&lt;init&gt;(dataEstimate:infcalcs.Pair[Double],randDataEstimate:List[infcalcs.Pair[Double]]):infcalcs.Estimates" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.Estimates@&lt;init&gt;(dataEstimate:infcalcs.Pair[Double],randDataEstimate:List[infcalcs.Pair[Double]],coeffOfDetermination:Double):infcalcs.Estimates" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -206,6 +207,23 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="infcalcs.Estimates#coeffOfDetermination" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="coeffOfDetermination:Double"></a>
+      <a id="coeffOfDetermination:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">coeffOfDetermination</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.Estimates@coeffOfDetermination:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="infcalcs.Estimates#dataEstimate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="dataEstimate:infcalcs.Pair[Double]"></a>
       <a id="dataEstimate:Pair[Double]"></a>

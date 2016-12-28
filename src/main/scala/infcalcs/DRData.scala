@@ -2,6 +2,7 @@ package infcalcs
 
 import Tree._
 import Orderings._
+import scala.util.Random.nextInt
 
 /**
  * Structure for input-output (dose-response) data.
@@ -24,7 +25,7 @@ class DRData(calcConfig: CalcConfig)
   require(checkSize(sig) == 1 && checkSize(resp) == 1,
     "all signals and responses must have consistent dimensionality")
 
-  val zippedVals = (sig, resp).zipped.toVector
+  val zippedVals: Vector[Pair[NTuple[Double]]] = (sig, resp).zipped.toVector
 
   lazy val sigVals = calcConfig.srParameters("signalValues")
   lazy val respVals = calcConfig.srParameters("responseValues")
@@ -131,8 +132,7 @@ class DRData(calcConfig: CalcConfig)
    *
    * @param trees vector of partition trees (corresponding to ordered pair data
    *              points)
-   *
-   * @return vector of bin index vectors
+    * @return vector of bin index vectors
    *
    */
   private def keys(
@@ -141,6 +141,16 @@ class DRData(calcConfig: CalcConfig)
     val vtups = CTBuild.keyFromDimLengths(dimLengths)
     (vtups.indices map (x => (vtups(x), x))).toMap
   }
+
+  /**
+    * Generates a new [[DRData]] instance by resampling values with replacement
+    * @return [[DRData]]
+    */
+  private def resample_with_replacement(): DRData = {
+    val (rsig, rresp) = ((0 until numObs) map (x => zippedVals(nextInt(numObs)))).toVector.unzip
+    new DRData(calcConfig)(rsig, rresp)
+  }
+
 
   /**
    * Delimiters for signal space
@@ -201,6 +211,16 @@ class DRData(calcConfig: CalcConfig)
     writer.flush()
     writer.close()
   }
+
+  /**
+    * Generate a bootstrap sample from a data set. Sample size is defined as a
+    * command line argument
+    *
+    * @return vector of [[DRData]] instances
+    */
+  def bootstrap_sample(): Vector[DRData] =
+    ((0 until calcConfig.numParameters("numForBootstrap").toInt) map (x =>
+      resample_with_replacement())).toVector
 
 
 }

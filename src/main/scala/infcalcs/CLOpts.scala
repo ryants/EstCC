@@ -12,7 +12,8 @@ case class Config(
     dataFile: String = "",
     paramFile: String = "",
     seed: Int = -1,
-    cores: Int = 1)
+    cores: Int = 1,
+    bootstrap: Int = -1)
 
 /**
  * Parser for command line options, inherited by [[EstCC]]
@@ -20,11 +21,11 @@ case class Config(
 trait CLOpts {
   val parser = new scopt.OptionParser[Config]("EstCC.jar") {
     head("EstCC","with adaptive bin control")
-    opt[Unit]('v', "verbose") action { (_, c) =>
-      c.copy(verbose = true)
+    opt[Unit]('v', "verbose") action {
+      (_, c) => c.copy(verbose = true)
     } text "periodically print calculation status to stdout"
-    opt[Unit]('n', "no-regr") action { (_, c) =>
-      c.copy(noReg = true)
+    opt[Unit]('n', "no-regr") action {
+      (_, c) => c.copy(noReg = true)
     } text "calculate mutual information from data without regression estimator"
     opt[String]('d', "data") required() valueName "<file>" action {
       (x, c) => c.copy(dataFile = x)
@@ -38,6 +39,9 @@ trait CLOpts {
     opt[Int]('c', "cores") action {
       (x, c) => c.copy(cores = x)
     } text "specify positive integer for available number of CPU cores"
+    opt[Int]('b',"bootstrap") action {
+      (x, c) => c.copy(bootstrap = x)
+    } text "specify positive integer to use bootstrapping estimation of confidence intervals"
     help("help") text "prints this usage text"
   }
 }

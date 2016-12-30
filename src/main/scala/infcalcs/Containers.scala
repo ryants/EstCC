@@ -50,7 +50,7 @@ case class SubCalc(inv: Double, table: CTable[Double])
  * @param subCalcs
  * @param label
  */
-case class RegData(subCalcs: Vector[SubCalc], label: String) {
+case class RegData(subCalcs: Seq[SubCalc], label: String) {
 
   lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.mutualInformation))).unzip
 
@@ -119,6 +119,18 @@ case class EstTuple(
 case class Estimates(
     dataEstimate: Pair[Double],
     randDataEstimate: List[Pair[Double]],
+    coeffOfDetermination: Double)
+
+/**
+  * Case class with actual and 1 randomized data set estimates
+  *
+  * @param dataEstimate mean and 95% confidence interval bounds
+  * @param randDataEstimate
+  * @param coeffOfDetermination
+  */
+case class EstimateBS(
+    dataEstimate: (Double,Pair[Double]),
+    randDataEstimate: (Double,Pair[Double]),
     coeffOfDetermination: Double)
 
 /**

@@ -235,3 +235,13 @@ abstract class CTable[A](implicit n: Numeric[A]) {
     writer.close()
   }
 }
+
+object CTable {
+  val values: Seq[String] = Seq(
+    "signalEntropy",
+    "responseEntropy",
+    "condSignalEntropy",
+    "condResponseEntropy",
+    "mutualInformation",
+    "transferEfficiency")
+}

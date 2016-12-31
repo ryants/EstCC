@@ -50,15 +50,19 @@ case class SubCalc(inv: Double, table: CTable[Double])
  * @param subCalcs
  * @param label
  */
-case class RegData(subCalcs: Seq[SubCalc], label: String, value: String) {
+case class RegData(subCalcs: Seq[SubCalc], label: String) {
 
-  lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.ctVals(value)))).unzip
+  private def getValues(value: String): Pair[Seq[Double]] =
+    (subCalcs map (x => (x.inv, x.table.ctVals(value)))).unzip
 
   /**
    * Calculates simple linear regression between inverse sample size and
    * mutualInformation
    */
-  def calculateRegression: SLR = new SLR(invVals, miVals, label)
+  def calculateRegression(value: String = "mutualInformation"): SLR = {
+    val (invVals, calcVals) = getValues(value)
+    new SLR(invVals, calcVals, label)
+  }
 
 }
 

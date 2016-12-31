@@ -422,12 +422,12 @@ object EstimateMI {
     val cBinPair = binPair._2 mkString ","
     val tag = s"${label}_r${rBinPair}_c${cBinPair}"
 
-    val estimate = buildSingleRegData(calcConfig)(binPair,data,wts,tag=tag).calculateRegression
+    val estimate = buildSingleRegData(calcConfig)(binPair,data,wts,tag=tag).calculateRegression()
     val sample = data.bootstrap_sample() map (x =>
-      buildSingleRegData(calcConfig)(binPair,x,wts).calculateRegression.intercept)
+      buildSingleRegData(calcConfig)(binPair,x,wts).calculateRegression().intercept)
     //TODO FIGURE OUT MORE EFFICIENT WAY TO DO THIS
     val rand_sample = data.bootstrap_sample() map (x =>
-      buildSingleRegData(calcConfig)(binPair,x,wts,true).calculateRegression.intercept)
+      buildSingleRegData(calcConfig)(binPair,x,wts,true).calculateRegression().intercept)
     EstimateBS((estimate.intercept,meanAndConfBS(sample)._2),meanAndConfBS(rand_sample),estimate.rSquared)
   }
 
@@ -449,7 +449,7 @@ object EstimateMI {
   def calcMultRegs(calcConfig: CalcConfig)
       (r: (RegData, RegDataRand)): (SLR, List[Option[SLR]]) = {
     // Regression on original data
-    val regLine = r._1.calculateRegression
+    val regLine = r._1.calculateRegression()
     if (calcConfig.outputRegData)
       regLine.toFile(s"regData_${regLine.label}.dat")
     // Regression on randomized data
@@ -793,11 +793,22 @@ object EstimateMI {
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)
     IOFile.delimInfoToFile((rd, cd), (sigKey, respKey), calcConfig.stringParameters("filePrefix"))
 
-    val slrs: Iterable[SLR] = tables.head.ctVals.keys map
-        (x => new SLR(invFracs, tables map (_(x)), x))
-    val estimates: Map[String, Pair[Double]] = (slrs map (x =>
-      (x.label, (x.intercept, x.i95Conf)))).toMap
-    IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
+    if (calcConfig.numParameters("numForBootstrap") > 0){
+      val sample = data.bootstrap_sample() map (x =>
+        buildSingleRegData(calcConfig)(binPair, data, wts, tag="final"))
+      val dists = for {
+        x <- CTable.values
+      } yield (sample map (_.calculateRegression(x).intercept))
+      val estimates: Map[String, (Double, Pair[Double])] =
+        (CTable.values zip (dists map meanAndConfBS)).toMap
+      IOFile.optInfoToFileBS(estimates, calcConfig.stringParameters("filePrefix"))
+    } else {
+      val slrs: Iterable[SLR] = tables.head.ctVals.keys map
+        (x => new SLR(invFracs, tables map (_ (x)), x))
+      val estimates: Map[String, Pair[Double]] = (slrs map (x =>
+        (x.label, (x.intercept, x.i95Conf)))).toMap
+      IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
+    }
   }
 
 }

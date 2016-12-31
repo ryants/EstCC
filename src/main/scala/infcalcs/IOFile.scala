@@ -202,6 +202,24 @@ object IOFile {
   }
 
   /**
+    * Alternate to [[optInfoToFile]] for bootstrapped data
+    *
+    * @param c
+    * @param s
+    */
+  def optInfoToFileBS(c: Map[String, (Double, Pair[Double])], s: String): Unit = {
+    val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
+    val data = c.keys map { x =>
+      val v = c(x)
+      val s = s"${v._1}\t${v._2._1}\t${v._2._2}"
+      writer.write(s"${x}\t${v}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+
+  /**
    * Writes relevant delimiter information to file
    *
    * @param dPair Pair of delimiters as [[NTuple]] of type [[Tree]]

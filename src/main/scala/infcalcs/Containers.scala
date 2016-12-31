@@ -109,6 +109,20 @@ case class EstTuple(
     unbiased: Boolean)
 
 /**
+  * Alternative to [[EstTuple]] for use with bootstrapping approach
+  *
+  * @param pairBinTuples
+  * @param estimates
+  * @param weight
+  * @param unbiased
+  */
+case class EstTupleBS(
+    pairBinTuples: Pair[NTuple[Int]],
+    estimates: Option[EstimateBS],
+    weight: Option[Weight],
+    unbiased: Boolean)
+
+/**
  * Case class with the actual and randomized mutual information estimates.
  * Also includes the coefficient of determination for the actual linear fit
  *
@@ -122,7 +136,8 @@ case class Estimates(
     coeffOfDetermination: Double)
 
 /**
-  * Case class with actual and 1 randomized data set estimates
+  * Case class with actual and 1 randomized data set estimates using a
+  * bootstrapping approach
   *
   * @param dataEstimate mean and 95% confidence interval bounds
   * @param randDataEstimate

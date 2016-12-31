@@ -50,9 +50,9 @@ case class SubCalc(inv: Double, table: CTable[Double])
  * @param subCalcs
  * @param label
  */
-case class RegData(subCalcs: Seq[SubCalc], label: String) {
+case class RegData(subCalcs: Seq[SubCalc], label: String, value: String) {
 
-  lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.mutualInformation))).unzip
+  lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.ctVals(value)))).unzip
 
   /**
    * Calculates simple linear regression between inverse sample size and
@@ -69,15 +69,15 @@ case class RegData(subCalcs: Seq[SubCalc], label: String) {
  * @param subCalcs
  * @param label
  */
-case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String) {
+case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String, value: String = "mutualInformation") {
 
   lazy val trans = subCalcs.transpose
   lazy val invVals = trans map (_ map (_.inv))
-  lazy val miVals = trans map (_ map (_.table.mutualInformation))
+  lazy val miVals = trans map (_ map (_.table.ctVals(value)))
 
   /**
    * Calculates simple linear regression between inverse sample size and
-   * mutualInformation but is wrapped in the Option monad to
+   * [[CTable]] based value but is wrapped in the Option monad to
    * accommodate estimates that are not numeric
    */
   def calculateRegression: List[Option[SLR]] = {

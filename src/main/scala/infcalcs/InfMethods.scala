@@ -1099,6 +1099,102 @@ object EstimateCC {
   }
 
   /**
+    * Alternate to [[estimateCCVerbose]] for bootstrapped data
+    *
+    * @param p
+    * @param index
+    * @param calcConfig
+    */
+  def estimateCCBS(
+      p: DRData,
+      index: Int = 0)(implicit calcConfig: CalcConfig): Unit = {
+
+    def calcEstimates(binPair: Pair[NTuple[Int]], wts: List[Option[Weight]], index: Int): Vector[Vector[EstTupleBS]] = {
+
+      var estimates: Array[Vector[EstTupleBS]] = Array()
+      (0 until wts.length) foreach { w =>
+
+        val estimate = EstimateMI.genEstimatesBSImp(calcConfig)(p, binPair._1, wts(w))
+        val opt = EstimateMI.optMIBS(calcConfig)(estimate)
+
+        estimates = estimates :+ estimate
+
+        calcConfig.outF match {
+          case Some(f) =>
+            IOFile.estimatesToFileBS(estimate, s"${f}_${w}_${index}.dat")
+          case None =>
+        }
+
+        wts(w) match {
+          case Some(wt) => {
+            val estimate = opt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+            val printOut = s"  ${1 + w}) Weight: ${wt.label}, " +
+              s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
+            println(printOut)
+          }
+          case None => {
+            val estimate = opt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+            val printOut = s"  ${1 + w}) Weight: None, " +
+              s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
+            println(printOut)
+          }
+        }
+      }
+      estimates.toVector
+    }
+    var signalBins = calcConfig.initSignalBins
+
+    val finalOpt: EstTupleBS =
+      if (calcConfig.srParameters("signalValues").isDefined) {
+        println(s"# Signal Bins: ${signalBins.product}")
+        val weights = getWeights(calcConfig)(p, calcConfig.initSignalBins)
+        val estimates = calcEstimates(calcConfig.initBinTuples, weights, 0)
+
+        EstimateMI.optMIBS(calcConfig)(
+          estimates map EstimateMI.optMIBS(calcConfig))
+
+      } else {
+
+        var numConsecBiasedSigEst = 0
+        var optList: Array[EstTupleBS] = Array()
+        var weights: List[Option[Weight]] = Nil
+        var index = 0
+
+        while (numConsecBiasedSigEst < calcConfig.numParameters("numConsecBiasedSigEst").toInt &&
+          EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))) {
+
+          println(s"# Signal Bins: ${signalBins.product}")
+
+          weights = getWeights(calcConfig)(p, signalBins)
+          val estimates = calcEstimates((signalBins, calcConfig.initResponseBins), weights, index)
+          val incrCriterion = estimates forall (est => est forall (!_.unbiased))
+          val opt = EstimateMI.optMIBS(calcConfig)(
+            estimates map EstimateMI.optMIBS(calcConfig))
+
+          optList = optList :+ opt
+
+          if (incrCriterion) {
+            numConsecBiasedSigEst += 1
+          } else {
+            numConsecBiasedSigEst = 0
+          }
+
+          signalBins = EstimateMI.updateSigBinNumbers(calcConfig)(signalBins)
+          index += 1
+
+        }
+
+        EstimateMI.optMIBS(calcConfig)(optList.toVector)
+
+      }
+    val estimate = finalOpt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+    println(estimate.dataEstimate._1)
+    EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, finalOpt.weight)
+  }
+
+
+
+  /**
    * Estimates the channel capacity for a [[DRData]] given a [[CalcConfig]]
    *
    * This function generates a list of [[Weight]] instances to apply to the data

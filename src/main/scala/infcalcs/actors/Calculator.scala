@@ -13,28 +13,52 @@ class Calculator(implicit calcConfig: CalcConfig) extends Actor {
   def receive = {
     case Estimate(w, s, p, wIndex, sIndex) => {
       val binPair = (s, calcConfig.initResponseBins)
-      val estMI =
-        if (EstCC.appConfig.verbose) EstimateMI.genEstimatesMultImp(calcConfig)(p, s, w)
-        else EstimateMI.genEstimatesMult(calcConfig)(p, binPair, w)
-      val biased = estMI forall (!_.unbiased)
-      calcConfig.outF match {
-        case Some(str) => IOFile.estimatesToFileMult(
-          estMI,
-          s"${str}_${wIndex}_${sIndex}.dat")
-        case _ =>
-      }
-      val opt = EstimateMI.optMIMult(calcConfig)(estMI)
-
-      def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0,0.0),Nil,0.0)).dataEstimate
-
-      if (EstCC.appConfig.verbose) {
-        w match {
-          case Some(wt) => println(s"${wt.label}\tI = ${getDataEstimate(opt.estimates)._1}")
-          case None => println(s"None\tI = ${getDataEstimate(opt.estimates)._1}")
+      if (calcConfig.numParameters("numForBootstrap") > 0) {
+        val estMI =
+          EstimateMI.genEstimatesBSImp(calcConfig)(p,binPair._1,w)
+        val biased = estMI forall (!_.unbiased)
+        calcConfig.outF match {
+          case Some(str) => IOFile.estimatesToFileBS(
+            estMI,
+            s"${str}_${wIndex}_${sIndex}.dat")
+          case _ =>
         }
+        val opt = EstimateMI.optMIBS(calcConfig)(estMI)
 
+        def getDataEstimate(est: Option[EstimateBS]) = (est getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)).dataEstimate
+
+        if (EstCC.appConfig.verbose) {
+          w match {
+            case Some(wt) => println(s"${wt.label}\tI = ${getDataEstimate(opt.estimates)._1}")
+            case None => println(s"None\tI = ${getDataEstimate(opt.estimates)._1}")
+          }
+
+        }
+        sender ! ResultBS(opt, biased)
+      } else {
+        val estMI =
+          if (EstCC.appConfig.verbose) EstimateMI.genEstimatesMultImp(calcConfig)(p, s, w)
+          else EstimateMI.genEstimatesMult(calcConfig)(p, binPair, w)
+        val biased = estMI forall (!_.unbiased)
+        calcConfig.outF match {
+          case Some(str) => IOFile.estimatesToFileMult(
+            estMI,
+            s"${str}_${wIndex}_${sIndex}.dat")
+          case _ =>
+        }
+        val opt = EstimateMI.optMIMult(calcConfig)(estMI)
+
+        def getDataEstimate(est: Option[Estimates]) = (est getOrElse Estimates((0.0, 0.0), Nil, 0.0)).dataEstimate
+
+        if (EstCC.appConfig.verbose) {
+          w match {
+            case Some(wt) => println(s"${wt.label}\tI = ${getDataEstimate(opt.estimates)._1}")
+            case None => println(s"None\tI = ${getDataEstimate(opt.estimates)._1}")
+          }
+
+        }
+        sender ! Result(opt, biased)
       }
-      sender ! Result(opt, biased)
     }
   }
 }

@@ -35,6 +35,19 @@ class FixedDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Distr
         stopCalculation()
       }
     }
+    case resbs: ResultBS => {
+      receivedCalc()
+      updateEstBSList(resbs)
+      if (!sentAllCalcs) {
+        if (EstCC.appConfig.verbose) {
+          println(s"${totalCalculations - received} weights remaining for current signal bins")
+        }
+        sender ! Estimate(wts(sent), sb, p, sent, sigIndex)
+        sentCalc()
+      } else if (receivedAllCalcs) {
+        stopCalculation()
+      }
+    }
     case init: Init => {
       try initializeCalculators(init)
       catch {

@@ -21,6 +21,8 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
   /** Results sent back from [[Calculator]] instances */
   var estList: Array[EstTuple] = Array()
 
+  var estBSList: Array[EstTupleBS] = Array()
+
   /** Tracks the number of signal bins for calculations */
   var signalBins: NTuple[Int] = calcConfig.initSignalBins
 
@@ -44,6 +46,8 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
   def receivedAllCalcs: Boolean = received == totalCalculations
 
   def updateEstList(r: Result) = estList = estList :+ r.res
+
+  def updateEstBSList(r: ResultBS) = estBSList = estBSList :+ r.res
 
   /**
    * Initializes some number of [[Calculator]] instances to calculate
@@ -77,12 +81,23 @@ abstract class Distributor(p: DRData)(implicit calcConfig: CalcConfig) extends A
     if (EstCC.appConfig.verbose) {
       println(s"Stop criterion reached with ${signalBins.product} total bins")
     }
-    val maxOpt = EstimateMI.optMIMult(calcConfig)(estList.toVector)
-    EstimateMI.finalEstimation(
-      maxOpt.pairBinTuples,
-      p,
-      maxOpt.weight)(calcConfig)
-    println(s"${(maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)).dataEstimate._1}")
+    if (calcConfig.numParameters("numForBootstrap") > 0) {
+      val maxOpt = EstimateMI.optMIBS(calcConfig)(estBSList.toVector)
+      EstimateMI.finalEstimation(
+        maxOpt.pairBinTuples,
+        p,
+        maxOpt.weight)(calcConfig)
+      println(s"${(maxOpt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)).dataEstimate._1}")
+
+    } else {
+      val maxOpt = EstimateMI.optMIMult(calcConfig)(estList.toVector)
+      EstimateMI.optMIMult(calcConfig)(estList.toVector)
+      EstimateMI.finalEstimation(
+        maxOpt.pairBinTuples,
+        p,
+        maxOpt.weight)(calcConfig)
+      println(s"${(maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)).dataEstimate._1}")
+    }
     context.system.shutdown()
   }
 

@@ -35,4 +35,10 @@ case class Estimate(
  */
 case class Result(res: EstTuple, biased: Boolean)
 
-
+/**
+  * Alternate to [[Result]] for bootstrapping data
+  *
+  * @param res
+  * @param biased
+  */
+case class ResultBS(res: EstTupleBS, biased: Boolean)

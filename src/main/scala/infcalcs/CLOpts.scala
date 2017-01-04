@@ -12,8 +12,7 @@ case class Config(
     dataFile: String = "",
     paramFile: String = "",
     seed: Int = -1,
-    cores: Int = 1,
-    bootstrap: Int = -1)
+    cores: Int = 1)
 
 /**
  * Parser for command line options, inherited by [[EstCC]]
@@ -39,9 +38,6 @@ trait CLOpts {
     opt[Int]('c', "cores") action {
       (x, c) => c.copy(cores = x)
     } text "specify positive integer for available number of CPU cores"
-    opt[Int]('b',"bootstrap") action {
-      (x, c) => c.copy(bootstrap = x)
-    } text "specify positive integer to use bootstrapping estimation of confidence intervals"
     help("help") text "prints this usage text"
   }
 }

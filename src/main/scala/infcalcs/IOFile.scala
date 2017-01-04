@@ -193,11 +193,8 @@ object IOFile {
     * @param calcConfig
     */
   def estimatesToFileBS(d: Vector[EstTupleBS], f: String)(implicit calcConfig: CalcConfig): Unit = {
-    val numRandTables = calcConfig.numParameters("numRandom").toInt
     val writer = new BufferedWriter(new FileWriter(new File(f)))
-    val rands = (0 until numRandTables).toList map
-      (x => ("\tMIRand " + x + "\tSDRand " + x))
-    writer.write("# rBins\tcBins\tMI\tSD" + rands.mkString + "\tCoD")
+    writer.write("# rBins\tcBins\tMI\tlow\thigh\tMIRand\tlow\thigh\tCoD")
     writer.newLine()
     val wtString = d.head.weight match {
       case None => "None"

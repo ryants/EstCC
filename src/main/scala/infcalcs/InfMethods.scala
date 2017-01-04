@@ -594,13 +594,13 @@ object EstimateMI {
       signalBins: NTuple[Int],
       wts: Option[Weight] = None): Vector[EstTupleBS] = {
 
-    def isNotBiased(v: Double, lci: Double): Boolean =
-      v - lci <= calcConfig.numParameters("cutoffValue")
+    def isNotBiased(lc: Double): Boolean =
+      lc <= calcConfig.numParameters("cutoffValue")
 
     if (calcConfig.srParameters("responseValues").isDefined) {
       val binPair = (signalBins, calcConfig.initResponseBins)
       val estimate = calcBootstrapEstimates(calcConfig)(binPair, pl, wts)
-      val notBiased = isNotBiased(estimate.randDataEstimate._1,estimate.randDataEstimate._2._1)
+      val notBiased = isNotBiased(estimate.randDataEstimate._2._1)
       Vector(EstTupleBS(binPair, Some(estimate), wts, notBiased))
     } else {
       var numConsecRandPos = 0
@@ -612,7 +612,7 @@ object EstimateMI {
 
         val binPair = (signalBins, responseBins)
         val estimate = calcBootstrapEstimates(calcConfig)(binPair, pl, wts)
-        val notBiased = isNotBiased(estimate.randDataEstimate._1, estimate.randDataEstimate._2._1)
+        val notBiased = isNotBiased(estimate.randDataEstimate._2._1)
         val est = EstTupleBS(binPair, Some(estimate), wts, notBiased)
         res = res :+ est
         if (est.unbiased) numConsecRandPos = 0

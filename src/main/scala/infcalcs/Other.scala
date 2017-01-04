@@ -54,11 +54,11 @@ object MathFuncs {
     * Like [[meanAndConf]] but for a bootstrapped data set
     *
     * @param ls values
-    * @return (mean, 95% confidence interval)
+    * @return (mean, values corresponding to 95% confidence interval)
     */
   def meanAndConfBS(ls: Seq[Double]): (Double,Pair[Double]) = {
     val lowIndex = (0.05*ls.length).toInt
-    val highIndex = (0.05*ls.length).toInt
+    val highIndex = (0.95*ls.length).toInt
     val mean = ls.sum / ls.length.toDouble
     val lss = ls.sorted
     return (mean, (lss(lowIndex), lss(highIndex)))

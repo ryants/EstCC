@@ -26,4 +26,9 @@ class OLSTest extends FlatSpec with Matchers {
     (ols.sSE - 0.09091 < 1e-5) shouldBe true
   }
 
+  it should "provide fitted values given a data point" in {
+    val xi = DenseVector(1.0,2.0)
+    (ols fit xi) shouldBe ols.intercept*xi(0) + ols.slope*xi(1)
+  }
+
 }

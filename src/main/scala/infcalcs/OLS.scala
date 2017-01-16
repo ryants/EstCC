@@ -1,6 +1,8 @@
 package infcalcs
 
-import breeze.linalg.{DenseMatrix, DenseVector, diag, inv, sum}
+import java.io.File
+
+import breeze.linalg.{DenseMatrix, DenseVector, csvwrite, diag, inv, sum}
 import breeze.stats.mean
 import cern.jet.stat.Probability._
 
@@ -31,6 +33,7 @@ class OLS(val xs: DenseMatrix[Double], val ys: DenseVector[Double]) {
   lazy val betaCovRobust: DenseMatrix[Double] = ixtx * (xs.t * omega * xs) * ixtx
   lazy val betaVarRobust: DenseVector[Double] = diag(betaCovRobust)
 
+  // These are only useful for simple linear regression
   lazy val intercept: Double = beta(0)
   lazy val slope: Double = beta(1)
   lazy val iSE: Double = math.sqrt(betaVar(0))
@@ -51,4 +54,44 @@ class OLS(val xs: DenseMatrix[Double], val ys: DenseVector[Double]) {
     val TSS: Double = sum(valDiff :* valDiff)
     (SSR/TSS)
   }
+
+  /**
+    * Writes the regression data to a file.
+    *
+    * Each datapoint is written to the file on its own line, with the x
+    * and y values separated by a space. The third column contains the
+    * fitted values
+    *
+    * @param f The name of the file to write.
+    */
+  def toFile(f: String) = {
+    val writeFile = new File(f)
+    val mat = DenseMatrix.vertcat(xs(::,1 to -1),ys.toDenseMatrix.t,(xs*beta).toDenseMatrix.t)
+    csvwrite(writeFile,mat,'\t')
+  }
+
+  def fit: DenseVector[Double] => Double =
+    (xi: DenseVector[Double]) => xi.t * beta
+
+}
+
+/**
+  * Companion object to [[OLS]] class
+  */
+object OLS {
+
+  /**
+    * Constructor for simple linear regression.  It adds in a vector
+    * for constants and converts the [[Seq]] to [[DenseMatrix]] or
+    * [[DenseVector]] appropriately
+    *
+    * @param xs
+    * @param ys
+    * @return
+    */
+  def apply(xs: Seq[Double], ys: Seq[Double]): OLS = {
+    val xsm = xs map (x => Seq(1.0, x))
+    new OLS(DenseMatrix(xsm: _*),DenseVector(ys: _*))
+  }
+
 }

@@ -18,6 +18,7 @@ class OLSTest extends FlatSpec with Matchers {
     ols.dof shouldBe ols.n - ols.k
   }
 
+  // checked against values from R linear model
   it should "calculate regression coefficients" in {
     (ols.intercept-1.0 < 1e-5) shouldBe true
     (ols.slope-0.54545 < 1e-5) shouldBe true
@@ -29,6 +30,12 @@ class OLSTest extends FlatSpec with Matchers {
   it should "provide fitted values given a data point" in {
     val xi = DenseVector(1.0,2.0)
     (ols fit xi) shouldBe ols.intercept*xi(0) + ols.slope*xi(1)
+  }
+
+  // checked against values from R sandwich package
+  it should "accurately calculate robust estimates of the coefficient variances" in {
+    (ols.betaVarRobust(0) - math.sqrt(0.23515152) < 1e-8) shouldBe true
+    (ols.betaVarRobust(1) - math.sqrt(0.005970448) < 1e-9) shouldBe true
   }
 
 }

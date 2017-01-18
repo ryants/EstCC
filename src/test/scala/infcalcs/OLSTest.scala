@@ -10,7 +10,7 @@ class OLSTest extends FlatSpec with Matchers {
 
   val xs = new DenseMatrix(10,2,Array(1,1,1,1,1,1,1,1,1,1,1,2,3,4,5,6,7,8,9,10) map (_.toDouble))
   val ys = new DenseVector(Array(1,3,2,4,3,5,4,6,5,7) map (_.toDouble))
-  val ols = new OLS(xs,ys)
+  val ols = new OLS(xs,ys,"")
 
   "Ordinary least squares" should "correctly reproduce data dimensions" in {
     ols.n shouldBe 10

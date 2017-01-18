@@ -259,7 +259,8 @@ object EstimateMI {
 
     @tailrec
     def findCtPos(value: Double, tree: Tree[CtPos] = t): CtPos =
-      if (value > tree.maxVal.get.cumProb) throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.get.cumProb}}) in tree"))
+      if (value > tree.maxVal.get.cumProb)
+        throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.get.cumProb}}) in tree"))
       else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
       else {
         val ctPos = tree.value.get
@@ -432,7 +433,7 @@ object EstimateMI {
     EstimateBS(
       (estimate.intercept,meanAndConfBS(sample)._2),
       (randEstimate.intercept,meanAndConfBS(rand_sample)._2),
-      estimate.rSquared)
+      estimate.coeffOfDetermination)
   }
 
   /**
@@ -441,8 +442,8 @@ object EstimateMI {
    * Calculates a linear regression of the mutual information of each
    * subsampled or randomized dataset vs. the inverse sample size. Returns
    * results as a tuple: the first entry in the tuple contains the regression
-   * line (as an instance of [[SLR]]) for the original dataset; the second
-   * entry in the tuple contains a list of regression lines ([[SLR]] objects),
+   * line (as an instance of [[OLS]]) for the original dataset; the second
+   * entry in the tuple contains a list of regression lines ([[OLS]] objects),
    * one for each of numRandTables rounds of randomization. Because linear
    * regression may fail on the randomized data, some entries in the list may be None.
    *
@@ -451,7 +452,7 @@ object EstimateMI {
    * @return (regression on original data, list of regressions on random data)
    */
   def calcMultRegs(calcConfig: CalcConfig)
-      (r: (RegData, RegDataRand)): (SLR, List[Option[SLR]]) = {
+      (r: (RegData, RegDataRand)): (OLS, List[Option[OLS]]) = {
     // Regression on original data
     val regLine = r._1.calculateRegression()
     if (calcConfig.outputRegData)
@@ -471,15 +472,15 @@ object EstimateMI {
    * @param regs (regression, list of regressions), as from [[calcMultRegs]]
    * @return [[Estimates]] instance
    */
-  def multIntercepts(regs: (SLR, List[Option[SLR]])): Estimates = {
+  def multIntercepts(regs: (OLS, List[Option[OLS]])): Estimates = {
     // Retrieves intercept and associated conf. interval for a regression model
-    def getStats(ls: List[Option[SLR]], acc: List[Pair[Double]]): List[Pair[Double]] =
+    def getStats(ls: List[Option[OLS]], acc: List[Pair[Double]]): List[Pair[Double]] =
       if (ls.isEmpty) acc
       else ls.head match {
-        case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.i95Conf))
+        case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.iConf95))
         case None => getStats(ls.tail, acc :+(Double.NaN, Double.NaN))
       }
-    Estimates((regs._1.intercept, regs._1.i95Conf), getStats(regs._2, List()), regs._1.rSquared)
+    Estimates((regs._1.intercept, regs._1.iConf95), getStats(regs._2, List()), regs._1.coeffOfDetermination)
   }
 
   /**
@@ -790,7 +791,7 @@ object EstimateMI {
       }).unzip
     }
 
-    val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
+    val regData = OLS(invFracs, tables map (_.mutualInformation), "final_est")
     regData toFile "final_est_regr.dat"
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
@@ -807,10 +808,10 @@ object EstimateMI {
         (CTable.values zip (dists map meanAndConfBS)).toMap
       IOFile.optInfoToFileBS(estimates, calcConfig.stringParameters("filePrefix"))
     } else {
-      val slrs: Iterable[SLR] = tables.head.ctVals.keys map
-        (x => new SLR(invFracs, tables map (_ (x)), x))
+      val slrs: Iterable[OLS] = tables.head.ctVals.keys map
+        (x => OLS(invFracs, tables map (_ (x)), x))
       val estimates: Map[String, Pair[Double]] = (slrs map (x =>
-        (x.label, (x.intercept, x.i95Conf)))).toMap
+        (x.label, (x.intercept, x.iConf95)))).toMap
       IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
     }
   }

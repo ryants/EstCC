@@ -59,9 +59,9 @@ case class RegData(subCalcs: Seq[SubCalc], label: String) {
    * Calculates simple linear regression between inverse sample size and
    * mutualInformation
    */
-  def calculateRegression(value: String = "mutualInformation"): SLR = {
+  def calculateRegression(value: String = "mutualInformation"): OLS = {
     val (invVals, calcVals) = getValues(value)
-    new SLR(invVals, calcVals, label)
+    OLS(invVals, calcVals)
   }
 
 }
@@ -84,12 +84,12 @@ case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String, value: 
    * [[CTable]] based value but is wrapped in the Option monad to
    * accommodate estimates that are not numeric
    */
-  def calculateRegression: List[Option[SLR]] = {
+  def calculateRegression: List[Option[OLS]] = {
     trans.indices.toList map { x =>
-      val slrLabel = label + s"rand${x}"
-      val slr = new SLR(invVals(x), miVals(x), slrLabel)
+      val olsLabel = label + s"rand${x}"
+      val slr = OLS(invVals(x), miVals(x))
       if (slr.intercept.isNaN) {
-        IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${slrLabel}.dat")
+        IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${olsLabel}.dat")
         None
       }
       else Some(slr)

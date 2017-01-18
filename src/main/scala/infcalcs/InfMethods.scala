@@ -423,12 +423,16 @@ object EstimateMI {
     val tag = s"${label}_r${rBinPair}_c${cBinPair}"
 
     val estimate = buildSingleRegData(calcConfig)(binPair,data,wts,tag=tag).calculateRegression()
+    val randEstimate = buildSingleRegData(calcConfig)(binPair,data,wts,true).calculateRegression()
     val sample = data.bootstrap_sample() map (x =>
       buildSingleRegData(calcConfig)(binPair,x,wts).calculateRegression().intercept)
     //TODO FIGURE OUT MORE EFFICIENT WAY TO DO THIS
     val rand_sample = data.bootstrap_sample() map (x =>
       buildSingleRegData(calcConfig)(binPair,x,wts,true).calculateRegression().intercept)
-    EstimateBS((estimate.intercept,meanAndConfBS(sample)._2),meanAndConfBS(rand_sample),estimate.rSquared)
+    EstimateBS(
+      (estimate.intercept,meanAndConfBS(sample)._2),
+      (randEstimate.intercept,meanAndConfBS(rand_sample)._2),
+      estimate.rSquared)
   }
 
   /**

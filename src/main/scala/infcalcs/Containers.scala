@@ -61,7 +61,7 @@ case class RegData(subCalcs: Seq[SubCalc], label: String) {
    */
   def calculateRegression(value: String = "mutualInformation"): OLS = {
     val (invVals, calcVals) = getValues(value)
-    OLS(invVals, calcVals)
+    OLS(invVals, calcVals, label)
   }
 
 }
@@ -87,7 +87,7 @@ case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String, value: 
   def calculateRegression: List[Option[OLS]] = {
     trans.indices.toList map { x =>
       val olsLabel = label + s"rand${x}"
-      val slr = OLS(invVals(x), miVals(x))
+      val slr = OLS(invVals(x), miVals(x), label)
       if (slr.intercept.isNaN) {
         IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${olsLabel}.dat")
         None

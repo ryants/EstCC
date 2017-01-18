@@ -13,7 +13,7 @@ import cern.jet.stat.Probability._
 /**
   * Class that perfoms ordinary least squares regression
   */
-class OLS(val xs: DenseMatrix[Double], val ys: DenseVector[Double]) {
+class OLS(val xs: DenseMatrix[Double], val ys: DenseVector[Double], val label: String) {
 
   require(xs.rows == ys.length)
   val n: Int = ys.length
@@ -89,9 +89,9 @@ object OLS {
     * @param ys
     * @return
     */
-  def apply(xs: Seq[Double], ys: Seq[Double]): OLS = {
+  def apply(xs: Seq[Double], ys: Seq[Double], label: String): OLS = {
     val xsm = xs map (x => Seq(1.0, x))
-    new OLS(DenseMatrix(xsm: _*),DenseVector(ys: _*))
+    new OLS(DenseMatrix(xsm: _*),DenseVector(ys: _*),label)
   }
 
 }

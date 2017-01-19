@@ -38,4 +38,42 @@ class OLSTest extends FlatSpec with Matchers {
     (ols.betaVarRobust(1) - math.sqrt(0.005970448) < 1e-9) shouldBe true
   }
 
+  "Simple least-squares regression" should
+    "calculate the slope and intercept of perfect data" in {
+    val xdata = List(0.0, 1.0, 2.0, 3.0, 4.0, 5.0)
+    val ydata = List(2.0, 5.0, 8.0, 11.0, 14.0, 17.0)
+    val myOls = OLS(xdata, ydata, "")
+    // Since we didn't provide a label, it should be empty
+    myOls.label shouldBe ""
+    // Check the number of datapoints
+    myOls.n shouldBe 6
+    // Check the intercept
+    myOls.intercept shouldBe (2.0 +- 1e-5)
+    // Check the slope
+    myOls.slope shouldBe (3.0 +- 1e-5)
+    // Check the stderr of slope intercept (both should be 0)
+    myOls.sSE shouldBe (0.0 +- 1e-5)
+    myOls.iSE shouldBe (0.0 +- 1e-5)
+    // Check the regression prediction (should match the ydata)
+    val diff = (myOls.xs * myOls.beta) :- DenseVector(ydata: _*)
+    diff map (_ < 1e-8) reduce (_ && _) shouldBe true
+  }
+
+  it should "calculate slope, intercept, and stderr for noisy data" in {
+    // Created noisy data in Python and calculated linear regression
+    // using scipy.stats.linregress as a sanity check
+    val xdata = List(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0)
+    val ydata = List(5.24869073, 3.77648717, 6.9436565, 8.85406276,
+      15.73081526, 12.39692261, 23.48962353, 21.4775862,
+      26.63807819, 28.50125925)
+    val myOls = OLS(xdata, ydata, "labeltest")
+    // Check the label
+    myOls.label shouldBe "labeltest"
+    // Check the estimates of the slope and intercept
+    ((myOls.slope - 2.92452540594) < 1e-10) shouldBe true
+    ((myOls.intercept - 2.14535389327) < 1e-10) shouldBe true
+    ((myOls.iSE - 1.5586509206) < 1e-10) shouldBe true
+    ((myOls.sSE - 0.291962067489) < 1e-10) shouldBe true
+  }
+
 }

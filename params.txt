@@ -1,6 +1,5 @@
 signalColumns	0
 responseColumns	1
-sampleFractions	0.4,0.925,0.075
 biPeakWeights	0.4 0.5 0.6
 sigBinSpacing 4 #will be overridden due to the presence of the signalVals1 parameter
 respBinSpacing  4
@@ -15,7 +14,8 @@ uniSigmaNumber	5
 biMuNumber	5
 biSigmaNumber	5
 repsPerFraction	20
-sampleSizeTol   0.2
+lowFraction 0.6
+numFractions    5
 avgEntriesPerBin    0
 
 logSpace	false

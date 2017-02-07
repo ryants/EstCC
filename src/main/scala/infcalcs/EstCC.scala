@@ -3,6 +3,7 @@ package infcalcs
 import ParameterFuncs._
 import EstimateCC.{
 estimateCC,
+estimateCCBS,
 estimateCCVerbose,
 calculateWithoutEstimator
 }
@@ -59,6 +60,7 @@ object EstCC extends App with CLOpts {
         system actorOf (Props(new AdaptiveDistributor(p)), "dist")
     distributor ! Init(numCalculators)
     system.awaitTermination()
-  } else if (appConfig.verbose) estimateCCVerbose(p)
+  } else if (calcConfig.numParameters("numForBootstrap") > 0) estimateCCBS(p)
+  else if (appConfig.verbose) estimateCCVerbose(p)
   else estimateCC(p, calcConfig.initSignalBins)
 }

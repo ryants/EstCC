@@ -50,7 +50,7 @@ class EstimateMITest extends FlatSpec with Matchers {
     isNotBiased(thisTestConfig)(randEstimates2) shouldBe true
   }
 
-  "subSample" should "correctly generate subsamples of a data set" in {
+  "resample" should "correctly generate subsamples of a data set" in {
 
     def genValue = Random.nextDouble() * 100
 
@@ -91,6 +91,26 @@ class EstimateMITest extends FlatSpec with Matchers {
     // Check the randomized contingency tables
     regRand.trans.length shouldBe testConfig.numParameters("numRandom").toInt
     regRand.trans(0).length shouldBe fracListLength
+  }
+
+  "buildSingleRegData" should "return an appropriate RegData data structure" in {
+    val numReps = testConfig.numParameters("repsPerFraction").toInt
+    val reg = buildSingleRegData(testConfig)(numBins, pl, None)
+    val fracs = pl.fracs
+    val invLength = reg.subCalcs.length
+    // Check the length of the inverse sample sizes
+    val fracListLength = (fracs.length * numReps) + numReps
+    invLength shouldBe fracListLength // check the length
+    // Check the first inverse sample size
+    //    invss(0) shouldBe 1.0 / rdm.subContTables(0).numSamples (DOES NOT WORK DUE TO LOW NUMBER OF CT ENTRIES & NEW SAMPLE SIZE FEATURES)
+    // Check the resampled contingency tables
+    val cts = reg.subCalcs map (_.table)
+    // Check the length of the CT list
+    cts.length shouldBe fracListLength
+    // The first contingency table (fraction 1.0) should have the same number of entries
+    // as the original
+    cts.head.numSamples shouldBe ct.numSamples
+
   }
 
   "calcMultRegs" should "produce the correct number of regression results" in {

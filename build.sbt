@@ -1,6 +1,6 @@
 name := "EstCC"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked")
 
@@ -8,7 +8,9 @@ libraryDependencies ++= Seq("colt" % "colt" % "1.2.0",
 "org.scalatest" % "scalatest_2.11" % "2.2.4" % "test",
 "com.github.scopt" %% "scopt" % "3.2.0",
 "com.typesafe.akka" %% "akka-actor" % "2.3.3",
-"com.storm-enroute" %% "scalameter" % "0.7"
+"com.storm-enroute" %% "scalameter" % "0.7",
+  "org.scalanlp" %% "breeze" % "0.12",
+  "org.scalanlp" %% "breeze-natives" % "0.12"
 )
 
 resolvers ++= Seq(Resolver.sonatypeRepo("public"),

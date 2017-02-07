@@ -76,7 +76,46 @@ class AdaptiveDistributor(p: DRData)(implicit calcConfig: CalcConfig) extends Di
       }
 
     }
+      //TODO IMPLEMENT
+    case rbs: ResultBS => {
+      //record calc, update total bin number if necessary
+      receivedCalc()
+      updateEstBSList(rbs)
+      if (allBiased && !rbs.biased) allBiased = false
+      if (rbs.biased) numBiasedPerBin = numBiasedPerBin + 1
 
+      if (receivedAllCalcs) {
+        //if all scheduled calcs are biased then update stop criterion
+        if (allBiased) numConsecBiasedSigEst = numConsecBiasedSigEst + 1
+
+        //if criterion met then stop calc
+        if (stopCriterion()) stopCalculation()
+        //otherwise update the signal bins and send a new calc back to the sender
+        else {
+          if (EstCC.appConfig.verbose) {
+            println(s"Completed ${weights.length} calculations for current signal bins with ${numBiasedPerBin} biased calculations.  Increasing signal bins")
+          }
+          updateSignalBins()
+          (0 until numCalculators) foreach { n => {
+            (context actorSelection s"calc_${n}") ! Estimate(weights(wtIndex), signalBins, p, wtIndex, sigIndex)
+            sentCalc()
+          }
+          }
+        }
+
+      } else if (!sentAllCalcs) {
+        //if some calculations remain to be sent, send them
+        if (EstCC.appConfig.verbose) {
+          println(s"${totalCalculations - received} weights remaining for signal bin number = ${signalBins.mkString(",")}")
+        }
+        sender ! Estimate(weights(wtIndex), signalBins, p, wtIndex, sigIndex)
+        sentCalc()
+      } else {
+        if (EstCC.appConfig.verbose) {
+          println(s"${totalCalculations - received} weights remaining for signal bin number = ${signalBins.mkString(",")}")
+        }
+      }
+    }
     // must be first message sent to distributor, otherwise calculator instantiation will fail
     case init: Init => {
       numCalculators = init.numActors

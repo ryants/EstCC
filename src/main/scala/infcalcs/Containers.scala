@@ -50,15 +50,19 @@ case class SubCalc(inv: Double, table: CTable[Double])
  * @param subCalcs
  * @param label
  */
-case class RegData(subCalcs: Vector[SubCalc], label: String) {
+case class RegData(subCalcs: Seq[SubCalc], label: String) {
 
-  lazy val (invVals, miVals) = (subCalcs map (x => (x.inv, x.table.mutualInformation))).unzip
+  private def getValues(value: String): Pair[Seq[Double]] =
+    (subCalcs map (x => (x.inv, x.table.ctVals(value)))).unzip
 
   /**
    * Calculates simple linear regression between inverse sample size and
    * mutualInformation
    */
-  def calculateRegression: SLR = new SLR(invVals, miVals, label)
+  def calculateRegression(value: String = "mutualInformation"): OLS = {
+    val (invVals, calcVals) = getValues(value)
+    OLS(invVals, calcVals, label)
+  }
 
 }
 
@@ -69,23 +73,23 @@ case class RegData(subCalcs: Vector[SubCalc], label: String) {
  * @param subCalcs
  * @param label
  */
-case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String) {
+case class RegDataRand(subCalcs: Vector[Vector[SubCalc]], label: String, value: String = "mutualInformation") {
 
   lazy val trans = subCalcs.transpose
   lazy val invVals = trans map (_ map (_.inv))
-  lazy val miVals = trans map (_ map (_.table.mutualInformation))
+  lazy val miVals = trans map (_ map (_.table.ctVals(value)))
 
   /**
    * Calculates simple linear regression between inverse sample size and
-   * mutualInformation but is wrapped in the Option monad to
+   * [[CTable]] based value but is wrapped in the Option monad to
    * accommodate estimates that are not numeric
    */
-  def calculateRegression: List[Option[SLR]] = {
+  def calculateRegression: List[Option[OLS]] = {
     trans.indices.toList map { x =>
-      val slrLabel = label + s"rand${x}"
-      val slr = new SLR(invVals(x), miVals(x), slrLabel)
+      val olsLabel = label + s"rand${x}"
+      val slr = OLS(invVals(x), miVals(x), label)
       if (slr.intercept.isNaN) {
-        IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${slrLabel}.dat")
+        IOFile.regDataToFile((invVals(x), miVals(x)), s"regData_NaNint_${olsLabel}.dat")
         None
       }
       else Some(slr)
@@ -109,6 +113,20 @@ case class EstTuple(
     unbiased: Boolean)
 
 /**
+  * Alternative to [[EstTuple]] for use with bootstrapping approach
+  *
+  * @param pairBinTuples
+  * @param estimates
+  * @param weight
+  * @param unbiased
+  */
+case class EstTupleBS(
+    pairBinTuples: Pair[NTuple[Int]],
+    estimates: Option[EstimateBS],
+    weight: Option[Weight],
+    unbiased: Boolean)
+
+/**
  * Case class with the actual and randomized mutual information estimates.
  * Also includes the coefficient of determination for the actual linear fit
  *
@@ -119,6 +137,19 @@ case class EstTuple(
 case class Estimates(
     dataEstimate: Pair[Double],
     randDataEstimate: List[Pair[Double]],
+    coeffOfDetermination: Double)
+
+/**
+  * Case class with actual and 1 randomized data set estimates using a
+  * bootstrapping approach
+  *
+  * @param dataEstimate mean and 95% confidence interval bounds
+  * @param randDataEstimate
+  * @param coeffOfDetermination
+  */
+case class EstimateBS(
+    dataEstimate: (Double,Pair[Double]),
+    randDataEstimate: (Double,Pair[Double]),
     coeffOfDetermination: Double)
 
 /**

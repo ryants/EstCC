@@ -2,7 +2,8 @@ package infcalcs
 
 import infcalcs.CTBuild._
 import infcalcs.exceptions.ValueOutOfBoundsException
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
+import infcalcs.ParameterFuncs.updateParameters
 
 /**
  * Created by ryansuderman on 2/16/16.
@@ -84,6 +85,23 @@ class CTBuildTest extends FlatSpec with Matchers {
     findVectIndex(Vector(1.0), tree2, dr respKey Vector(4)) shouldBe 0
     findVectIndex(Vector(2.0), tree2, dr respKey Vector(4)) shouldBe 1
     findVectIndex(Vector(3.0), tree2, dr respKey Vector(4)) shouldBe 2
+  }
+
+  "A DRData instance" should "generate appropriate bootstrap samples" in {
+    val modParams = List(("numForBootstrap","10"))
+
+    val c = CalcConfig(updateParameters(modParams))
+    val s = Range(0,9).toVector map (x => Vector(x.toDouble))
+    val r = Range(0,9).toVector map (x => Vector(x.toDouble))
+    val dr = new DRData(c)(s,r)
+    val drObs = dr.numObs
+    val bs = dr.bootstrap_sample()
+    bs.length shouldBe 10
+    bs(0).numObs shouldBe drObs
+    val bsObs = bs forall {
+      x => x.numObs == dr.numObs
+    }
+    bsObs shouldBe true
   }
 
   it should "build a contingency table" in {

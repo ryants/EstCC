@@ -186,6 +186,44 @@ object IOFile {
   }
 
   /**
+    * Alternate to [[estimatesToFileMult]] for bootstrapping data
+    *
+    * @param d
+    * @param f
+    * @param calcConfig
+    */
+  def estimatesToFileBS(d: Vector[EstTupleBS], f: String)(implicit calcConfig: CalcConfig): Unit = {
+    val writer = new BufferedWriter(new FileWriter(new File(f)))
+    writer.write("# rBins\tcBins\tMI\tlow\thigh\tMIRand\tlow\thigh\tCoD")
+    writer.newLine()
+    val wtString = d.head.weight match {
+      case None => "None"
+      case Some(x) => x.label
+    }
+    writer.write(s"# Weight String: ${wtString}")
+    writer.newLine()
+
+    def getDataEstimate(est: Option[EstimateBS]) =
+      (est getOrElse EstimateBS((0.0,(0.0,0.0)),(0.0,(0.0,0.0)),0.0)).dataEstimate
+    def getRandDataEstimate(est: Option[EstimateBS]) =
+      (est getOrElse EstimateBS((0.0,(0.0,0.0)),(0.0,(0.0,0.0)),0.0)).randDataEstimate
+    def getCoD(est: Option[EstimateBS]) =
+      (est getOrElse EstimateBS((0.0,(0.0,0.0)),(0.0,(0.0,0.0)),0.0)).coeffOfDetermination
+
+    val lines =
+      for (x <- d) yield s"${x.pairBinTuples._1.mkString(",")} ${x.pairBinTuples._2.mkString(",")} " +
+        s"${getDataEstimate(x.estimates)._1} ${getDataEstimate(x.estimates)._2._1} ${getDataEstimate(x.estimates)._2._2} " +
+        s"${getRandDataEstimate(x.estimates)._1} ${getRandDataEstimate(x.estimates)._2._1} ${getRandDataEstimate(x.estimates)._2._2} " +
+        s"${getCoD(x.estimates)}"
+    for (l <- lines) {
+      writer.write(l)
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+
+  /**
    * Writes relevant estimate information to file
    *
    * @param c Map of value names and their estimate and error
@@ -195,6 +233,24 @@ object IOFile {
     val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
     val data = c.keys map { x =>
       writer.write(s"${x}\t${c(x)}")
+      writer.newLine()
+    }
+    writer.flush()
+    writer.close()
+  }
+
+  /**
+    * Alternate to [[optInfoToFile]] for bootstrapped data
+    *
+    * @param c
+    * @param s
+    */
+  def optInfoToFileBS(c: Map[String, (Double, Pair[Double])], s: String): Unit = {
+    val writer = new BufferedWriter(new FileWriter(new File(s"${s}_info.dat")))
+    val data = c.keys map { x =>
+      val v = c(x)
+      val s = s"${v._1}\t${v._2._1}\t${v._2._2}"
+      writer.write(s"${x}\t${v}")
       writer.newLine()
     }
     writer.flush()

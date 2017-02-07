@@ -92,8 +92,7 @@ object CTBuild {
    *
    * @param dLs vector of dimension lengths (bins or values)
    * @param acc accumulator for building key
-   *
-   * @return key of bin indices
+    * @return key of bin indices
    */
   @tailrec
   def keyFromDimLengths(
@@ -118,8 +117,7 @@ object CTBuild {
    *                  bin indices
    * @param m mapping of bin indices, whose index is used for insertion into
    *          the contingency table
-   *
-   * @return index of 2D bin
+    * @return index of 2D bin
    */
   def findVectIndex(
       tuple: NTuple[Double],
@@ -141,8 +139,7 @@ object CTBuild {
    * @param data container for dose-response data
    * @param nb one-dimensional bin numbers for row and column values resp.
    * @param randomize shuffles the data to produce a table with randomized data
-   *
-   * @return contingency table for ordered pair data points
+    * @return contingency table for ordered pair data points
    */
   def buildTable(
       data: DRData,
@@ -209,6 +206,7 @@ object EstimateMI {
 
   import CTBuild.buildTable
   import Orderings._
+  import MathFuncs.meanAndConfBS
 
   /**
    * Checks that there are fewer (or an equal number of) bins than nonzero
@@ -261,7 +259,8 @@ object EstimateMI {
 
     @tailrec
     def findCtPos(value: Double, tree: Tree[CtPos] = t): CtPos =
-      if (value > tree.maxVal.get.cumProb) throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.get.cumProb}}) in tree"))
+      if (value > tree.maxVal.get.cumProb)
+        throw new ValueOutOfBoundsException((s"value: ${value} is larger than maximum (${tree.maxVal.get.cumProb}}) in tree"))
       else if (tree.isEmpty) throw new EmptyTreeException("cannot search an empty tree")
       else {
         val ctPos = tree.value.get
@@ -326,9 +325,9 @@ object EstimateMI {
    * @param binPair Pair of tuples containing the numbers of row and column bins.
    * @param data The input/output dataset.
    * @param wts An optional weights vector to be applied to the rows.
-   *
-   * @return ([[RegData]], [[RegDataRand]])
+    * @return ([[RegData]], [[RegDataRand]])
    */
+  @deprecated
   def buildRegData(calcConfig: CalcConfig)(
       binPair: Pair[NTuple[Int]],
       data: DRData,
@@ -376,13 +375,75 @@ object EstimateMI {
   }
 
   /**
+    * Alternate function to generate [[RegData]] instances regardless of
+    * randomization
+    *
+    * @param calcConfig
+    * @param binPair
+    * @param data
+    * @param wts
+    * @return
+    */
+  def buildSingleRegData(calcConfig: CalcConfig)(
+      binPair: Pair[NTuple[Int]],
+      data: DRData,
+      wts: Option[Weight],
+      rand: Boolean = false,
+      tag: String = ""): RegData = {
+    val table = buildTableWithWeight(data, binPair, wts)
+    val probTree = buildTree(buildOrderedNodeList(table.generateCtPos(rand)))
+    val reg = data.fracList map { x =>
+      val subTable = resample((x * data.numObs).toInt, table.rows, table.cols, probTree)
+      val inv = 1.0 / subTable.numSamples.toDouble
+      SubCalc(inv, subTable.cTableWithDoubles)
+    }
+    RegData(reg,tag)
+  }
+
+  /**
+    * Calculate the estimated mutual information and bootstrap confidence
+    * intervals for a particular binning of the data
+    *
+    * @param calcConfig
+    * @param binPair
+    * @param data
+    * @param wts
+    * @return an [[Estimates]] instance
+    */
+  def calcBootstrapEstimates(calcConfig: CalcConfig)(
+      binPair: Pair[NTuple[Int]],
+      data: DRData,
+      wts: Option[Weight]): EstimateBS = {
+
+    val label = wts match {
+      case None => "None"
+      case Some(w) => w.label
+    }
+    val rBinPair = binPair._1 mkString ","
+    val cBinPair = binPair._2 mkString ","
+    val tag = s"${label}_r${rBinPair}_c${cBinPair}"
+
+    val estimate = buildSingleRegData(calcConfig)(binPair,data,wts,tag=tag).calculateRegression()
+    val randEstimate = buildSingleRegData(calcConfig)(binPair,data,wts,true).calculateRegression()
+    val sample = data.bootstrap_sample() map (x =>
+      buildSingleRegData(calcConfig)(binPair,x,wts).calculateRegression().intercept)
+    //TODO FIGURE OUT MORE EFFICIENT WAY TO DO THIS
+    val rand_sample = data.bootstrap_sample() map (x =>
+      buildSingleRegData(calcConfig)(binPair,x,wts,true).calculateRegression().intercept)
+    EstimateBS(
+      (estimate.intercept,meanAndConfBS(sample)._2),
+      (randEstimate.intercept,meanAndConfBS(rand_sample)._2),
+      estimate.coeffOfDetermination)
+  }
+
+  /**
    * Calculates regression model for both original and randomized data.
    *
    * Calculates a linear regression of the mutual information of each
    * subsampled or randomized dataset vs. the inverse sample size. Returns
    * results as a tuple: the first entry in the tuple contains the regression
-   * line (as an instance of [[SLR]]) for the original dataset; the second
-   * entry in the tuple contains a list of regression lines ([[SLR]] objects),
+   * line (as an instance of [[OLS]]) for the original dataset; the second
+   * entry in the tuple contains a list of regression lines ([[OLS]] objects),
    * one for each of numRandTables rounds of randomization. Because linear
    * regression may fail on the randomized data, some entries in the list may be None.
    *
@@ -391,9 +452,9 @@ object EstimateMI {
    * @return (regression on original data, list of regressions on random data)
    */
   def calcMultRegs(calcConfig: CalcConfig)
-      (r: (RegData, RegDataRand)): (SLR, List[Option[SLR]]) = {
+      (r: (RegData, RegDataRand)): (OLS, List[Option[OLS]]) = {
     // Regression on original data
-    val regLine = r._1.calculateRegression
+    val regLine = r._1.calculateRegression()
     if (calcConfig.outputRegData)
       regLine.toFile(s"regData_${regLine.label}.dat")
     // Regression on randomized data
@@ -411,15 +472,15 @@ object EstimateMI {
    * @param regs (regression, list of regressions), as from [[calcMultRegs]]
    * @return [[Estimates]] instance
    */
-  def multIntercepts(regs: (SLR, List[Option[SLR]])): Estimates = {
+  def multIntercepts(regs: (OLS, List[Option[OLS]])): Estimates = {
     // Retrieves intercept and associated conf. interval for a regression model
-    def getStats(ls: List[Option[SLR]], acc: List[Pair[Double]]): List[Pair[Double]] =
+    def getStats(ls: List[Option[OLS]], acc: List[Pair[Double]]): List[Pair[Double]] =
       if (ls.isEmpty) acc
       else ls.head match {
-        case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.i95Conf))
+        case Some(x) => getStats(ls.tail, acc :+(x.intercept, x.iConf95))
         case None => getStats(ls.tail, acc :+(Double.NaN, Double.NaN))
       }
-    Estimates((regs._1.intercept, regs._1.i95Conf), getStats(regs._2, List()), regs._1.rSquared)
+    Estimates((regs._1.intercept, regs._1.iConf95), getStats(regs._2, List()), regs._1.coeffOfDetermination)
   }
 
   /**
@@ -525,6 +586,50 @@ object EstimateMI {
   }
 
   /**
+    * Alternate to [[genEstimatesMultImp]] when using bootstrapping approach
+    *
+    * @param calcConfig
+    * @param pl
+    * @param signalBins
+    * @param wts
+    * @return [[Vector]] of [[EstTupleBS]] instances
+    */
+  def genEstimatesBSImp(calcConfig: CalcConfig)(
+      pl: DRData,
+      signalBins: NTuple[Int],
+      wts: Option[Weight] = None): Vector[EstTupleBS] = {
+
+    def isNotBiased(lc: Double): Boolean =
+      lc <= calcConfig.numParameters("cutoffValue")
+
+    if (calcConfig.srParameters("responseValues").isDefined) {
+      val binPair = (signalBins, calcConfig.initResponseBins)
+      val estimate = calcBootstrapEstimates(calcConfig)(binPair, pl, wts)
+      val notBiased = isNotBiased(estimate.randDataEstimate._2._1)
+      Vector(EstTupleBS(binPair, Some(estimate), wts, notBiased))
+    } else {
+      var numConsecRandPos = 0
+      var res: Array[EstTupleBS] = Array()
+      var responseBins = calcConfig.initResponseBins
+
+      while (numConsecRandPos < calcConfig.numParameters("numConsecRandPos").toInt &&
+        binNumberIsAppropriate(calcConfig)(pl, (signalBins, responseBins))) {
+
+        val binPair = (signalBins, responseBins)
+        val estimate = calcBootstrapEstimates(calcConfig)(binPair, pl, wts)
+        val notBiased = isNotBiased(estimate.randDataEstimate._2._1)
+        val est = EstTupleBS(binPair, Some(estimate), wts, notBiased)
+        res = res :+ est
+        if (est.unbiased) numConsecRandPos = 0
+        else numConsecRandPos += 1
+
+        responseBins = updateRespBinNumbers(calcConfig)(responseBins)
+      }
+      res.toVector
+    }
+  }
+
+  /**
    * Increments the bins for response space
    *
    * @param calcConfig
@@ -616,6 +721,39 @@ object EstimateMI {
   }
 
   /**
+    * Alternate version of [[optMIMult]] that uses data structures compatible
+    * with bootstrapping
+    *
+    * @param calcConfig
+    * @param d
+    * @return
+    */
+  def optMIBS(calcConfig: CalcConfig)(d: Vector[EstTupleBS]): EstTupleBS = {
+    @tailrec
+    def opt(i: EstTupleBS, ds: Vector[EstTupleBS]): EstTupleBS =
+      if (ds.isEmpty) i
+      else {
+        val v = ds.head.estimates match {
+          case None => -1
+          case Some(est) => est.dataEstimate._1
+        }
+        if (i.estimates.get.dataEstimate._1 > v) opt(i, ds.tail) else opt(ds.head,ds.tail)
+      }
+    val baseTuple: Pair[NTuple[Int]] =
+      (d.head.pairBinTuples._1 map (x => 0), d.head.pairBinTuples._2 map (x => 0))
+    val baseValue = (0.0,(0.0,0.0))
+    val baseEstimates = EstimateBS(baseValue, baseValue, 0.0) //placeholder (null estimate) for opt
+    val base =
+      EstTupleBS(
+        baseTuple,
+        Some(baseEstimates),
+        None,
+        false)
+
+    opt(base, d filter (_.unbiased))
+  }
+
+  /**
    * Takes the pair of n-dimensional bin number vectors resulting in maximal
    * mutual information in order to estimate all relevant quantities as defined
    * in [[tables.CTable.ctVals]].  These data are outputted to an information file
@@ -653,18 +791,29 @@ object EstimateMI {
       }).unzip
     }
 
-    val regData = new SLR(invFracs, tables map (_.mutualInformation), "final_est")
+    val regData = OLS(invFracs, tables map (_.mutualInformation), "final_est")
     regData toFile "final_est_regr.dat"
 
     val (rd, sigKey) = (data sigDelims binPair._1, data sigKey binPair._1)
     val (cd, respKey) = (data respDelims binPair._2, data respKey binPair._2)
     IOFile.delimInfoToFile((rd, cd), (sigKey, respKey), calcConfig.stringParameters("filePrefix"))
 
-    val slrs: Iterable[SLR] = tables.head.ctVals.keys map
-        (x => new SLR(invFracs, tables map (_(x)), x))
-    val estimates: Map[String, Pair[Double]] = (slrs map (x =>
-      (x.label, (x.intercept, x.i95Conf)))).toMap
-    IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
+    if (calcConfig.numParameters("numForBootstrap") > 0){
+      val sample = data.bootstrap_sample() map (x =>
+        buildSingleRegData(calcConfig)(binPair, data, wts, tag="final"))
+      val dists = for {
+        x <- CTable.values
+      } yield (sample map (_.calculateRegression(x).intercept))
+      val estimates: Map[String, (Double, Pair[Double])] =
+        (CTable.values zip (dists map meanAndConfBS)).toMap
+      IOFile.optInfoToFileBS(estimates, calcConfig.stringParameters("filePrefix"))
+    } else {
+      val slrs: Iterable[OLS] = tables.head.ctVals.keys map
+        (x => OLS(invFracs, tables map (_ (x)), x))
+      val estimates: Map[String, Pair[Double]] = (slrs map (x =>
+        (x.label, (x.intercept, x.iConf95)))).toMap
+      IOFile.optInfoToFile(estimates, calcConfig.stringParameters("filePrefix"))
+    }
   }
 
 }
@@ -953,6 +1102,102 @@ object EstimateCC {
     EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, finalOpt.weight)
 
   }
+
+  /**
+    * Alternate to [[estimateCCVerbose]] for bootstrapped data
+    *
+    * @param p
+    * @param index
+    * @param calcConfig
+    */
+  def estimateCCBS(
+      p: DRData,
+      index: Int = 0)(implicit calcConfig: CalcConfig): Unit = {
+
+    def calcEstimates(binPair: Pair[NTuple[Int]], wts: List[Option[Weight]], index: Int): Vector[Vector[EstTupleBS]] = {
+
+      var estimates: Array[Vector[EstTupleBS]] = Array()
+      (0 until wts.length) foreach { w =>
+
+        val estimate = EstimateMI.genEstimatesBSImp(calcConfig)(p, binPair._1, wts(w))
+        val opt = EstimateMI.optMIBS(calcConfig)(estimate)
+
+        estimates = estimates :+ estimate
+
+        calcConfig.outF match {
+          case Some(f) =>
+            IOFile.estimatesToFileBS(estimate, s"${f}_${w}_${index}.dat")
+          case None =>
+        }
+
+        wts(w) match {
+          case Some(wt) => {
+            val estimate = opt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+            val printOut = s"  ${1 + w}) Weight: ${wt.label}, " +
+              s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
+            println(printOut)
+          }
+          case None => {
+            val estimate = opt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+            val printOut = s"  ${1 + w}) Weight: None, " +
+              s"Est. MI: ${estimate.dataEstimate._1} ${0xB1.toChar} ${estimate.dataEstimate._2}"
+            println(printOut)
+          }
+        }
+      }
+      estimates.toVector
+    }
+    var signalBins = calcConfig.initSignalBins
+
+    val finalOpt: EstTupleBS =
+      if (calcConfig.srParameters("signalValues").isDefined) {
+        println(s"# Signal Bins: ${signalBins.product}")
+        val weights = getWeights(calcConfig)(p, calcConfig.initSignalBins)
+        val estimates = calcEstimates(calcConfig.initBinTuples, weights, 0)
+
+        EstimateMI.optMIBS(calcConfig)(
+          estimates map EstimateMI.optMIBS(calcConfig))
+
+      } else {
+
+        var numConsecBiasedSigEst = 0
+        var optList: Array[EstTupleBS] = Array()
+        var weights: List[Option[Weight]] = Nil
+        var index = 0
+
+        while (numConsecBiasedSigEst < calcConfig.numParameters("numConsecBiasedSigEst").toInt &&
+          EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))) {
+
+          println(s"# Signal Bins: ${signalBins.product}")
+
+          weights = getWeights(calcConfig)(p, signalBins)
+          val estimates = calcEstimates((signalBins, calcConfig.initResponseBins), weights, index)
+          val incrCriterion = estimates forall (est => est forall (!_.unbiased))
+          val opt = EstimateMI.optMIBS(calcConfig)(
+            estimates map EstimateMI.optMIBS(calcConfig))
+
+          optList = optList :+ opt
+
+          if (incrCriterion) {
+            numConsecBiasedSigEst += 1
+          } else {
+            numConsecBiasedSigEst = 0
+          }
+
+          signalBins = EstimateMI.updateSigBinNumbers(calcConfig)(signalBins)
+          index += 1
+
+        }
+
+        EstimateMI.optMIBS(calcConfig)(optList.toVector)
+
+      }
+    val estimate = finalOpt.estimates getOrElse EstimateBS((0.0, (0.0, 0.0)), (0.0, (0.0, 0.0)), 0.0)
+    println(estimate.dataEstimate._1)
+    EstimateMI.finalEstimation(finalOpt.pairBinTuples, p, finalOpt.weight)
+  }
+
+
 
   /**
    * Estimates the channel capacity for a [[DRData]] given a [[CalcConfig]]

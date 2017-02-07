@@ -14,6 +14,7 @@ object InfConfig {
   /** Parameters that have numerical values. */
   val numParams: Map[String, Double] =
     Map("numRandom" -> 10,
+      "numForBootstrap" -> -1, // positive integer denotes number of bootstrap samples for estimation of confidence intervals
       "numForCutoff" -> 1,
       "numConsecRandPos" -> 3, //observed number of randomized data sets above MI cutoff with consecutive bin number increments to halt calculation
       "numConsecBiasedSigEst" -> 3, //observed number of consecutive signal bin numbers with no unbiased estimates

@@ -20,11 +20,11 @@ case class Config(
 trait CLOpts {
   val parser = new scopt.OptionParser[Config]("EstCC.jar") {
     head("EstCC","with adaptive bin control")
-    opt[Unit]('v', "verbose") action { (_, c) =>
-      c.copy(verbose = true)
+    opt[Unit]('v', "verbose") action {
+      (_, c) => c.copy(verbose = true)
     } text "periodically print calculation status to stdout"
-    opt[Unit]('n', "no-regr") action { (_, c) =>
-      c.copy(noReg = true)
+    opt[Unit]('n', "no-regr") action {
+      (_, c) => c.copy(noReg = true)
     } text "calculate mutual information from data without regression estimator"
     opt[String]('d', "data") required() valueName "<file>" action {
       (x, c) => c.copy(dataFile = x)

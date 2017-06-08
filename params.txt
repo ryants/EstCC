@@ -1,29 +1,30 @@
 signalColumns	0
 responseColumns	1
 biPeakWeights	0.4 0.5 0.6
-sigBinSpacing 4 #will be overridden due to the presence of the signalVals1 parameter
-respBinSpacing  4
+sigBinSpacing	4	#will be overridden due to the presence of the signalVals1 parameter
+respBinSpacing	4
 
 numRandom	10
 numForCutoff	1
-numConsecRandPos  3
-numConsecBiasedSigEst 3
+numConsecRandPos	3
+numConsecBiasedSigEst	3
 cutoffValue	0
 uniMuNumber	5
 uniSigmaNumber	5
 biMuNumber	5
 biSigmaNumber	5
 repsPerFraction	20
-lowFraction 0.6
-numFractions    5
-avgEntriesPerBin    0
+lowFraction	0.6
+numFractions	5
+avgEntriesPerBin	0
 
 logSpace	false
-outputRegData   false
-pwUniformWeight    false
-uniformWeight   true
+outputRegData	false
+pwUniformWeight	false
+uniformWeight	true
 
 directory	./
 filePrefix	out
 
-signalVals1	0,18,1 #signalVals[1-9]* and responseVals[1-9]* can also be specified
+signalVals1	0,18,1	#signalVals[1-9]* and responseVals[1-9]* can also be specified
+

@@ -77,6 +77,16 @@ and `responseColumns` parameters, otherwise the program will either fail to
 execute or produce incorrect results.  For example, if there are 4 signal
 columns in your data file, you must either specify `signalVals[1-4]` or `signalBins[1-4]`
 
+**Note also that certain bin number configurations can result in a calculation failure**
+To avoid calculation artifacts resulting from the subsampling procedure, the program
+implements a hard constraint on the upper limit of bins.  The number of bins in a particular
+dimension must be less than the number of unique values in that dimension times the 
+smallest fraction in the subsampling procedure.  A BinConfigurationException will be 
+thrown if this criterion is not met at the outset of the calculation.  This can be 
+avoided by specifying the set of values explicitly using the signalVals* or 
+responseVals* parameters or by setting the sigBinSpacing or respBinSpacing parameters 
+to be lower than the default setting of 4 (except in extreme cases).
+
 ### OUTPUT
 
 The output is recorded in a series of files containing the estimated mutual

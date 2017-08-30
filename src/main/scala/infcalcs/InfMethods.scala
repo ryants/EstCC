@@ -1093,8 +1093,11 @@ object EstimateCC {
           index += 1
 
         }
-
+        if (optList.isEmpty && !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))){
+          throw new BinConfigurationException("Initial bin numbers are too high, adjust calculation configuration")
+        }
         EstimateMI.optMIMult(calcConfig)(optList.toVector)
+
 
       }
     val estimate = finalOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
@@ -1253,6 +1256,9 @@ object EstimateCC {
         !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))) {
       //output results when stop criterion is reached
 
+      if (optRes.isEmpty && !EstimateMI.binNumberIsAppropriate(calcConfig)(p, (signalBins, calcConfig.initResponseBins))){
+        throw new BinConfigurationException("Initial bin numbers are too high, adjust calculation configuration")
+      }
       val maxOpt = EstimateMI.optMIMult(calcConfig)(optRes)
       val estimate = maxOpt.estimates getOrElse Estimates((0.0, 0.0), Nil, 0.0)
       println(estimate.dataEstimate._1)

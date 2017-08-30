@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>SLR - infcalcs.SLR</title>
-          <meta name="description" content="SLR - infcalcs.SLR" />
-          <meta name="keywords" content="SLR infcalcs.SLR" />
+          <title>OLS - infcalcs.OLS</title>
+          <meta name="description" content="OLS - infcalcs.OLS" />
+          <meta name="keywords" content="OLS infcalcs.OLS" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
-            var hash = 'infcalcs.SLR';
+            var hash = 'infcalcs.OLS';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -28,12 +28,14 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img alt="Class" src="../lib/class_big.png" />
+        <a href="OLS$.html" title="See companion object"><img alt="Class/Object" src="../lib/class_to_object_big.png" /></a>
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>SLR</h1><h3><span class="morelinks"><div>Related Doc:
-            <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
+        <h1><a href="OLS$.html" title="See companion object">OLS</a></h1><h3><span class="morelinks"><div>
+            Related Docs:
+            <a href="OLS$.html" title="See companion object">object OLS</a>
+            | <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
           </div></span></h3><span class="permalink">
-      <a href="../index.html#infcalcs.SLR" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -45,13 +47,11 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">SLR</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">OLS</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Implementation of simple least-squares (linear) regression.</p><p>Takes x and y values as input data and calculates the least-squares
-regression line, along with estimates of the standard error and 95%
-confidence interval of both the slope and the intercept.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Class that perfoms ordinary least squares regression
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -65,20 +65,20 @@ confidence interval of both the slope and the intercept.
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="infcalcs.SLR"><span>SLR</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="infcalcs.OLS"><span>OLS</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -91,19 +91,19 @@ confidence interval of both the slope and the intercept.
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="infcalcs.SLR#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(xList:Seq[Double],yList:Seq[Double],label:String):infcalcs.SLR"></a>
-      <a id="&lt;init&gt;:SLR"></a>
+              <ol><li name="infcalcs.OLS#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(xs:breeze.linalg.DenseMatrix[Double],ys:breeze.linalg.DenseVector[Double],label:String):infcalcs.OLS"></a>
+      <a id="&lt;init&gt;:OLS"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SLR</span><span class="params">(<span name="xList">xList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="yList">yList: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span>
+        <span class="name">OLS</span><span class="params">(<span name="xs">xs: <span class="extype" name="breeze.linalg.DenseMatrix">DenseMatrix</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="ys">ys: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@&lt;init&gt;(xList:Seq[Double],yList:Seq[Double],label:String):infcalcs.SLR" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@&lt;init&gt;(xs:breeze.linalg.DenseMatrix[Double],ys:breeze.linalg.DenseVector[Double],label:String):infcalcs.OLS" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -129,7 +129,7 @@ confidence interval of both the slope and the intercept.
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -146,7 +146,7 @@ confidence interval of both the slope and the intercept.
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@##():Int" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@##():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -163,7 +163,7 @@ confidence interval of both the slope and the intercept.
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -180,11 +180,96 @@ confidence interval of both the slope and the intercept.
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="infcalcs.OLS#beta" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="beta:breeze.linalg.DenseVector[Double]"></a>
+      <a id="beta:DenseVector[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">beta</span><span class="result">: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@beta:breeze.linalg.DenseVector[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#betaCov" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="betaCov:breeze.linalg.DenseMatrix[Double]"></a>
+      <a id="betaCov:DenseMatrix[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">betaCov</span><span class="result">: <span class="extype" name="breeze.linalg.DenseMatrix">DenseMatrix</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@betaCov:breeze.linalg.DenseMatrix[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#betaCovRobust" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="betaCovRobust:breeze.linalg.DenseMatrix[Double]"></a>
+      <a id="betaCovRobust:DenseMatrix[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">betaCovRobust</span><span class="result">: <span class="extype" name="breeze.linalg.DenseMatrix">DenseMatrix</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@betaCovRobust:breeze.linalg.DenseMatrix[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#betaVar" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="betaVar:breeze.linalg.DenseVector[Double]"></a>
+      <a id="betaVar:DenseVector[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">betaVar</span><span class="result">: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@betaVar:breeze.linalg.DenseVector[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#betaVarRobust" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="betaVarRobust:breeze.linalg.DenseVector[Double]"></a>
+      <a id="betaVarRobust:DenseVector[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">betaVarRobust</span><span class="result">: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@betaVarRobust:breeze.linalg.DenseVector[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -197,7 +282,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@clone():Object" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@clone():Object" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -208,6 +293,40 @@ confidence interval of both the slope and the intercept.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="infcalcs.OLS#coeffOfDetermination" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="coeffOfDetermination:Double"></a>
+      <a id="coeffOfDetermination:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">coeffOfDetermination</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@coeffOfDetermination:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#dof" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="dof:Int"></a>
+      <a id="dof:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dof</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@dof:Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -220,7 +339,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -237,11 +356,28 @@ confidence interval of both the slope and the intercept.
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="infcalcs.OLS#errs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="errs:breeze.linalg.DenseVector[Double]"></a>
+      <a id="errs:DenseVector[Double]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">errs</span><span class="result">: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@errs:breeze.linalg.DenseVector[Double]" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -254,7 +390,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@finalize():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@finalize():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -265,6 +401,23 @@ confidence interval of both the slope and the intercept.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="infcalcs.OLS#fit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fit:breeze.linalg.DenseVector[Double]=&gt;Double"></a>
+      <a id="fit:(DenseVector[Double])⇒Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fit</span><span class="result">: (<span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]) ⇒ <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@fit:breeze.linalg.DenseVector[Double]=&gt;Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -277,7 +430,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -294,46 +447,80 @@ confidence interval of both the slope and the intercept.
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@hashCode():Int" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@hashCode():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="infcalcs.SLR#i95Conf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="i95Conf:Double"></a>
-      <a id="i95Conf:Double"></a>
+    </li><li name="infcalcs.OLS#iConf95" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iConf95:Double"></a>
+      <a id="iConf95:Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">i95Conf</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">iConf95</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@i95Conf:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@iConf95:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The 95% confidence interval of the intercept estimate.</p>
-    </li><li name="infcalcs.SLR#iError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="iError:Double"></a>
-      <a id="iError:Double"></a>
+      
+    </li><li name="infcalcs.OLS#iRobustConf95" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iRobustConf95:Double"></a>
+      <a id="iRobustConf95:Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">iError</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">iRobustConf95</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@iError:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@iRobustConf95:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The standard error of the intercept estimate.</p>
-    </li><li name="infcalcs.SLR#intercept" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      
+    </li><li name="infcalcs.OLS#iRobustSE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iRobustSE:Double"></a>
+      <a id="iRobustSE:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iRobustSE</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@iRobustSE:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#iSE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="iSE:Double"></a>
+      <a id="iSE:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iSE</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@iSE:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#intercept" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="intercept:Double"></a>
       <a id="intercept:Double"></a>
       <h4 class="signature">
@@ -345,11 +532,11 @@ confidence interval of both the slope and the intercept.
         <span class="name">intercept</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@intercept:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@intercept:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The y-intercept of the regression line.</p>
+      
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -362,12 +549,29 @@ confidence interval of both the slope and the intercept.
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="infcalcs.SLR#label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="infcalcs.OLS#k" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="k:Int"></a>
+      <a id="k:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">k</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@k:Int" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#label" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="label:String"></a>
       <a id="label:String"></a>
       <h4 class="signature">
@@ -379,28 +583,28 @@ confidence interval of both the slope and the intercept.
         <span class="name">label</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@label:String" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@label:String" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="infcalcs.SLR#n" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="n:Double"></a>
-      <a id="n:Double"></a>
+    </li><li name="infcalcs.OLS#n" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="n:Int"></a>
+      <a id="n:Int"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">n</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">n</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@n:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@n:Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The number of datapoints.</p>
+      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -413,7 +617,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -430,7 +634,7 @@ confidence interval of both the slope and the intercept.
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@notify():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@notify():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -447,81 +651,80 @@ confidence interval of both the slope and the intercept.
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.SLR#rSquared" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="rSquared:Double"></a>
-      <a id="rSquared:Double"></a>
+    </li><li name="infcalcs.OLS#sConf95" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sConf95:Double"></a>
+      <a id="sConf95:Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">rSquared</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">sConf95</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@rSquared:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@sConf95:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The coefficient of determination</p>
-    </li><li name="infcalcs.SLR#regLine" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="regLine:Double=&gt;Double"></a>
-      <a id="regLine:(Double)⇒Double"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">regLine</span><span class="result">: (<span class="extype" name="scala.Double">Double</span>) ⇒ <span class="extype" name="scala.Double">Double</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@regLine:Double=&gt;Double" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">The predicted y-values from the linear regression model.</p><div class="fullcomment"><div class="comment cmt"><p>The predicted y-values from the linear regression model.</p><p>Use the map function to call it on a list of Doubles.
-</p></div></div>
-    </li><li name="infcalcs.SLR#s95Conf" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="s95Conf:Double"></a>
-      <a id="s95Conf:Double"></a>
+      
+    </li><li name="infcalcs.OLS#sRobustConf95" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sRobustConf95:Double"></a>
+      <a id="sRobustConf95:Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">s95Conf</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">sRobustConf95</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@s95Conf:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@sRobustConf95:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The 95% confidence interval of the slope estimate.</p>
-    </li><li name="infcalcs.SLR#sError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sError:Double"></a>
-      <a id="sError:Double"></a>
+      
+    </li><li name="infcalcs.OLS#sRobustSE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sRobustSE:Double"></a>
+      <a id="sRobustSE:Double"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">sError</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+        <span class="name">sRobustSE</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@sError:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@sRobustSE:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The standard error of the slope estimate.</p>
-    </li><li name="infcalcs.SLR#slope" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      
+    </li><li name="infcalcs.OLS#sSE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sSE:Double"></a>
+      <a id="sSE:Double"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sSE</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.OLS@sSE:Double" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="infcalcs.OLS#slope" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="slope:Double"></a>
       <a id="slope:Double"></a>
       <h4 class="signature">
@@ -533,11 +736,11 @@ confidence interval of both the slope and the intercept.
         <span class="name">slope</span><span class="result">: <span class="extype" name="scala.Double">Double</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@slope:Double" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@slope:Double" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">The slope of the regression line.</p>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -550,24 +753,24 @@ confidence interval of both the slope and the intercept.
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.SLR#toFile" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="toFile(f:String,header:String):Unit"></a>
-      <a id="toFile(String,String):Unit"></a>
+    </li><li name="infcalcs.OLS#toFile" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toFile(f:String):Unit"></a>
+      <a id="toFile(String):Unit"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toFile</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="header">header: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;&quot;</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">toFile</span><span class="params">(<span name="f">f: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@toFile(f:String,header:String):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@toFile(f:String):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -587,7 +790,7 @@ fitted values
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@toString():String" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@toString():String" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -604,7 +807,7 @@ fitted values
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@wait():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@wait():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -627,7 +830,7 @@ fitted values
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -650,7 +853,7 @@ fitted values
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -661,36 +864,36 @@ fitted values
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.SLR#xList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="xList:Seq[Double]"></a>
-      <a id="xList:Seq[Double]"></a>
+    </li><li name="infcalcs.OLS#xs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="xs:breeze.linalg.DenseMatrix[Double]"></a>
+      <a id="xs:DenseMatrix[Double]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">xList</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+        <span class="name">xs</span><span class="result">: <span class="extype" name="breeze.linalg.DenseMatrix">DenseMatrix</span>[<span class="extype" name="scala.Double">Double</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@xList:Seq[Double]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@xs:breeze.linalg.DenseMatrix[Double]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
-    </li><li name="infcalcs.SLR#yList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="yList:Seq[Double]"></a>
-      <a id="yList:Seq[Double]"></a>
+    </li><li name="infcalcs.OLS#ys" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ys:breeze.linalg.DenseVector[Double]"></a>
+      <a id="ys:DenseVector[Double]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">yList</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>
+        <span class="name">ys</span><span class="result">: <span class="extype" name="breeze.linalg.DenseVector">DenseVector</span>[<span class="extype" name="scala.Double">Double</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.SLR@yList:Seq[Double]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.OLS@ys:breeze.linalg.DenseVector[Double]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

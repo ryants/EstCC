@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>EstTuple - infcalcs.EstTuple</title>
-          <meta name="description" content="EstTuple - infcalcs.EstTuple" />
-          <meta name="keywords" content="EstTuple infcalcs.EstTuple" />
+          <title>EstTupleBS - infcalcs.EstTupleBS</title>
+          <meta name="description" content="EstTupleBS - infcalcs.EstTupleBS" />
+          <meta name="keywords" content="EstTupleBS infcalcs.EstTupleBS" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../index.html';
-            var hash = 'infcalcs.EstTuple';
+            var hash = 'infcalcs.EstTupleBS';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -30,10 +30,10 @@
       <div id="definition">
         <img alt="Class" src="../lib/class_big.png" />
         <p id="owner"><a href="package.html" class="extype" name="infcalcs">infcalcs</a></p>
-        <h1>EstTuple</h1><h3><span class="morelinks"><div>Related Doc:
+        <h1>EstTupleBS</h1><h3><span class="morelinks"><div>Related Doc:
             <a href="package.html" class="extype" name="infcalcs">package infcalcs</a>
           </div></span></h3><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -45,13 +45,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">EstTupleBS</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="EstimateBS.html" class="extype" name="infcalcs.EstimateBS">EstimateBS</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Case class that contains all mutual information estimates for a
-particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
-</p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Alternative to <a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a> for use with bootstrapping approach
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -71,7 +70,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="infcalcs.EstTuple"><span>EstTuple</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="infcalcs.EstTupleBS"><span>EstTupleBS</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -90,23 +89,23 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="infcalcs.EstTuple#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.Estimates],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTuple"></a>
-      <a id="&lt;init&gt;:EstTuple"></a>
+              <ol><li name="infcalcs.EstTupleBS#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.EstimateBS],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTupleBS"></a>
+      <a id="&lt;init&gt;:EstTupleBS"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">EstTuple</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="name">EstTupleBS</span><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="EstimateBS.html" class="extype" name="infcalcs.EstimateBS">EstimateBS</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.Estimates],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTuple" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@&lt;init&gt;(pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]],estimates:Option[infcalcs.EstimateBS],weight:Option[infcalcs.Weight],unbiased:Boolean):infcalcs.EstTupleBS" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl></div>
+      
     </li></ol>
             </div>
 
@@ -128,7 +127,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -145,7 +144,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@##():Int" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@##():Int" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -162,7 +161,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -179,7 +178,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -196,7 +195,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@clone():Object" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@clone():Object" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -219,28 +218,28 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstTuple#estimates" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="estimates:Option[infcalcs.Estimates]"></a>
-      <a id="estimates:Option[Estimates]"></a>
+    </li><li name="infcalcs.EstTupleBS#estimates" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="estimates:Option[infcalcs.EstimateBS]"></a>
+      <a id="estimates:Option[EstimateBS]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">estimates</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Estimates.html" class="extype" name="infcalcs.Estimates">Estimates</a>]</span>
+        <span class="name">estimates</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="EstimateBS.html" class="extype" name="infcalcs.EstimateBS">EstimateBS</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@estimates:Option[infcalcs.Estimates]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@estimates:Option[infcalcs.EstimateBS]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">pairs of (mean, 95% conf) values</p>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -253,7 +252,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@finalize():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@finalize():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -276,7 +275,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -293,7 +292,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -310,7 +309,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -327,7 +326,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@notify():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@notify():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -344,12 +343,12 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstTuple#pairBinTuples" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="infcalcs.EstTupleBS#pairBinTuples" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]]"></a>
       <a id="pairBinTuples:Pair[NTuple[Int]]"></a>
       <h4 class="signature">
@@ -361,11 +360,11 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">pairBinTuples</span><span class="result">: <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="package.html#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@pairBinTuples:infcalcs.Pair[infcalcs.NTuple[Int]]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">numbers of bins for given data dimensionality</p>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -378,12 +377,12 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="infcalcs.EstTuple#unbiased" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="infcalcs.EstTupleBS#unbiased" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unbiased:Boolean"></a>
       <a id="unbiased:Boolean"></a>
       <h4 class="signature">
@@ -395,11 +394,11 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">unbiased</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@unbiased:Boolean" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@unbiased:Boolean" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">true if estimate is not biased</p>
+      
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -412,7 +411,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@wait():Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@wait():Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -435,7 +434,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -458,7 +457,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -469,7 +468,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="infcalcs.EstTuple#weight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="infcalcs.EstTupleBS#weight" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="weight:Option[infcalcs.Weight]"></a>
       <a id="weight:Option[Weight]"></a>
       <h4 class="signature">
@@ -481,7 +480,7 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
         <span class="name">weight</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../index.html#infcalcs.EstTuple@weight:Option[infcalcs.Weight]" title="Permalink" target="_top">
+      <a href="../index.html#infcalcs.EstTupleBS@weight:Option[infcalcs.Weight]" title="Permalink" target="_top">
         <img src="../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

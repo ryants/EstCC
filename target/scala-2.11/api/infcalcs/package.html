@@ -72,7 +72,7 @@ information is estimated by performing a linear regression of the mutual
 information of each subsampled dataset against the inverse sample size;
 the intercept of the linear regression is the unbiased mutual
 information estimate. The regression calculation is performed by
-<a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
+<a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.OLS,List[Option[infcalcs.OLS]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
 of MI, identical MI calculations are performed on shuffled datasets of
 varying sizes. The function <a href="EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">infcalcs.EstimateMI.optMIMult</a> then selects the MI
 estimate that maximizes the MI estimate for real data while keeping the
@@ -93,7 +93,7 @@ weightings tested.
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -106,7 +106,7 @@ weightings tested.
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -320,6 +320,45 @@ particular pair of signal and response bin sets and a <a href="Weight.html" clas
 </p><div class="fullcomment"><div class="comment cmt"><p>Case class that contains all mutual information estimates for a
 particular pair of signal and response bin sets and a <a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>
 </p></div><dl class="paramcmts block"><dt class="param">pairBinTuples</dt><dd class="cmt"><p>numbers of bins for given data dimensionality</p></dd><dt class="param">estimates</dt><dd class="cmt"><p>pairs of (mean, 95% conf) values</p></dd><dt class="param">unbiased</dt><dd class="cmt"><p>true if estimate is not biased</p></dd></dl></div>
+    </li><li name="infcalcs.EstTupleBS" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EstTupleBSextendsProductwithSerializable"></a>
+      <a id="EstTupleBS:EstTupleBS"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EstTupleBS.html"><span class="name">EstTupleBS</span></a><span class="params">(<span name="pairBinTuples">pairBinTuples: <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<a href="#NTuple[T]=Vector[T]" class="extmbr" name="infcalcs.NTuple">NTuple</a>[<span class="extype" name="scala.Int">Int</span>]]</span>, <span name="estimates">estimates: <span class="extype" name="scala.Option">Option</span>[<a href="EstimateBS.html" class="extype" name="infcalcs.EstimateBS">EstimateBS</a>]</span>, <span name="weight">weight: <span class="extype" name="scala.Option">Option</span>[<a href="Weight.html" class="extype" name="infcalcs.Weight">Weight</a>]</span>, <span name="unbiased">unbiased: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@EstTupleBSextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Alternative to <a href="EstTuple.html" class="extype" name="infcalcs.EstTuple">EstTuple</a> for use with bootstrapping approach
+</p>
+    </li><li name="infcalcs.EstimateBS" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="EstimateBSextendsProductwithSerializable"></a>
+      <a id="EstimateBS:EstimateBS"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="EstimateBS.html"><span class="name">EstimateBS</span></a><span class="params">(<span name="dataEstimate">dataEstimate: (<span class="extype" name="scala.Double">Double</span>, <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>])</span>, <span name="randDataEstimate">randDataEstimate: (<span class="extype" name="scala.Double">Double</span>, <a href="#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>])</span>, <span name="coeffOfDetermination">coeffOfDetermination: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@EstimateBSextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Case class with actual and 1 randomized data set estimates using a
+bootstrapping approach
+</p><div class="fullcomment"><div class="comment cmt"><p>Case class with actual and 1 randomized data set estimates using a
+bootstrapping approach
+</p></div><dl class="paramcmts block"><dt class="param">dataEstimate</dt><dd class="cmt"><p>mean and 95% confidence interval bounds</p></dd></dl></div>
     </li><li name="infcalcs.Estimates" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="EstimatesextendsProductwithSerializable"></a>
       <a id="Estimates:Estimates"></a>
@@ -393,6 +432,24 @@ Also includes the coefficient of determination for the actual linear fit
     </span>
       <p class="shortcomment cmt">A node representing the head of a subtree in a binary tree.</p><div class="fullcomment"><div class="comment cmt"><p>A node representing the head of a subtree in a binary tree.
 </p></div><dl class="paramcmts block"><dt class="param">index</dt><dd class="cmt"><p>position in tree</p></dd><dt class="param">value</dt><dd class="cmt"><p>value of the <a href="Node.html" class="extype" name="infcalcs.Node">Node</a></p></dd><dt class="param">left</dt><dd class="cmt"><p>left sub<a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a></p></dd><dt class="param">right</dt><dd class="cmt"><p>right sub <a href="Tree.html" class="extype" name="infcalcs.Tree">Tree</a></p></dd></dl></div>
+    </li><li name="infcalcs.OLS" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OLSextendsAnyRef"></a>
+      <a id="OLS:OLS"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="OLS.html"><span class="name">OLS</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@OLSextendsAnyRef" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Class that perfoms ordinary least squares regression
+</p>
     </li><li name="infcalcs.PWeight" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PWeightextendsWeightwithProductwithSerializable"></a>
       <a id="PWeight:PWeight"></a>
@@ -460,7 +517,7 @@ object and optional paramter file.
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RegData.html"><span class="name">RegData</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RegData.html"><span class="name">RegData</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Seq">Seq</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@RegDataextendsProductwithSerializable" title="Permalink" target="_top">
@@ -479,7 +536,7 @@ regression estimates
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="RegDataRand.html"><span class="name">RegDataRand</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="RegDataRand.html"><span class="name">RegDataRand</span></a><span class="params">(<span name="subCalcs">subCalcs: <span class="extype" name="scala.Vector">Vector</span>[<span class="extype" name="scala.Vector">Vector</span>[<a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a>]]</span>, <span name="label">label: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;mutualInformation&quot;</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../index.html#infcalcs.package@RegDataRandextendsProductwithSerializable" title="Permalink" target="_top">
@@ -489,26 +546,6 @@ regression estimates
       <p class="shortcomment cmt">Same as <a href="RegData.html" class="extype" name="infcalcs.RegData">RegData</a> but holds arbitrary numbers of <a href="SubCalc.html" class="extype" name="infcalcs.SubCalc">SubCalc</a> instances
 for randomization purposes
 </p>
-    </li><li name="infcalcs.SLR" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="SLRextendsAnyRef"></a>
-      <a id="SLR:SLR"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="SLR.html"><span class="name">SLR</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../index.html#infcalcs.package@SLRextendsAnyRef" title="Permalink" target="_top">
-        <img src="../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Implementation of simple least-squares (linear) regression.</p><div class="fullcomment"><div class="comment cmt"><p>Implementation of simple least-squares (linear) regression.</p><p>Takes x and y values as input data and calculates the least-squares
-regression line, along with estimates of the standard error and 95%
-confidence interval of both the slope and the intercept.
-</p></div></div>
     </li><li name="infcalcs.SubCalc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SubCalcextendsProductwithSerializable"></a>
       <a id="SubCalc:SubCalc"></a>
@@ -719,7 +756,7 @@ maximizes the mutual information for the real but not the randomized
 datasets.</p><p>Other important methods include:
 - <a href="EstimateMI$.html#buildRegData(calcConfig:infcalcs.CalcConfig)(binPair:infcalcs.Pair[infcalcs.NTuple[Int]],data:infcalcs.DRData,wts:Option[infcalcs.Weight]):(infcalcs.RegData,infcalcs.RegDataRand)" class="extmbr" name="infcalcs.EstimateMI#buildRegData">EstimateMI.buildRegData</a>, which builds resampled and randomized contingency
 tables
-- <a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
+- <a href="EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.OLS,List[Option[infcalcs.OLS]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">EstimateMI.calcMultRegs</a>, which estimates the mutual information by linear
 regression.
 </p></div></div>
     </li><li name="infcalcs.IOFile" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
@@ -774,6 +811,24 @@ data to and from files.</p>
       </a>
     </span>
       <p class="shortcomment cmt">Contains a handful of useful mathematical functions.</p>
+    </li><li name="infcalcs.OLS" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OLS"></a>
+      <a id="OLS:OLS"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="OLS$.html"><span class="name">OLS</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.package@OLS" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Companion object to <a href="OLS.html" class="extype" name="infcalcs.OLS">OLS</a> class
+</p>
     </li><li name="infcalcs.Orderings" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Orderings"></a>
       <a id="Orderings:Orderings"></a>

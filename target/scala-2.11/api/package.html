@@ -70,7 +70,24 @@
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="_root_.infcalcs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="_root_.breeze" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="breeze"></a>
+      <a id="breeze:breeze"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="breeze/package.html"><span class="name">breeze</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#package@breeze" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="_root_.infcalcs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="infcalcs"></a>
       <a id="infcalcs:infcalcs"></a>
       <h4 class="signature">
@@ -111,7 +128,7 @@ information is estimated by performing a linear regression of the mutual
 information of each subsampled dataset against the inverse sample size;
 the intercept of the linear regression is the unbiased mutual
 information estimate. The regression calculation is performed by
-<a href="infcalcs/EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.SLR,List[Option[infcalcs.SLR]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
+<a href="infcalcs/EstimateMI$.html#calcMultRegs(calcConfig:infcalcs.CalcConfig)(r:(infcalcs.RegData,infcalcs.RegDataRand)):(infcalcs.OLS,List[Option[infcalcs.OLS]])" class="extmbr" name="infcalcs.EstimateMI#calcMultRegs">infcalcs.EstimateMI.calcMultRegs</a>.</p><p>- Because increasing the number of bins can artifactually inflate estimates
 of MI, identical MI calculations are performed on shuffled datasets of
 varying sizes. The function <a href="infcalcs/EstimateMI$.html#optMIMult(calcConfig:infcalcs.CalcConfig)(d:Vector[infcalcs.EstTuple]):infcalcs.EstTuple" class="extmbr" name="infcalcs.EstimateMI#optMIMult">infcalcs.EstimateMI.optMIMult</a> then selects the MI
 estimate that maximizes the MI estimate for real data while keeping the

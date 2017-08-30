@@ -62,7 +62,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -75,7 +75,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -389,6 +389,25 @@ function for evaluating the CDF of the Gaussian at a point x.
 around the mean assuming normally distributed data.</p><div class="fullcomment"><div class="comment cmt"><p>Given a list of doubles, returns the mean and 95% confidence interval
 around the mean assuming normally distributed data.
 </p></div><dl class="paramcmts block"><dt class="param">ls</dt><dd class="cmt"><p>List of doubles</p></dd><dt>returns</dt><dd class="cmt"><p>(mean, 95% confidence interval)</p></dd></dl></div>
+    </li><li name="infcalcs.MathFuncs#meanAndConfBS" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="meanAndConfBS(ls:Seq[Double]):(Double,infcalcs.Pair[Double])"></a>
+      <a id="meanAndConfBS(Seq[Double]):(Double,Pair[Double])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">meanAndConfBS</span><span class="params">(<span name="ls">ls: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: (<span class="extype" name="scala.Double">Double</span>, <a href="package.html#Pair[T]=(T,T)" class="extmbr" name="infcalcs.Pair">Pair</a>[<span class="extype" name="scala.Double">Double</span>])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../index.html#infcalcs.MathFuncs$@meanAndConfBS(ls:Seq[Double]):(Double,infcalcs.Pair[Double])" title="Permalink" target="_top">
+        <img src="../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Like <a href="#meanAndConf(ls:Iterable[Double]):infcalcs.Pair[Double]" class="extmbr" name="infcalcs.MathFuncs#meanAndConf">meanAndConf</a> but for a bootstrapped data set
+</p><div class="fullcomment"><div class="comment cmt"><p>Like <a href="#meanAndConf(ls:Iterable[Double]):infcalcs.Pair[Double]" class="extmbr" name="infcalcs.MathFuncs#meanAndConf">meanAndConf</a> but for a bootstrapped data set
+</p></div><dl class="paramcmts block"><dt class="param">ls</dt><dd class="cmt"><p>values</p></dd><dt>returns</dt><dd class="cmt"><p>(mean, values corresponding to 95% confidence interval)</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
